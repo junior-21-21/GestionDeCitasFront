@@ -1,0 +1,110 @@
+// ===================
+// VARIABLES PERSONALIZADAS
+// ===================
+$primary-color: #0d6efd;
+$primary-hover: #0b5ed7; // reemplazo de darken($primary-color, 5%)
+$bg-gradient: linear-gradient(135deg, #e0f2ff, #f6faff);
+
+// ===================
+// CONTENEDOR PRINCIPAL
+// ===================
+.container {
+  background: $bg-gradient;
+  min-height: 100vh;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// ===================
+// CARD DE LOGIN
+// ===================
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  padding: 2.5rem 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
+  animation: fadeSlide 0.4s ease-in-out;
+
+  h2 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: $primary-color;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .form-control {
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+
+    &:focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+  }
+
+  .btn-primary {
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.6rem;
+    margin-top: 1rem;
+    background-color: $primary-color;
+    border-color: $primary-color;
+
+    &:hover {
+      background-color: $primary-hover;
+      border-color: $primary-hover;
+    }
+  }
+
+  p {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    text-align: center;
+    color: #444;
+
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// ===================
+// ANIMACIÓN
+// ===================
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ===================
+// RESPONSIVE
+// ===================
+@media (max-width: 576px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+}

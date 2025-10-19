@@ -1,0 +1,19 @@
+<div class="config-container">
+  <h2>Registrar Nuevo Vendedor</h2>
+
+  <form (ngSubmit)="registrarVendedor()">
+    <label for="nombres">Nombres:</label>
+    <input type="text" id="nombres" [(ngModel)]="vendedor.nombres" name="nombres" required>
+
+    <label for="username">Usuario:</label>
+    <input type="text" id="username" [(ngModel)]="vendedor.username" name="username" required>
+
+    <label for="password">Contraseña:</label>
+    <input type="password" id="password" [(ngModel)]="vendedor.password" name="password" required>
+
+    <button type="submit">Registrar Vendedor</button>
+  </form>
+
+  <p class="success" *ngIf="mensaje">{{ mensaje }}</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+</div>

@@ -1,0 +1,84 @@
+<div class="container mt-4">
+  <h3 class="mb-3">{{ editando ? 'Editar Veterinario' : 'Registrar Veterinario' }}</h3>
+
+  <form (ngSubmit)="guardar()" #form="ngForm">
+    <div class="mb-3">
+      <label for="nombres" class="form-label">Nombres</label>
+      <input
+        type="text"
+        id="nombres"
+        class="form-control"
+        required
+        [(ngModel)]="nuevoVet.nombres"
+        name="nombres"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="cmp" class="form-label">CMP</label>
+      <input
+        type="text"
+        id="cmp"
+        class="form-control"
+        required
+        [(ngModel)]="nuevoVet.cmp"
+        name="cmp"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label for="especialidad" class="form-label">Especialidad</label>
+      <select
+        id="especialidad"
+        class="form-select"
+        required
+        [(ngModel)]="nuevoVet.especialidadId"
+        name="especialidadId"
+      >
+        <option [ngValue]="0" disabled>Seleccione una especialidad</option>
+        <option *ngFor="let esp of especialidades" [ngValue]="esp.id">
+          {{ esp.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary me-2" [disabled]="form.invalid">
+      {{ editando ? 'Actualizar' : 'Registrar' }}
+    </button>
+    <button
+      *ngIf="editando"
+      type="button"
+      class="btn btn-secondary"
+      (click)="cancelarEdicion()"
+    >
+      Cancelar
+    </button>
+  </form>
+
+  <hr class="my-4" />
+
+  <h4 class="mb-3">Listado de Veterinarios</h4>
+  <table class="table table-bordered table-striped">
+    <thead class="table-light">
+    <tr>
+      <th>ID</th>
+      <th>Nombres</th>
+      <th>CMP</th>
+      <th>Especialidad</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let vet of veterinarios">
+      <td>{{ vet.id }}</td>
+      <td>{{ vet.nombres }}</td>
+      <td>{{ vet.cmp }}</td>
+      <td>{{ vet.especialidad }}</td>
+      <td>
+        <button class="btn btn-sm btn-warning me-2" (click)="editar(vet)">Editar</button>
+        <button class="btn btn-sm btn-danger" (click)="eliminar(vet.id)">Eliminar</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,55 @@
+// Estilo general del contenedor de fondo
+.container {
+  background-color: #f8f9fa; // color suave de fondo
+  min-height: 100vh;
+}
+
+// Tarjeta de registro
+.login-card {
+  max-width: 400px;
+  width: 100%;
+  border-radius: 1rem;
+  background-color:transparent;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+
+  h2 {
+    font-weight: bold;
+    color: #007bff;
+  }
+
+  form {
+    .form-label {
+      font-weight: 500;
+    }
+
+    .form-control {
+      border-radius: 0.5rem;
+
+      &:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+    }
+
+    .btn {
+      font-weight: 600;
+      padding: 0.6rem;
+      border-radius: 0.5rem;
+    }
+
+    .spinner-border {
+      margin-right: 0.5rem;
+    }
+
+    .text-danger {
+      font-size: 0.9rem;
+    }
+
+    a {
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

@@ -1,0 +1,148 @@
+// Variables de color pastel
+$celeste-claro: #e0f7fa;
+$celeste: #b2ebf2;
+$celeste-intenso: #00bcd4;
+$gris-claro: #f8f9fa;
+$gris-borde: #dee2e6;
+$texto-oscuro: #343a40;
+
+mat-toolbar.bg-primary {
+  background-color: $celeste-intenso !important;
+  color: white !important;
+  font-size: 1.1rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+mat-sidenav-container {
+  height: 100vh;
+}
+
+mat-sidenav.bg-light {
+  background-color: $gris-claro;
+  border-right: 1px solid $gris-borde;
+
+  .btn {
+    font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+
+    &.btn-outline-primary {
+      color: $celeste-intenso;
+      border-color: $celeste-intenso;
+
+      &:hover {
+        background-color: $celeste;
+        color: white;
+        border-color: $celeste-intenso;
+      }
+    }
+
+    &.btn-outline-secondary {
+      color: $texto-oscuro;
+      border-color: $gris-borde;
+
+      &:hover {
+        background-color: $celeste-claro;
+        border-color: $celeste;
+        color: $texto-oscuro;
+      }
+    }
+
+    &.btn-danger {
+      background-color: #f44336;
+      color: white;
+      border: none;
+
+      &:hover {
+        background-color: #d32f2f;
+      }
+    }
+  }
+}
+
+mat-sidenav-content {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+
+  // Para mantener el estilo pastel
+  min-height: 100vh;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
+}
+mat-sidenav-container {
+  height: 100vh;
+  background-color: $celeste-claro; // Fondo general pastel
+}
+body, html {
+  background-color: $celeste-claro; // Fondo general celeste pastel
+  height: 100%;
+  margin: 0;
+}
+mat-sidenav.celeste-pastel {
+  background-color: #e0f7fa; // celeste pastel
+  border-right: 1px solid #b2ebf2;
+
+  .btn {
+    background-color: white;
+    border: 1px solid #b2ebf2;
+    color: #007c91;
+
+    &:hover {
+      background-color: #b2ebf2;
+      color: white;
+    }
+  }
+
+  .btn.btn-outline-secondary {
+    border-color: #81d4fa;
+    color: #004d40;
+
+    &:hover {
+      background-color: #b2ebf2;
+      color: #004d40;
+    }
+  }
+
+  hr {
+    border-color: #b2ebf2;
+  }
+}
+mat-sidenav.fondo-azul {
+  background-color: #0d6efd; // Azul Bootstrap
+  color: white;
+
+  .btn {
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+  }
+
+  .btn-outline-secondary {
+    border-color: #cfe2ff;
+    color: #e0e0e0;
+
+    &:hover {
+      background-color: #cfe2ff;
+      color: #0d6efd;
+    }
+  }
+
+  hr {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+    color: white;
+
+    &:hover {
+      background-color: #c82333;
+    }
+  }
+}

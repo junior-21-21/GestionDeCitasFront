@@ -1,0 +1,101 @@
+<form class="row g-3 mt-3">
+
+  <!-- 🔍 Buscar medicamento -->
+  <div class="col-md-12">
+    <label class="form-label">Buscar medicamento (por ID o nombre):</label>
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control"
+        [(ngModel)]="filtro"
+        name="filtro"
+        placeholder="Ej. Amoxicilina o 101"
+      />
+      <button type="button" class="btn btn-outline-primary" (click)="filtrar()">Buscar</button>
+    </div>
+  </div>
+
+  <!-- 📋 Lista de medicamentos filtrados -->
+  <div class="col-12" *ngIf="medicamentosFiltrados.length > 0; else sinMedicamentos">
+    <table class="table table-sm table-bordered table-hover mt-3">
+      <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Stock</th>
+        <th>Cantidad a asociar</th>
+        <th>Acción</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let med of medicamentosFiltrados">
+        <td>{{ med.id }}</td>
+        <td>{{ med.nombre }}</td>
+        <td>{{ med.stock }}</td>
+        <td style="width:120px;">
+          <input
+            type="number"
+            min="1"
+            [max]="med.stock"
+            [(ngModel)]="med.cantidadAsociar"
+            name="cantidad{{med.id}}"
+            class="form-control"
+          />
+        </td>
+        <td>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-success"
+            (click)="asociarMedicamento(med)"
+            [disabled]="
+              !med.cantidadAsociar ||
+              med.cantidadAsociar < 1 ||
+              med.cantidadAsociar > med.stock
+            "
+          >
+            Asociar
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Lista de medicamentos ya asociados -->
+  <div class="col-12 mt-4" *ngIf="medicamentosAsociados.length > 0; else sinAsociados">
+    <h5>Medicamentos Recetados</h5>
+    <table class="table table-sm table-bordered table-hover mt-2">
+      <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Cantidad</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let med of medicamentosAsociados">
+        <td>{{ getMedicamento(med.medicamentoId)?.id || med.medicamentoId }}</td>
+        <td>{{ getMedicamento(med.medicamentoId)?.nombre || 'Desconocido' }}</td>
+        <td>{{ med.cantidad }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #sinAsociados>
+    <div class="alert alert-info mt-3">
+      No hay medicamentos recetados para esta consulta.
+    </div>
+  </ng-template>
+
+  <ng-template #sinMedicamentos>
+    <div class="alert alert-info mt-3">
+      No se encontraron medicamentos.
+    </div>
+  </ng-template>
+
+  <!-- ✅ Botón volver -->
+  <div class="col-12 text-end mt-3">
+    <a routerLink="/consultas" class="btn btn-secondary ms-2">Volver</a>
+  </div>
+</form>

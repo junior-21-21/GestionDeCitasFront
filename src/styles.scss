@@ -1,0 +1,8 @@
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(208, 240, 253, 0.7); /* celeste pastel translúcido */
+  z-index: -1;
+}

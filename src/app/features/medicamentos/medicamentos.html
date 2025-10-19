@@ -1,0 +1,180 @@
+<div class="container mt-5">
+  <h2 class="text-primary mb-4">💊 Gestión de Medicamentos</h2>
+
+  <!-- Formulario de Registro -->
+  <form *ngIf="!editando" (ngSubmit)="registrar()" class="card p-4 shadow-sm mb-4">
+    <h5 class="mb-3 text-success">Registrar Nuevo Medicamento</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input
+          type="text"
+          id="nombre"
+          class="form-control"
+          [(ngModel)]="nuevo.nombre"
+          name="nombre"
+          required
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="descripcion" class="form-label">Descripción</label>
+        <input
+          type="text"
+          id="descripcion"
+          class="form-control"
+          [(ngModel)]="nuevo.descripcion"
+          name="descripcion"
+          required
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="stock" class="form-label">Stock</label>
+        <input
+          type="number"
+          id="stock"
+          class="form-control"
+          [(ngModel)]="nuevo.stock"
+          name="stock"
+          required
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="precio" class="form-label">Precio</label>
+        <input
+          type="number"
+          id="precio"
+          class="form-control"
+          [(ngModel)]="nuevo.precio"
+          name="precio"
+          step="0.01"
+          required
+        />
+      </div>
+    </div>
+    <div class="mt-3 d-flex justify-content-end">
+      <button type="submit" class="btn btn-success">Registrar</button>
+    </div>
+  </form>
+
+  <!-- Formulario de Edición -->
+  <form
+    *ngIf="editando"
+    (ngSubmit)="actualizar()"
+    class="card p-4 shadow-sm mb-4 border-warning"
+  >
+    <h5 class="mb-3 text-warning">✏️ Editar Medicamento</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="nombreEdit" class="form-label">Nombre</label>
+        <input
+          type="text"
+          id="nombreEdit"
+          class="form-control"
+          [(ngModel)]="editando.nombre"
+          name="nombreEdit"
+          required
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="descripcionEdit" class="form-label">Descripción</label>
+        <input
+          type="text"
+          id="descripcionEdit"
+          class="form-control"
+          [(ngModel)]="editando.descripcion"
+          name="descripcionEdit"
+          required
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="stockEdit" class="form-label">Stock</label>
+        <input
+          type="number"
+          id="stockEdit"
+          class="form-control"
+          [(ngModel)]="editando.stock"
+          name="stockEdit"
+          required
+        />
+      </div>
+      <div class="col-md-6">
+        <label for="precioEdit" class="form-label">Precio</label>
+        <input
+          type="number"
+          id="precioEdit"
+          class="form-control"
+          [(ngModel)]="editando.precio"
+          name="precioEdit"
+          step="0.01"
+          required
+        />
+      </div>
+    </div>
+    <div class="mt-3 d-flex justify-content-end gap-2">
+      <button type="submit" class="btn btn-warning">Actualizar</button>
+      <button type="button" class="btn btn-secondary" (click)="cancelarEdicion()">
+        Cancelar
+      </button>
+    </div>
+  </form>
+
+  <!-- Tabla de Medicamentos -->
+  <div class="card shadow-sm p-4">
+    <h5 class="text-secondary mb-3">📋 Lista de Medicamentos</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Stock</th>
+          <th>Precio</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let m of medicamentosPaginados">
+          <td>{{ m.id }}</td>
+          <td>{{ m.nombre }}</td>
+          <td>{{ m.descripcion }}</td>
+          <td>{{ m.stock }}</td>
+          <td>{{ m.precio | currency }}</td>
+          <td class="text-center">
+            <button
+              class="btn btn-sm btn-outline-primary me-1"
+              (click)="seleccionarParaEditar(m)"
+            >
+              <i class="bi bi-pencil-fill"></i> Editar
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="eliminar(m.id)">
+              <i class="bi bi-trash-fill"></i> Eliminar
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <nav aria-label="Paginación medicamentos" class="mt-3">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <button class="page-link" (click)="irPagina(currentPage - 1)">Anterior</button>
+        </li>
+
+        <li
+          class="page-item"
+          *ngFor="let _ of [].constructor(totalPages); let i = index"
+          [class.active]="currentPage === i + 1"
+        >
+          <button class="page-link" (click)="irPagina(i + 1)">{{ i + 1 }}</button>
+        </li>
+
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link" (click)="irPagina(currentPage + 1)">Siguiente</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>

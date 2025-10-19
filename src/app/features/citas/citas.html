@@ -1,0 +1,89 @@
+<div class="container mt-4">
+  <div class="card shadow-sm p-4">
+    <h3 class="mb-4 text-primary fw-bold">
+      {{ editando ? '✏️ Editar Cita' : '📅 Registrar Nueva Cita' }}
+    </h3>
+
+    <form (ngSubmit)="registrar()" class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Fecha</label>
+        <input type="date" class="form-control" [(ngModel)]="nuevaCita.fecha" name="fecha" required />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Hora</label>
+        <input type="time" class="form-control" [(ngModel)]="nuevaCita.hora" name="hora" required />
+      </div>
+
+      <div class="col-md-12">
+        <label class="form-label">Motivo</label>
+        <input type="text" class="form-control" [(ngModel)]="nuevaCita.motivo" name="motivo" required />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Mascota</label>
+        <select class="form-select" [(ngModel)]="nuevaCita.mascotaId" name="mascotaId" required>
+          <option *ngFor="let m of mascotas" [value]="m.id">{{ m.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Veterinario</label>
+        <select class="form-select" [(ngModel)]="nuevaCita.veterinarioId" name="veterinarioId" required>
+          <option *ngFor="let v of veterinarios" [value]="v.id">{{ v.nombres }}</option>
+        </select>
+      </div>
+
+      <div class="col-12 d-flex justify-content-end mt-3">
+        <button type="submit" class="btn btn-primary px-4">
+          {{ editando ? 'Guardar Cambios' : 'Registrar' }}
+        </button>
+        <button *ngIf="editando" type="button" class="btn btn-secondary ms-2" (click)="cancelarEdicion()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="mt-5">
+    <h3 class="text-secondary">📋 Listado de Citas</h3>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover mt-3">
+        <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Motivo</th>
+          <th>Mascota</th>
+          <th>Veterinario</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let cita of citas">
+          <td>{{ cita.id }}</td>
+          <td>{{ cita.fecha }}</td>
+          <td>{{ cita.hora }}</td>
+          <td>{{ cita.motivo }}</td>
+          <td>{{ cita.nombreMascota }}</td>
+          <td>{{ cita.nombreVeterinario }}</td>
+          <td>
+              <span class="badge" [ngClass]="{
+                'bg-success': cita.estado === 'ACTIVO',
+                'bg-secondary': cita.estado !== 'ACTIVO'
+              }">
+                {{ cita.estado }}
+              </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-1" (click)="prepararEdicion(cita)">Editar</button>
+            <button class="btn btn-sm btn-outline-warning" (click)="cambiarEstado(cita.id, cita.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO')">
+              {{ cita.estado === 'ACTIVO' ? 'Desactivar' : 'Activar' }}
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

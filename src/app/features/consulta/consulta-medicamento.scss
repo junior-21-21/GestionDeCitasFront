@@ -1,0 +1,73 @@
+@use 'sass:color';
+
+form {
+  max-width: 700px;
+  margin: 2.5rem auto;
+  padding: 2.5rem;
+  background-color: #fdfdfd;
+  border-radius: 14px;
+  border: 1px solid #ccc;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+
+  div {
+    margin-bottom: 1.5rem;
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+      border: 1px solid color.adjust(#ccc, $lightness: 10%);
+      border-radius: 8px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
+      }
+    }
+  }
+
+  button[type='submit'] {
+    background-color: #28a745;
+    color: white;
+    padding: 0.75rem 1.8rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: color.adjust(#28a745, $lightness: -8%);
+    }
+  }
+}
+
+button[routerLink] {
+  display: inline-block;
+  margin: 1.2rem auto;
+  padding: 0.6rem 1.6rem;
+  font-size: 1.1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: color.adjust(#007bff, $lightness: -10%);
+  }
+}

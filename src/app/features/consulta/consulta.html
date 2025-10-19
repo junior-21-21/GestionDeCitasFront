@@ -1,0 +1,230 @@
+<div class="container mt-5">
+  <div class="card shadow p-4 mb-4">
+    <h3 class="text-primary mb-3">📝 Registrar Nueva Consulta</h3>
+    <form (ngSubmit)="registrar()" class="row g-3" #form="ngForm">
+      <div class="col-md-6">
+        <label class="form-label">Fecha:</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="consulta.fecha"
+          name="fecha"
+          required
+          #fecha="ngModel"
+        />
+        <div class="text-danger" *ngIf="fecha.invalid && fecha.touched">
+          Fecha es obligatoria
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Motivo:</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="consulta.motivo"
+          name="motivo"
+          required
+          #motivo="ngModel"
+        />
+        <div class="text-danger" *ngIf="motivo.invalid && motivo.touched">
+          Motivo es obligatorio
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Diagnóstico:</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="consulta.diagnostico"
+          name="diagnostico"
+          required
+          #diagnostico="ngModel"
+        />
+        <div class="text-danger" *ngIf="diagnostico.invalid && diagnostico.touched">
+          Diagnóstico es obligatorio
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Tratamiento:</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="consulta.tratamiento"
+          name="tratamiento"
+          required
+          #tratamiento="ngModel"
+        />
+        <div class="text-danger" *ngIf="tratamiento.invalid && tratamiento.touched">
+          Tratamiento es obligatorio
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Mascota:</label>
+        <select
+          class="form-select"
+          [(ngModel)]="consulta.mascotaId"
+          name="mascotaId"
+          required
+          #mascotaId="ngModel"
+        >
+          <option value="" disabled>Seleccione una mascota</option>
+          <option *ngFor="let m of mascotas" [value]="m.id">{{ m.nombre }}</option>
+        </select>
+        <div class="text-danger" *ngIf="mascotaId.invalid && mascotaId.touched">
+          Seleccione una mascota
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Veterinario:</label>
+        <select
+          class="form-select"
+          [(ngModel)]="consulta.veterinarioId"
+          name="veterinarioId"
+          required
+          #veterinarioId="ngModel"
+        >
+          <option value="" disabled>Seleccione un veterinario</option>
+          <option *ngFor="let v of veterinarios" [value]="v.id">{{ v.nombres }}</option>
+        </select>
+        <div class="text-danger" *ngIf="veterinarioId.invalid && veterinarioId.touched">
+          Seleccione un veterinario
+        </div>
+      </div>
+
+      <div class="col-12 text-end mt-3">
+        <button
+          type="submit"
+          class="btn btn-success px-4"
+          [disabled]="form.invalid"
+        >
+          Registrar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card shadow p-4">
+    <h3 class="text-secondary mb-3">📋 Consultas Registradas</h3>
+
+    <div *ngIf="consultas.length > 0; else noConsultas" class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+        <tr>
+          <th>Fecha</th>
+          <th>Motivo</th>
+          <th>Diagnóstico</th>
+          <th>Tratamiento</th>
+          <th>Mascota</th>
+          <th>Veterinario</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let c of consultasPaginadas">
+          <td>{{ c.fecha }}</td>
+          <td>{{ c.motivo }}</td>
+          <td>{{ c.diagnostico }}</td>
+          <td>{{ c.tratamiento }}</td>
+          <td>{{ c.nombreMascota }}</td>
+          <td>{{ c.nombreVeterinario }}</td>
+          <td>
+            <div class="d-flex flex-column gap-1">
+              <a
+                [routerLink]="['/consultas', c.id, 'medicamentos']"
+                class="btn btn-sm btn-outline-primary"
+              >
+                Asociar Medicamento
+              </a>
+              <button
+                class="btn btn-sm btn-outline-info"
+                (click)="abrirMedicamentosPanel(c.id)"
+              >
+                Ver Medicamentos
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginación -->
+      <nav aria-label="Paginación consultas" class="mt-3">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="irPagina(currentPage - 1)">
+              Anterior
+            </button>
+          </li>
+
+          <li
+            class="page-item"
+            *ngFor="let _ of [].constructor(totalPages); let i = index"
+            [class.active]="currentPage === i + 1"
+          >
+            <button class="page-link" (click)="irPagina(i + 1)">{{ i + 1 }}</button>
+          </li>
+
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" (click)="irPagina(currentPage + 1)">
+              Siguiente
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <ng-template #noConsultas>
+      <div class="alert alert-info text-center">
+        No hay consultas registradas.
+      </div>
+    </ng-template>
+
+    <!-- Panel flotante de medicamentos -->
+    <div
+      class="overlay"
+      *ngIf="medicamentosVisible"
+      (click)="cerrarMedicamentosPanel()"
+    ></div>
+
+    <div class="floating-panel" *ngIf="medicamentosVisible">
+      <div class="floating-panel-header d-flex justify-content-between align-items-center">
+        <h5>💊 Medicamentos Asociados</h5>
+        <button
+          class="btn-close"
+          aria-label="Cerrar"
+          (click)="cerrarMedicamentosPanel()"
+        ></button>
+      </div>
+
+      <div class="floating-panel-body">
+        <ul
+          *ngIf="medicamentosAsociados.length > 0; else sinMedicamentos"
+          class="list-group list-group-flush"
+        >
+          <li
+            *ngFor="let m of medicamentosAsociados"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            <div>
+              <strong>{{ m.nombreMedicamento }}</strong> - {{ m.descripcionMedicamento }}
+            </div>
+            <span class="badge bg-success rounded-pill">
+              {{ m.cantidad }} unidad{{ m.cantidad > 1 ? 'es' : '' }}
+            </span>
+          </li>
+        </ul>
+
+        <ng-template #sinMedicamentos>
+          <div class="alert alert-warning text-center">
+            No hay medicamentos asociados a esta consulta.
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

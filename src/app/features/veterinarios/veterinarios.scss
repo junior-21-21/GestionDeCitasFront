@@ -1,0 +1,41 @@
+form {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  input, select {
+    padding: 0.5rem;
+    flex: 1;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    background-color: #00796b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+  }
+
+  th {
+    background-color: #eeeeee;
+  }
+
+  button {
+    background-color: #d32f2f;
+    color: white;
+    padding: 0.3rem 0.7rem;
+    border: none;
+    border-radius: 4px;
+  }
+}

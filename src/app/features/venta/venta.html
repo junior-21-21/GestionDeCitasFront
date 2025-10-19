@@ -1,0 +1,89 @@
+<div class="container mt-4">
+  <h2>Registro de Venta</h2>
+
+  <div class="mb-3">
+    <label class="form-label">Buscar Cliente por DNI</label>
+    <input class="form-control" [(ngModel)]="busquedaDni" placeholder="Ingrese DNI">
+    <button class="btn btn-primary mt-2" (click)="buscarClientePorDni()">Buscar</button>
+  </div>
+
+  <div *ngIf="ventaNueva.clienteId !== 0" class="alert alert-success">
+    Cliente seleccionado: <strong>{{ getClienteNombreDni() }}</strong>
+  </div>
+
+  <hr>
+
+  <h4>Agregar Medicamentos</h4>
+  <div class="row mb-3" *ngFor="let m of medicamentos">
+    <div class="col-md-4">
+      <strong>{{ m.nombre }}</strong> - {{ m.descripcion }}
+    </div>
+    <div class="col-md-2">Stock: {{ m.stock }}</div>
+    <div class="col-md-2">Precio: {{ m.precio | currency:'USD' }}</div>
+    <div class="col-md-2">
+      <input type="number" [(ngModel)]="m.cantidadAsociar" class="form-control" min="1" [max]="m.stock">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-success" (click)="agregarMedicamento(m)">Agregar</button>
+    </div>
+  </div>
+
+  <h4>Detalle de Venta</h4>
+  <table class="table table-bordered" *ngIf="ventaNueva.detalles.length > 0">
+    <thead>
+    <tr>
+      <th>Medicamento</th>
+      <th>Cantidad</th>
+      <th>Precio Unitario</th> <th>Subtotal</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let detalle of ventaNueva.detalles">
+      <td>{{ getNombreMedicamento(detalle.medicamentoId) }}</td>
+      <td>{{ detalle.cantidad }}</td>
+      <td>{{ getPrecioMedicamento(detalle.medicamentoId) | currency:'USD' }}</td>
+      <td>{{ getSubtotalDetalle(detalle) | currency:'USD' }}</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="mt-3">
+    <strong>Total:</strong> {{ getTotalVentaNueva() | currency:'USD' }}
+  </div>
+
+
+  <button class="btn btn-primary mt-3" (click)="registrarVenta()">Registrar Venta</button>
+
+  <hr class="my-5">
+
+  <h3>Historial de Ventas</h3>
+
+  <div *ngIf="ventas.length === 0" class="alert alert-info">
+    No hay ventas registradas.
+  </div>
+
+  <table class="table table-striped" *ngIf="ventas.length > 0">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Fecha</th>
+      <th>Cliente</th>
+      <th>Total</th>
+      <th>Recibo</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let v of ventas">
+      <td>{{ v.id }}</td>
+      <td>{{ v.fecha | date:'short' }}</td>
+      <td>{{ v.cliente.nombres }} {{ v.cliente.apellidos }}</td>
+      <td>{{ v.total | currency:'USD' }}</td>
+      <td>
+        <button class="btn btn-outline-secondary btn-sm" (click)="descargarRecibo(v.id)">
+          Descargar
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>

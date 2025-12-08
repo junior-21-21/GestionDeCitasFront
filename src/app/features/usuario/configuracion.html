@@ -1,19 +1,119 @@
-<div class="config-container">
-  <h2>Registrar Nuevo Vendedor</h2>
+<div class="container mt-4 mb-5 fade-in">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="premium-title mb-0">Gestión de Usuarios</h2>
+    <button class="btn btn-primary" (click)="abrirCrear()">
+      <mat-icon class="small-icon">person_add</mat-icon> Nuevo Usuario
+    </button>
+  </div>
 
-  <form (ngSubmit)="registrarVendedor()">
-    <label for="nombres">Nombres:</label>
-    <input type="text" id="nombres" [(ngModel)]="vendedor.nombres" name="nombres" required>
+  <!-- TABLE CARD -->
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light">
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Nombres</th>
+            <th>Roles</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of usuarios">
+            <td>#{{ u.id }}</td>
+            <td class="fw-bold text-primary">{{ u.username }}</td>
+            <td>{{ u.nombres }}</td>
+            <td>
+              <span *ngFor="let rol of u.roles" class="badge bg-secondary me-1">
+                {{ rol.nombre || rol }}
+              </span>
+            </td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-secondary me-1" (click)="abrirEditar(u)" title="Editar">
+                <mat-icon class="small-icon">edit</mat-icon>
+              </button>
+              <button class="btn btn-sm btn-warning me-1 text-dark" (click)="abrirCambiarPassword(u)" title="Cambiar Contraseña">
+                <mat-icon class="small-icon">key</mat-icon>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="eliminarUsuario(u)" title="Eliminar">
+                <mat-icon class="small-icon">delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="usuarios.length === 0">
+            <td colspan="5" class="text-center py-4 text-muted">
+              No hay usuarios registrados.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    <label for="username">Usuario:</label>
-    <input type="text" id="username" [(ngModel)]="vendedor.username" name="username" required>
+  <!-- MODAL FORMULARIO (Crear / Editar) -->
+  <div class="modal-backdrop fade show" *ngIf="modalVisible"></div>
+  <div class="modal fade show d-block" *ngIf="modalVisible" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="modalVisible = false"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form (ngSubmit)="guardarUsuario()">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nombres Completos</label>
+              <input type="text" class="form-control" [(ngModel)]="usuarioSeleccionado.nombres" name="nombres" required>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nombre de Usuario</label>
+              <input type="text" class="form-control" [(ngModel)]="usuarioSeleccionado.username" name="username" required>
+            </div>
 
-    <label for="password">Contraseña:</label>
-    <input type="password" id="password" [(ngModel)]="vendedor.password" name="password" required>
+            <div class="mb-3" *ngIf="!modoEdicion">
+              <label class="form-label fw-bold">Contraseña</label>
+              <input type="password" class="form-control" [(ngModel)]="usuarioSeleccionado.password" name="password" required>
+            </div>
 
-    <button type="submit">Registrar Vendedor</button>
-  </form>
+             <!-- Selección de Roles (Solo Ejemplo visual, lógica simple) -->
+             <div class="mb-3">
+                <label class="form-label fw-bold">Rol Principal</label>
+                <select class="form-select" [(ngModel)]="usuarioSeleccionado.roles![0]" name="rol">
+                    <option *ngFor="let r of rolesDisponibles" [value]="r">{{ r }}</option>
+                </select>
+             </div>
 
-  <p class="success" *ngIf="mensaje">{{ mensaje }}</p>
-  <p class="error" *ngIf="error">{{ error }}</p>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-secondary" (click)="modalVisible = false">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PASSWORD -->
+  <div class="modal-backdrop fade show" *ngIf="passwordModalVisible" style="z-index: 1055;"></div>
+  <div class="modal fade show d-block" *ngIf="passwordModalVisible" tabindex="-1" style="z-index: 1060;">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="modal-content shadow-lg">
+              <div class="modal-header bg-warning">
+                  <h5 class="modal-title text-dark">Cambiar Contraseña</h5>
+                  <button type="button" class="btn-close" (click)="passwordModalVisible = false"></button>
+              </div>
+              <div class="modal-body">
+                  <div class="mb-3">
+                      <label class="form-label">Nueva Contraseña</label>
+                      <input type="password" class="form-control" [(ngModel)]="newPassword" placeholder="******">
+                  </div>
+                  <button class="btn btn-primary w-100" (click)="guardarPassword()">Actualizar</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
 </div>

@@ -1,8 +1,258 @@
+@use "sass:color";
+
+/* =========================================
+   PREMIUM THEME - VETERINARY CLINIC
+   ========================================= */
+
+// --- VARIABLES ---
+$primary: #3f51b5;         // Indigo profundo
+$primary-light: #7986cb;
+$secondary: #ff4081;       // Pink Accent
+$success: #00c853;         // Green
+$warning: #ffa000;         // Amber
+$danger: #d32f2f;          // Red
+$info: #00b0ff;            // Light Blue
+
+$bg-body: #f5f7fa;         // Gris muy suave (Ghost White)
+$bg-card: #ffffff;
+$text-main: #263238;       // Blue Grey Dark
+$text-muted: #607d8b;
+
+$shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+$shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1);
+$radius: 12px;
+
+// --- GLOBAL TEXTURE ---
+body {
+  background-color: $bg-body;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: $text-main;
+  overflow-x: hidden;
+}
+
+// Background shape decoration (optional subtle watermark)
 body::before {
   content: "";
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(208, 240, 253, 0.7); /* celeste pastel translúcido */
+  top: -10%; right: -10%;
+  width: 50%; height: 50%;
+  background: radial-gradient(circle, rgba($primary, 0.03) 0%, transparent 70%);
   z-index: -1;
+  border-radius: 50%;
+}
+
+// --- TYPOGRAPHY ---
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: color.adjust($primary, $lightness: -10%);
+  margin-bottom: 1rem;
+}
+
+// --- COMPONENT: CARDS ---
+.card {
+  background: $bg-card;
+  border: none;
+  border-radius: $radius;
+  box-shadow: $shadow-soft;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+
+  // Header elegante
+  .card-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 1.25rem;
+    font-weight: 600;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    mat-icon {
+      margin-right: 8px;
+      opacity: 0.8;
+    }
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-hover;
+  }
+}
+
+// --- COMPONENT: BUTTONS ---
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  // Primary Gradient
+  &.btn-primary {
+    background: linear-gradient(135deg, $primary 0%, color.adjust($primary, $lightness: -10%) 100%);
+    border: none;
+    color: white;
+
+    &:hover {
+      background: linear-gradient(135deg, color.adjust($primary, $lightness: 5%) 0%, $primary 100%);
+      box-shadow: 0 4px 12px rgba($primary, 0.3);
+    }
+  }
+
+  // Success Gradient
+  &.btn-success {
+    background: linear-gradient(135deg, $success 0%, color.adjust($success, $lightness: -10%) 100%);
+    border: none;
+    color: white;
+
+    &:hover {
+      background: linear-gradient(135deg, color.adjust($success, $lightness: 5%) 0%, $success 100%);
+      box-shadow: 0 4px 12px rgba($success, 0.3);
+    }
+  }
+
+  // Danger Gradient
+  &.btn-danger {
+    background: linear-gradient(135deg, $danger 0%, color.adjust($danger, $lightness: -10%) 100%);
+    border: none;
+    color: white;
+
+    &:hover {
+      background: linear-gradient(135deg, color.adjust($danger, $lightness: 5%) 0%, $danger 100%);
+      box-shadow: 0 4px 12px rgba($danger, 0.3);
+    }
+  }
+
+  // Outline (Secondary)
+  &.btn-outline-secondary {
+    border: 2px solid #e0e0e0;
+    color: $text-muted;
+    background: transparent;
+    box-shadow: none;
+
+    &:hover {
+      border-color: $text-muted;
+      color: $text-main;
+      background: rgba(0,0,0,0.02);
+    }
+  }
+}
+
+// --- COMPONENT: TABLES ---
+.table-responsive {
+  border-radius: $radius;
+  overflow: hidden;
+  box-shadow: $shadow-soft;
+}
+
+.table {
+  margin-bottom: 0;
+  background-color: white;
+
+  thead {
+    th {
+      background-color: #f8f9fa;
+      color: $text-muted;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      border-bottom: 2px solid #e9ecef;
+      padding: 1rem;
+    }
+  }
+
+  tbody {
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid #f1f1f1;
+      vertical-align: middle;
+      color: $text-main;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover {
+      background-color: #f0f4f8; // Light blue hover
+    }
+  }
+}
+
+// --- FORM INPUTS ---
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 0.75rem 1rem;
+  background-color: #fafafa;
+  transition: all 0.2s;
+
+  &:focus {
+    background-color: white;
+    border-color: $primary;
+    box-shadow: 0 0 0 4px rgba($primary, 0.1);
+  }
+}
+
+.input-group-text {
+  background-color: #eee;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+// --- ALERTS & BADGES ---
+.alert {
+  border-radius: $radius;
+  border: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+
+  strong { 
+    margin-left: 5px; 
+  }
+}
+
+.badge {
+  padding: 0.5em 0.8em;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+// --- UTILITIES ---
+.premium-title {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 4px;
+    background: $secondary;
+    border-radius: 2px;
+  }
+}
+
+.text-gradient {
+  background: linear-gradient(45deg, $primary, $secondary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

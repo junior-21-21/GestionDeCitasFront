@@ -33,19 +33,31 @@ export class CitaService {
     return this.http.get<any[]>(`${this.baseUrl}/veterinario/${vetId}`);
   }
 
-listarResumen(): Observable<CitaResponseDTO[]> {
-  return this.http.get<CitaResponseDTO[]>(`${this.baseUrl}/resumen`);
-}
+  listarResumen(): Observable<CitaResponseDTO[]> {
+    return this.http.get<CitaResponseDTO[]>(`${this.baseUrl}/resumen`);
+  }
 
-editarCita(id: number, dto: CitaDTO): Observable<any> {
-  return this.http.put(`${this.baseUrl}/${id}`, dto);
-}
+  editarCita(id: number, dto: CitaDTO): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}`, dto);
+  }
 
-listarMascotas(): Observable<{ id: number; nombre: string }[]> {
-  return this.http.get<{ id: number; nombre: string }[]>('http://localhost:8080/api/mascotas');
-}
+  listarMascotas(): Observable<{ id: number; nombre: string }[]> {
+    return this.http.get<{ id: number; nombre: string }[]>('http://localhost:8080/api/mascotas');
+  }
 
-listarVeterinarios(): Observable<{ id: number; nombres: string }[]> {
-  return this.http.get<{ id: number; nombres: string }[]>('http://localhost:8080/api/veterinarios');
-}
+  listarVeterinarios(): Observable<{ id: number; nombres: string }[]> {
+    return this.http.get<{ id: number; nombres: string }[]>('http://localhost:8080/api/veterinarios');
+  }
+
+  descargarComprobante(id: number): Observable<Blob> {
+    return this.http.get(`http://localhost:8080/api/reportes/cita/${id}/pdf`, { responseType: 'blob' });
+  }
+
+  eliminarCita(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${id}`);
+  }
+
+  obtenerPorId(id: number): Observable<CitaDTO> {
+    return this.http.get<CitaDTO>(`${this.baseUrl}/${id}`);
+  }
 }

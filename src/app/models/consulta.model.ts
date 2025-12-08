@@ -5,6 +5,7 @@ export interface ConsultaDTO {
   tratamiento: string;
   mascotaId: number;
   veterinarioId: number;
+  citaId?: number;
 }
 
 export interface ConsultaResponse {

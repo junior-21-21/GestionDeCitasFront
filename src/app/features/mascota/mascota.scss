@@ -1,64 +1,133 @@
-.container {
-  max-width: 700px;
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+// Variables
+$primary: #0d6efd;
+$success: #198754;
+$bg-light: #f8f9fa;
+$radius: 12px;
+
+// Animación de entrada suave
+.fade-in { animation: fadeIn 0.5s ease-out; }
+.animate-up { animation: slideUp 0.4s ease-out; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+// Estilos Generales de Tarjetas
+.card {
+  border-radius: $radius;
+  // El overflow hidden asegura que el header tenga las esquinas redondas
 }
 
-h2 {
-  font-weight: 600;
-  color: #2c3e50;
-  text-align: center;
+// Estilo especial para la alerta de cliente
+.client-alert {
+  background-color: #d1e7dd; // Verde muy suave
+  border: 1px solid #badbcc;
+  border-radius: $radius;
+  padding: 1rem;
+  
+  .icon-box {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
 }
 
-.form-label {
-  font-weight: 500;
-  color: #34495e;
-}
-
-input.form-control {
-  border-radius: 0.5rem;
-  border: 1px solid #ced4da;
-  transition: border-color 0.3s, box-shadow 0.3s;
+// Inputs del formulario más limpios
+.custom-input {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  transition: all 0.2s;
 
   &:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: $primary;
+    box-shadow: 0 0 0 4px rgba($primary, 0.1);
   }
 }
 
-.btn {
-  padding: 0.5rem 1.2rem;
-  font-weight: 500;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease-in-out;
-
-  &.btn-outline-primary:hover {
-    background-color: #0d6efd;
-    color: #fff;
+// TABLA Y ACCIONES
+.table {
+  th {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #6c757d;
   }
-
-  &.btn-success {
-    background-color: #198754;
-
+  
+  // Botones de acción en la tabla
+  .btn-outline-primary, .btn-outline-danger {
+    font-weight: 500;
+    border-width: 1px;
+    white-space: nowrap; // Evita que el texto se parta
+    
     &:hover {
-      background-color: #157347;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
   }
 }
 
-.alert {
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-}
+// --- RESPONSIVE (MÓVIL) ---
+@media (max-width: 768px) {
+  // Ocultar encabezados de tabla
+  .table thead { display: none; }
+  
+  // Convertir filas en tarjetas
+  .table tbody tr {
+    display: block;
+    background: white;
+    margin-bottom: 1rem;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    padding: 1rem;
+  }
 
-.input-group input {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: none;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #f0f0f0;
+    text-align: right;
 
-.input-group .btn {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+    &:last-child { 
+      border-bottom: none; 
+      margin-top: 10px;
+      justify-content: center; // Centrar botones en móvil
+      width: 100%;
+      display: block; // Importante para que el div interno ocupe el ancho
+    }
+
+    // Usamos el atributo data-label del HTML para poner el título
+    &:before {
+      content: attr(data-label);
+      font-weight: bold;
+      color: #888;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      margin-right: 10px;
+    }
+    
+    // El td de acciones no necesita label "before" visible
+    &:last-child:before {
+        display: none;
+    }
+  }
+  
+  // En móvil, hacemos que los botones ocupen el ancho completo para ser fáciles de tocar
+  .action-buttons {
+    width: 100%;
+    display: flex !important;
+    gap: 10px;
+    
+    button {
+      flex: 1; // 50% de ancho cada uno
+      justify-content: center;
+      padding: 0.5rem;
+    }
+  }
 }

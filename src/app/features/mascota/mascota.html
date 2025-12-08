@@ -1,102 +1,169 @@
-<div class="container mt-5">
-  <h2 class="mb-4 text-primary">🐾 Registrar Mascota</h2>
+<div class="container py-5 fade-in">
+  
+  <!-- TARJETA PRINCIPAL: REGISTRO -->
+  <div class="card shadow border-0 mb-5 overflow-hidden">
+    <!-- Header Azul -->
+    <div class="card-header bg-primary text-white py-3">
+      <h4 class="mb-0 fw-bold"><i class="bi bi-paw-fill me-2"></i>Registrar Mascota</h4>
+    </div>
+    
+    <div class="card-body p-4 bg-white">
+      
+      <!-- Buscador Centrado -->
+      <div class="row justify-content-center mb-4">
+        <div class="col-lg-8">
+          <label class="form-label fw-bold text-secondary small text-uppercase">Identificación del Cliente</label>
+          <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+            <input type="text" class="form-control border-0 bg-light" placeholder="Ingrese DNI (8 dígitos)" [(ngModel)]="dniCliente" maxlength="8" (keyup.enter)="buscarClientePorDni()" />
+            <button class="btn btn-primary px-4 fw-bold" type="button" (click)="buscarClientePorDni()">
+              Buscar
+            </button>
+          </div>
+        </div>
+      </div>
 
-  <!-- Buscar Cliente -->
-  <div class="mb-3">
-    <label class="form-label">DNI del Cliente:</label>
-    <div class="input-group">
-      <input type="text" class="form-control" [(ngModel)]="dniCliente" maxlength="8" />
-      <button class="btn btn-outline-primary" type="button" (click)="buscarClientePorDni()">Buscar Cliente</button>
+      <!-- Feedback Cliente Encontrado -->
+      <div *ngIf="clienteEncontrado" class="alert client-alert d-flex align-items-center mb-4" role="alert">
+        <div class="icon-box bg-success text-white rounded-circle me-3 flex-shrink-0">
+          <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div>
+          <div class="small fw-bold text-uppercase text-success opacity-75">Cliente Seleccionado</div>
+          <div class="fs-5 fw-bold text-dark">{{ clienteEncontrado.nombres }} {{ clienteEncontrado.apellidos }}</div>
+        </div>
+      </div>
+
+      <!-- Formulario (Solo visible si hay cliente) -->
+      <form *ngIf="clienteEncontrado" (ngSubmit)="editando ? actualizar() : registrar()" class="animate-up">
+        <h5 class="text-secondary mb-3 border-bottom pb-2">Datos de la Mascota</h5>
+        
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Nombre</label>
+            <input type="text" class="form-control custom-input" [(ngModel)]="mascota.nombre" name="nombre" required placeholder="Ej. Firulais"/>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Especie</label>
+            <input type="text" class="form-control custom-input" [(ngModel)]="mascota.especie" name="especie" placeholder="Ej. Perro, Gato..."/>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Raza</label>
+            <input type="text" class="form-control custom-input" [(ngModel)]="mascota.raza" name="raza" placeholder="Ej. Labrador"/>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Edad (años)</label>
+            <input type="number" class="form-control custom-input" [(ngModel)]="mascota.edad" name="edad" placeholder="0"/>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-light text-secondary border" *ngIf="editando !== null" (click)="cancelarEdicion()">
+            Cancelar
+          </button>
+          
+          <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm" *ngIf="editando === null">
+            Registrar Mascota
+          </button>
+          
+          <button type="submit" class="btn btn-warning btn-lg px-4 text-white shadow-sm" *ngIf="editando !== null">
+            Actualizar Mascota
+          </button>
+        </div>
+      </form>
+      
+      <!-- Mensaje guía si no hay cliente -->
+      <div *ngIf="!clienteEncontrado" class="text-center text-muted py-4 opacity-50">
+        <small>Busque un cliente para habilitar el formulario</small>
+      </div>
+
     </div>
   </div>
 
-  <!-- Cliente encontrado -->
-  <div *ngIf="clienteEncontrado" class="alert alert-success">
-    <strong>Cliente encontrado:</strong> {{ clienteEncontrado.nombres }} {{ clienteEncontrado.apellidos }}
-  </div>
+  <!-- SECCIÓN 2: LISTADO DE MASCOTAS -->
+  <div class="card shadow border-0">
+    <div class="card-body p-0">
+      <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center flex-wrap gap-3">
+         <h5 class="text-primary mb-0 fw-bold"><i class="bi bi-list-ul me-2"></i>Mascotas Registradas</h5>
+         
+         <!-- BARRA DE FILTROS -->
+         <div class="d-flex gap-2 flex-wrap">
+            <!-- Filtro Especie -->
+            <select class="form-select form-select-sm" style="width: 150px;" [(ngModel)]="filtroEspecie" (change)="filtrar()">
+              <option value="">Todas las especies</option>
+              <option *ngFor="let esp of especiesUnicas" [value]="esp">{{ esp }}</option>
+            </select>
 
-  <!-- Formulario de mascota -->
-  <form *ngIf="clienteEncontrado" (ngSubmit)="editando ? actualizar() : registrar()">
-    <div class="mb-3">
-      <label class="form-label">Nombre:</label>
-      <input type="text" class="form-control" [(ngModel)]="mascota.nombre" name="nombre" required />
+            <!-- Buscador DNI -->
+            <div class="input-group input-group-sm" style="width: 250px;">
+              <input type="text" class="form-control" placeholder="Buscar DNI Dueño..." [(ngModel)]="dniFiltro" (keyup.enter)="buscarMascotasCliente()">
+              <button class="btn btn-primary" (click)="buscarMascotasCliente()"><i class="bi bi-search"></i></button>
+            </div>
+
+            <!-- Boton Limpiar -->
+            <button class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltros()" title="Ver Todas">
+              <i class="bi bi-arrow-clockwise"></i>
+            </button>
+         </div>
+      </div>
+
+      <div *ngIf="mascotas.length === 0" class="p-5 text-center text-muted">
+        <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
+        <p>No hay mascotas registradas.</p>
+      </div>
+
+      <div class="table-responsive" *ngIf="mascotas.length > 0">
+        <table class="table align-middle mb-0 table-hover">
+          <thead class="bg-light">
+            <tr class="text-uppercase text-secondary small">
+              <th class="ps-4 py-3 border-0">Nombre</th>
+              <th class="border-0">Especie</th>
+              <th class="border-0">Raza</th>
+              <th class="border-0">Edad</th>
+              <th class="text-end pe-4 border-0" style="min-width: 200px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of mascotasPaginadas" class="border-bottom">
+              <td class="ps-4 py-3 fw-bold text-primary" data-label="Nombre">{{ m.nombre }}</td>
+              <td data-label="Especie"><span class="badge bg-light text-dark border">{{ m.especie || '-' }}</span></td>
+              <td data-label="Raza">{{ m.raza || '-' }}</td>
+              <td data-label="Edad">{{ m.edad ?? '-' }} años</td>
+              
+              <!-- ACCIONES MEJORADAS -->
+              <td class="text-end pe-4">
+                <div class="d-inline-flex gap-2 action-buttons">
+                  <button class="btn btn-outline-info btn-sm d-flex align-items-center px-3" (click)="verHistorial(m)" title="Ver Historial Médico">
+                    <i class="bi bi-journal-medical me-2"></i> Historial
+                  </button>
+                  <button class="btn btn-outline-primary btn-sm d-flex align-items-center px-3" (click)="editarMascota(m)">
+                    <i class="bi bi-pencil-square me-2"></i> Editar
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm d-flex align-items-center px-3" (click)="eliminarMascota(m.id)">
+                    <i class="bi bi-trash me-2"></i> Eliminar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <div class="mb-3">
-      <label class="form-label">Especie:</label>
-      <input type="text" class="form-control" [(ngModel)]="mascota.especie" name="especie" />
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Raza:</label>
-      <input type="text" class="form-control" [(ngModel)]="mascota.raza" name="raza" />
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Edad:</label>
-      <input type="number" class="form-control" [(ngModel)]="mascota.edad" name="edad" />
-    </div>
-
-    <div class="d-flex justify-content-end gap-2">
-      <button type="submit" class="btn btn-success" *ngIf="editando === null">
-        <i class="bi bi-check-circle"></i> Registrar Mascota
-      </button>
-      <button type="submit" class="btn btn-warning" *ngIf="editando !== null">
-        <i class="bi bi-pencil-square"></i> Actualizar Mascota
-      </button>
-      <button type="button" class="btn btn-secondary" *ngIf="editando !== null" (click)="cancelarEdicion()">
-        Cancelar
-      </button>
-    </div>
-  </form>
-
-  <!-- Lista de mascotas -->
-  <div class="container mt-5">
-    <h3 class="text-primary mb-3">🐶 Lista de Mascotas Registradas</h3>
-
-    <div *ngIf="mascotas.length === 0" class="alert alert-warning">
-      No hay mascotas registradas.
-    </div>
-
-    <table class="table table-bordered table-hover" *ngIf="mascotas.length > 0">
-      <thead class="table-primary">
-      <tr>
-        <th>Nombre</th>
-        <th>Especie</th>
-        <th>Raza</th>
-        <th>Edad</th>
-        <th>Acciones</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let mascota of mascotasPaginadas">
-        <td>{{ mascota.nombre }}</td>
-        <td>{{ mascota.especie || '-' }}</td>
-        <td>{{ mascota.raza || '-' }}</td>
-        <td>{{ mascota.edad ?? '-' }}</td>
-        <td>
-          <button class="btn btn-sm btn-warning me-2" (click)="editarMascota(mascota)">
-            <i class="bi bi-pencil-square"></i> Editar
-          </button>
-          <button class="btn btn-sm btn-danger" (click)="eliminarMascota(mascota.id)">
-            <i class="bi bi-trash"></i> Eliminar
-          </button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-
-    <!-- Controles de paginación -->
-    <div class="d-flex justify-content-between align-items-center mt-2" *ngIf="mascotas.length > itemsPorPagina">
-      <button class="btn btn-outline-primary btn-sm" (click)="paginaAnterior()" [disabled]="paginaActual === 1">
-        ← Anterior
-      </button>
-
-      <span>Página {{ paginaActual }} de {{ totalPaginas() }}</span>
-
-      <button class="btn btn-outline-primary btn-sm" (click)="paginaSiguiente()" [disabled]="paginaActual === totalPaginas()">
-        Siguiente →
-      </button>
+    
+    <!-- Paginación -->
+    <div class="card-footer bg-white py-3 border-0" *ngIf="mascotas.length > itemsPorPagina">
+      <div class="d-flex justify-content-between align-items-center">
+        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="paginaAnterior()" [disabled]="paginaActual === 1">
+          <i class="bi bi-chevron-left"></i> Anterior
+        </button>
+        <span class="text-muted small fw-bold">Página {{ paginaActual }} de {{ totalPaginas() }}</span>
+        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="paginaSiguiente()" [disabled]="paginaActual === totalPaginas()">
+          Siguiente <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
     </div>
   </div>
 </div>

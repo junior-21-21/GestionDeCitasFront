@@ -1,148 +1,262 @@
-// Variables de color pastel
-$celeste-claro: #e0f7fa;
-$celeste: #b2ebf2;
-$celeste-intenso: #00bcd4;
-$gris-claro: #f8f9fa;
-$gris-borde: #dee2e6;
-$texto-oscuro: #343a40;
+@use "sass:color";
 
-mat-toolbar.bg-primary {
-  background-color: $celeste-intenso !important;
+// Variables de diseño & colores premium
+$sidebar-width-expanded: 260px;
+$sidebar-width-collapsed: 74px;
+$sidebar-bg: #ffffff;
+$toolbar-bg: #1a237e; // Azul profundo elegante
+$primary-color: #3f51b5;
+$accent-color: #ff4081;
+$text-muted: #6c757d;
+$hover-bg: #f8f9fa;
+$active-bg: #e8eaf6;
+$active-border: #3f51b5;
+$transition-speed: 0.3s;
+
+// Mixin para sombras suaves
+@mixin soft-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+// Global Styles
+mat-sidenav-container {
+  height: 100vh;
+  background-color: #f5f7fa; // Fondo general muy suave
+}
+
+// --- TOOLBAR ---
+mat-toolbar.main-toolbar {
+  background: linear-gradient(
+    90deg,
+    $toolbar-bg 0%,
+    color.adjust($toolbar-bg, $lightness: -5%) 100%
+  ) !important;
   color: white !important;
-  font-size: 1.1rem;
-  font-weight: 500;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+  height: 64px;
+  z-index: 1000;
+  @include soft-shadow;
 
-mat-sidenav-container {
-  height: 100vh;
-}
-
-mat-sidenav.bg-light {
-  background-color: $gris-claro;
-  border-right: 1px solid $gris-borde;
-
-  .btn {
-    font-weight: 500;
-    font-size: 0.95rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
-
-    &.btn-outline-primary {
-      color: $celeste-intenso;
-      border-color: $celeste-intenso;
-
-      &:hover {
-        background-color: $celeste;
-        color: white;
-        border-color: $celeste-intenso;
-      }
-    }
-
-    &.btn-outline-secondary {
-      color: $texto-oscuro;
-      border-color: $gris-borde;
-
-      &:hover {
-        background-color: $celeste-claro;
-        border-color: $celeste;
-        color: $texto-oscuro;
-      }
-    }
-
-    &.btn-danger {
-      background-color: #f44336;
-      color: white;
-      border: none;
-
-      &:hover {
-        background-color: #d32f2f;
-      }
-    }
-  }
-}
-
-mat-sidenav-content {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 2rem;
-
-  // Para mantener el estilo pastel
-  min-height: 100vh;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
-}
-mat-sidenav-container {
-  height: 100vh;
-  background-color: $celeste-claro; // Fondo general pastel
-}
-body, html {
-  background-color: $celeste-claro; // Fondo general celeste pastel
-  height: 100%;
-  margin: 0;
-}
-mat-sidenav.celeste-pastel {
-  background-color: #e0f7fa; // celeste pastel
-  border-right: 1px solid #b2ebf2;
-
-  .btn {
-    background-color: white;
-    border: 1px solid #b2ebf2;
-    color: #007c91;
-
-    &:hover {
-      background-color: #b2ebf2;
-      color: white;
+  .toggle-btn {
+    transition: transform 0.2s ease;
+    &:active {
+      transform: scale(0.95);
     }
   }
 
-  .btn.btn-outline-secondary {
-    border-color: #81d4fa;
-    color: #004d40;
+  .logo-text {
+    font-family: "Segoe UI", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 
-    &:hover {
-      background-color: #b2ebf2;
-      color: #004d40;
+    .logo-icon {
+      font-size: 24px;
+    }
+    .brand-name {
+      font-size: 1.2rem;
     }
   }
 
-  hr {
-    border-color: #b2ebf2;
+  .text-user {
+    font-weight: 300;
+    opacity: 0.9;
   }
-}
-mat-sidenav.fondo-azul {
-  background-color: #0d6efd; // Azul Bootstrap
-  color: white;
 
-  .btn {
-    background-color: transparent;
-    border: 1px solid white;
+  .avatar-circle-sm {
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
     color: white;
+    cursor: pointer;
+    transition: background 0.2s;
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+// --- SIDEBAR ---
+mat-sidenav.app-sidenav {
+  background-color: $sidebar-bg;
+  border-right: none;
+  width: $sidebar-width-expanded;
+  transition: width $transition-speed cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow-x: hidden; // Ocultar scroll horizontal durante transición
+  @include soft-shadow;
+
+  // Estado COLAPSADO
+  &.collapsed {
+    width: $sidebar-width-collapsed;
+
+    .sidenav-header {
+      padding: 1rem 0 !important;
+    }
+
+    .mat-list-item-content {
+      justify-content: center !important;
+      padding: 0 !important;
+    }
+
+    .mat-icon {
+      margin-right: 0 !important;
+      font-size: 24px;
+    }
+
+    // Centrar iconos en modo colapsado
+    ::ng-deep .mdc-list-item__content {
+      justify-content: center;
+    }
+    ::ng-deep .mat-mdc-list-item-icon {
+      margin-right: 0px !important;
+    }
+  }
+
+  // --- HEADER DEL SIDEBAR (PERFIL) ---
+  .sidenav-header {
+    background-color: $sidebar-bg;
+    transition: all $transition-speed;
+
+    .avatar-circle {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(
+        135deg,
+        $primary-color,
+        color.adjust($primary-color, $lightness: 20%)
+      );
       color: white;
+      font-size: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all $transition-speed;
+
+      &.small-avatar {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+        margin-bottom: 0 !important;
+      }
+    }
+
+    .user-details {
+      text-align: center;
+      margin-top: 10px;
+
+      .role-badge {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
     }
   }
 
-  .btn-outline-secondary {
-    border-color: #cfe2ff;
-    color: #e0e0e0;
+  // --- LISTA DE NAVEGACIÓN ---
+  .nav-list {
+    padding-top: 10px;
 
-    &:hover {
-      background-color: #cfe2ff;
-      color: #0d6efd;
+    .section-header {
+      padding-left: 24px;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      color: color.adjust($text-muted, $lightness: 10%);
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    a[mat-list-item] {
+      height: 48px;
+      margin: 4px 12px;
+      border-radius: 8px;
+      color: $text-muted;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+
+      mat-icon {
+        color: inherit;
+        transition: color 0.2s;
+      }
+
+      &:hover {
+        background-color: $hover-bg;
+        color: $primary-color;
+      }
+
+      // Estilo ACTIVO
+      &.active-link {
+        background-color: $active-bg;
+        color: $primary-color;
+        font-weight: 500;
+
+        &::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          height: 24px;
+          width: 4px;
+          background-color: $active-border;
+          border-radius: 0 4px 4px 0;
+        }
+
+        mat-icon {
+          color: $primary-color;
+        }
+      }
     }
   }
 
-  hr {
-    border-color: rgba(255, 255, 255, 0.3);
-  }
+  // --- FOOTER (LOGOUT) ---
+  .footer-actions {
+    // border-top: 1px solid rgba(0,0,0,0.05);
 
-  .btn-danger {
-    background-color: #dc3545;
-    color: white;
+    .logout-btn {
+      justify-content: flex-start; // Alineación izquierda por defecto
+      height: 48px;
+      border-radius: 8px;
 
-    &:hover {
-      background-color: #c82333;
+      // En modo colapsado, centrar icono
+      &.collapsed-mode {
+        justify-content: center;
+      }
     }
   }
+}
+
+// --- CONTENIDO ---
+.content-wrapper {
+  background-color: #f4f6f9;
+}
+
+.fade-in-content {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Utilidades de texto
+.fade-in {
+  animation: fadeIn 0.3s ease;
 }

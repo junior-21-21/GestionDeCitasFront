@@ -1,10 +1,8 @@
-import {
-  Component,
-  OnInit,
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
+import { CitaService } from '../../services/cita.service';
 
 import { ConsultaService } from '../../services/consulta.service';
 import { VeterinarioService } from '../../services/veterinario.service';
@@ -35,6 +33,7 @@ export class ConsultasComponent implements OnInit {
     tratamiento: '',
     mascotaId: 0,
     veterinarioId: 0,
+    citaId: undefined
   };
 
   veterinarios: VeterinarioResponseDTO[] = [];
@@ -51,13 +50,44 @@ export class ConsultasComponent implements OnInit {
   constructor(
     private consultaService: ConsultaService,
     private veterinarioService: VeterinarioService,
-    private mascotaService: MascotaService
+    private mascotaService: MascotaService,
+    private route: ActivatedRoute,
+    private citaService: CitaService
   ) {}
 
   ngOnInit(): void {
     this.cargarVeterinarios();
     this.cargarMascotas();
     this.cargarConsultas();
+
+    // Check for citaId param
+    this.route.queryParams.subscribe(params => {
+      const citaId = params['citaId'];
+      if (citaId) {
+        this.cargarDatosCita(citaId);
+      }
+    });
+  }
+
+  cargarDatosCita(id: number): void {
+     this.citaService.obtenerPorId(id).subscribe({
+       next: (cita) => {
+         this.consulta.mascotaId = cita.mascotaId;
+         this.consulta.veterinarioId = cita.veterinarioId;
+         this.consulta.motivo = cita.motivo;
+         this.consulta.fecha = new Date().toISOString().split('T')[0]; // Fecha actual para la consulta
+         this.consulta.citaId = id; // Asociar ID de cita (asegurar que DTO lo tenga)
+         
+         Swal.fire({
+            title: 'Atendiendo Cita',
+            text: `Datos cargados para la cita #${id}`,
+            icon: 'info',
+            timer: 2000,
+            showConfirmButton: false
+         });
+       },
+       error: () => Swal.fire('Error', 'No se pudo cargar la información de la cita', 'error')
+     });
   }
 
   cargarVeterinarios(): void {
@@ -75,6 +105,8 @@ export class ConsultasComponent implements OnInit {
     });
   }
 
+  dniBusqueda: string = '';
+
   cargarConsultas(): void {
     this.consultaService.listarConsultas().subscribe({
       next: (data) => {
@@ -83,6 +115,29 @@ export class ConsultasComponent implements OnInit {
       },
       error: () => Swal.fire('Error', 'No se pudo listar consultas', 'error'),
     });
+  }
+
+  buscarPorDni(): void {
+    if (!this.dniBusqueda.trim()) {
+      Swal.fire('Atención', 'Ingrese un DNI para buscar', 'warning');
+      return;
+    }
+
+    this.consultaService.buscarPorDni(this.dniBusqueda).subscribe({
+      next: (data) => {
+        this.consultas = data;
+        this.currentPage = 1;
+        if (data.length === 0) {
+          Swal.fire('Información', 'No se encontraron consultas para este DNI', 'info');
+        }
+      },
+      error: () => Swal.fire('Error', 'No se pudo realizar la búsqueda', 'error'),
+    });
+  }
+
+  limpiarBusqueda(): void {
+    this.dniBusqueda = '';
+    this.cargarConsultas();
   }
 
   registrar(): void {

@@ -1,47 +1,150 @@
-<!-- Barra superior -->
-<mat-toolbar class="bg-primary text-white d-flex align-items-center px-3 shadow">
-  <button mat-icon-button (click)="toggleSidebar()" class="me-2 d-lg-none">
+<!-- Spinner global -->
+<app-spinner></app-spinner>
+
+<!-- BARRA SUPERIOR (TOOLBAR) -->
+<mat-toolbar class="main-toolbar shadow-sm sticky-top">
+  <!-- Botón Menú Hamburger -->
+  <button mat-icon-button (click)="toggleSidebar()" class="me-3 text-white toggle-btn">
     <mat-icon>menu</mat-icon>
   </button>
-  <span class="fw-bold">🐾 Clínica Veterinaria</span>
+  
+  <span class="d-flex align-items-center logo-text">
+    <mat-icon class="me-2 logo-icon">pets</mat-icon> 
+    <span class="brand-name">Clínica Veterinaria</span>
+  </span>
+  
   <span class="flex-grow-1"></span>
-  <span *ngIf="usuario" class="d-none d-sm-block">Bienvenido, {{ usuario.nombres }}</span>
+
+  <!-- Información de Usuario -->
+  <div *ngIf="usuario" class="d-flex align-items-center user-info">
+    <span class="d-none d-sm-block me-3 text-user">Hola, {{ usuario.nombres }}</span>
+    <button mat-icon-button [matMenuTriggerFor]="menuUser" class="text-white avatar-btn">
+      <div class="avatar-circle-sm">
+        {{ usuario?.nombres?.charAt(0) || 'U' }}
+      </div>
+    </button>
+    
+    <mat-menu #menuUser="matMenu" xPosition="before">
+      <div class="px-3 py-2 border-bottom d-sm-none">
+        <span class="small text-muted">Usuario:</span><br>
+        <strong>{{ usuario.nombres }}</strong>
+      </div>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon color="warn">logout</mat-icon>
+        <span>Cerrar Sesión</span>
+      </button>
+    </mat-menu>
+  </div>
 </mat-toolbar>
 
-<!-- Contenedor con sidebar -->
-<mat-sidenav-container class="h-100">
+<!-- CONTENEDOR PRINCIPAL -->
+<mat-sidenav-container class="sidenav-container" autosize>
+  
+  <!-- SIDEBAR (MENÚ LATERAL) -->
   <mat-sidenav #sidenav
-               [(opened)]="sidebarAbierto"
-               [mode]="esPantallaPequena ? 'over' : 'side'"
-               [fixedInViewport]="esPantallaPequena"
-               class="fondo-azul"
-               [disableClose]="!esPantallaPequena">
+               [opened]="true" 
+               mode="side"
+               class="app-sidenav shadow-sm"
+               [class.collapsed]="isCollapsed">
+    
+    <div class="d-flex flex-column h-100 sidebar-content">
+      
+      <!-- Encabezado del Sidebar (Perfil) -->
+      <div class="sidenav-header d-flex flex-column align-items-center justify-content-center py-4">
+        <div class="avatar-circle mb-2 shadow-sm" [class.small-avatar]="isCollapsed">
+          {{ usuario?.nombres?.charAt(0) || 'V' }}
+        </div>
+        
+        <div class="user-details fade-in" *ngIf="!isCollapsed">
+          <div class="fw-bold text-primary text-truncate">{{ usuario?.nombres }}</div>
+          <small class="text-muted text-uppercase role-badge">Admin</small>
+        </div>
+      </div>
 
+      <mat-divider class="mx-3 mb-2" *ngIf="!isCollapsed"></mat-divider>
 
-  <div class="p-3 d-flex flex-column gap-2">
-      <a class="btn btn-outline-primary text-start" routerLink="/citas" (click)="cerrarSidebar()">📅 Citas</a>
-      <a class="btn btn-outline-primary text-start" routerLink="/clientes" (click)="cerrarSidebar()">👤 Clientes</a>
-      <a class="btn btn-outline-primary text-start" routerLink="/mascotas" (click)="cerrarSidebar()">🐶 Mascotas</a>
-      <a class="btn btn-outline-primary text-start" routerLink="/consultas" (click)="cerrarSidebar()">🩺 Consultas</a>
-      <a class="btn btn-outline-primary text-start" routerLink="/ventas" (click)="cerrarSidebar()">💵 Ventas</a>
+      <!-- Lista de Navegación -->
+      <mat-nav-list class="pt-2 flex-grow-1 nav-list">
+        
+        <!-- HEADER GESTIÓN -->
+        <h3 mat-subheader class="section-header" *ngIf="!isCollapsed">Gestión</h3>
+        <mat-divider *ngIf="isCollapsed" class="mb-2 mx-3"></mat-divider>
 
-      <ng-container *ngIf="esAdmin()">
-        <hr />
-        <a class="btn btn-outline-secondary text-start" routerLink="/medicamentos" (click)="cerrarSidebar()">💊 Medicamentos</a>
-        <a class="btn btn-outline-secondary text-start" routerLink="/especialidades" (click)="cerrarSidebar()">🏥 Especialidades</a>
-        <a class="btn btn-outline-secondary text-start" routerLink="/veterinarios" (click)="cerrarSidebar()">🧑‍⚕️ Veterinarios</a>
-        <a class="btn btn-outline-secondary text-start" routerLink="/usuarios" (click)="cerrarSidebar()">📈 Agregar Usuarios</a>
+        <!-- Enlaces -->
+        <a mat-list-item routerLink="/citas" routerLinkActive="active-link" 
+           [matTooltip]="isCollapsed ? 'Citas' : ''" matTooltipPosition="right">
+          <mat-icon matListItemIcon>calendar_today</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed">Citas</span>
+        </a>
 
-      </ng-container>
+        <a mat-list-item routerLink="/clientes" routerLinkActive="active-link"
+           [matTooltip]="isCollapsed ? 'Clientes' : ''" matTooltipPosition="right">
+          <mat-icon matListItemIcon>person</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed">Clientes</span>
+        </a>
 
-      <hr />
-      <button mat-stroked-button color="warn" (click)="logout()" class="btn btn-danger">
-        Cerrar sesión
-      </button>
+        <a mat-list-item routerLink="/mascotas" routerLinkActive="active-link"
+           [matTooltip]="isCollapsed ? 'Mascotas' : ''" matTooltipPosition="right">
+          <mat-icon matListItemIcon>pets</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed">Mascotas</span>
+        </a>
+
+        <a mat-list-item routerLink="/consultas" routerLinkActive="active-link"
+           [matTooltip]="isCollapsed ? 'Consultas' : ''" matTooltipPosition="right">
+          <mat-icon matListItemIcon>medical_services</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed">Consultas</span>
+        </a>
+        
+        <a mat-list-item routerLink="/ventas" routerLinkActive="active-link"
+           [matTooltip]="isCollapsed ? 'Ventas' : ''" matTooltipPosition="right">
+          <mat-icon matListItemIcon>point_of_sale</mat-icon>
+          <span matListItemTitle *ngIf="!isCollapsed">Ventas</span>
+        </a>
+
+        <!-- Sección Admin -->
+        <ng-container *ngIf="esAdmin()">
+          <mat-divider class="my-3 mx-3" *ngIf="!isCollapsed"></mat-divider>
+          <h3 mat-subheader class="section-header" *ngIf="!isCollapsed">Admin</h3>
+          <mat-divider *ngIf="isCollapsed" class="my-2 mx-3"></mat-divider>
+
+          <a mat-list-item routerLink="/medicamentos" routerLinkActive="active-link"
+             [matTooltip]="isCollapsed ? 'Medicamentos' : ''" matTooltipPosition="right">
+            <mat-icon matListItemIcon>medication</mat-icon>
+            <span matListItemTitle *ngIf="!isCollapsed">Medicamentos</span>
+          </a>
+
+          <a mat-list-item routerLink="/veterinarios" routerLinkActive="active-link"
+             [matTooltip]="isCollapsed ? 'Veterinarios' : ''" matTooltipPosition="right">
+            <mat-icon matListItemIcon>badge</mat-icon>
+            <span matListItemTitle *ngIf="!isCollapsed">Veterinarios</span>
+          </a>
+
+          <a mat-list-item routerLink="/usuarios" routerLinkActive="active-link"
+             [matTooltip]="isCollapsed ? 'Usuarios' : ''" matTooltipPosition="right">
+            <mat-icon matListItemIcon>manage_accounts</mat-icon>
+            <span matListItemTitle *ngIf="!isCollapsed">Usuarios</span>
+          </a>
+        </ng-container>
+
+      </mat-nav-list>
+
+      <!-- Botón de Salir -->
+      <div class="footer-actions p-3">
+        <button mat-button color="warn" class="w-100 logout-btn" (click)="logout()"
+                [matTooltip]="isCollapsed ? 'Cerrar Sesión' : ''" matTooltipPosition="right">
+          <mat-icon>power_settings_new</mat-icon> 
+          <span *ngIf="!isCollapsed" class="ms-2">Salir</span>
+        </button>
+      </div>
+
     </div>
   </mat-sidenav>
 
-  <mat-sidenav-content class="p-4 bg-light min-vh-100">
-    <router-outlet></router-outlet>
+  <!-- CONTENIDO DE LAS PÁGINAS -->
+  <mat-sidenav-content class="content-wrapper">
+    <div class="container-fluid p-4 fade-in-content">
+      <router-outlet></router-outlet>
+    </div>
   </mat-sidenav-content>
+
 </mat-sidenav-container>

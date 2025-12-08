@@ -63,7 +63,5 @@ export class LoginComponent {
     });
   }
 
-  irARegistro() {
-    this.router.navigate(['/registrar-admin']);
-  }
+  // Método eliminado por solicitud de rediseño premium
 }

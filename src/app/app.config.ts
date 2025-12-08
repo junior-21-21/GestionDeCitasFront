@@ -12,6 +12,15 @@ import {
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { AuthInterceptor } from './services/auth.interceptor'; // importa tu interceptor
+import { ErrorInterceptor } from './services/error.interceptor';
+import { LoadingInterceptor } from './services/loading.interceptor';
+
+import { registerLocaleData } from '@angular/common';
+import localeEsPe from '@angular/common/locales/es-PE';
+import { LOCALE_ID } from '@angular/core';
+
+// Registrar el locale para Perú
+registerLocaleData(localeEsPe);
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,10 +29,23 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     provideRouter(routes),
 
+    // ✅ Establecer el locale ID globalmente
+    { provide: LOCALE_ID, useValue: 'es-PE' },
+
     // ✅ registra el interceptor para que Angular lo use
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ErrorInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: LoadingInterceptor,
       multi: true
     }
   ]

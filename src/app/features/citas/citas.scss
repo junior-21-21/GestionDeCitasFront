@@ -111,3 +111,101 @@
     }
   }
 }
+/* --- TEMA VETERINARIA (Verde Menta) --- */
+:root {
+  --vet-primary: #20c997;
+  --vet-dark: #0ca678;
+  --vet-light: #e6fffa;
+}
+
+/* Animación de entrada suave (Slide Up) */
+.animate-enter {
+  animation: slideInUp 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- TARJETAS --- */
+.card-vet {
+  border: none;
+  border-radius: 1rem;
+  overflow: hidden; /* Para que el header respete los bordes */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.card-header-vet {
+  background: linear-gradient(135deg, var(--vet-primary), var(--vet-dark));
+  color: white;
+  padding: 1.5rem;
+  border: none;
+}
+
+/* --- INPUTS CON ICONOS INTEGRADOS --- */
+.input-group-text {
+  background-color: #f8f9fa;
+  border-right: none;
+  color: var(--vet-dark);
+}
+
+.form-control, .form-select {
+  border-left: none;
+}
+
+.form-control:focus, .form-select:focus {
+  box-shadow: none;
+  border-color: var(--vet-primary);
+}
+
+/* Efecto focus: ilumina el icono y el borde */
+.input-group:focus-within .input-group-text {
+  border-color: var(--vet-primary);
+  background-color: var(--vet-light);
+  color: var(--vet-dark);
+}
+
+.input-group:focus-within .form-control, 
+.input-group:focus-within .form-select {
+  border-color: var(--vet-primary);
+}
+
+/* --- BOTONES --- */
+.btn-vet {
+  background-color: var(--vet-primary);
+  color: white;
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-vet:hover {
+  background-color: var(--vet-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.3);
+  color: white;
+}
+
+/* --- TABLA INTERACTIVA --- */
+.table-hover tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: var(--vet-light);
+  transform: scale(1.01); /* Efecto pop sutil */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  z-index: 10;
+  position: relative;
+  cursor: default;
+}
+
+/* Badges de estado */
+.badge-status {
+  padding: 0.5em 0.8em;
+  border-radius: 50rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}

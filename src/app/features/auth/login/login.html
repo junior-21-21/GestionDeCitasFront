@@ -1,26 +1,59 @@
-<div class="container d-flex justify-content-center align-items-center min-vh-100 bg-light">
-  <div class="card shadow p-4 login-card">
-    <h2 class="text-center mb-4">Iniciar sesión</h2>
-
-    <form (ngSubmit)="login()">
-      <div class="mb-3">
-        <label class="form-label">Usuario</label>
-        <input [(ngModel)]="dto.username" name="username" class="form-control" required />
+<div class="vet-login-container d-flex justify-content-center align-items-center min-vh-100">
+  <div class="card shadow-lg border-0 rounded-4 login-card">
+    <div class="card-body p-4 p-md-5">
+      
+      <div class="text-center mb-4">
+        <div class="vet-avatar-circle mb-3">
+          <img 
+            src="https://cdn-icons-png.flaticon.com/512/4514/4514759.png" 
+            alt="Admin Avatar" 
+            class="avatar-img"
+          >
+        </div>
+        
+        <h2 class="fw-bold mb-1 text-white text-shadow">Veterinaria Petizoos</h2>
+        <p class="text-white-50 small">Panel de Administración</p>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Contraseña</label>
-        <input [(ngModel)]="dto.password" name="password" type="password" class="form-control" required />
-      </div>
+      <form (ngSubmit)="login()">
+        
+        <div class="mb-3">
+          <label class="form-label text-white fw-semibold small ms-1">Usuario</label>
+          <input 
+            [(ngModel)]="dto.username" 
+            name="username" 
+            class="form-control vet-input" 
+            placeholder="Ej. admin@vet.com"
+            required 
+          />
+        </div>
 
-      <button class="btn btn-primary w-100" type="submit">Ingresar</button>
+        <div class="mb-4">
+          <label class="form-label text-white fw-semibold small ms-1">Contraseña</label>
+          <input 
+            [(ngModel)]="dto.password" 
+            name="password" 
+            type="password" 
+            class="form-control vet-input" 
+            placeholder="••••••••"
+            required 
+          />
+        </div>
 
-      <p class="text-center mt-3 mb-0">
-        ¿No tienes cuenta?
-        <a (click)="irARegistro()" class="text-decoration-none text-primary" style="cursor: pointer;">
-          Regístrate como administrador
-        </a>
-      </p>
-    </form>
+        <button class="btn btn-vet w-100 py-2 rounded-3 fw-bold mb-4 shadow-sm" type="submit">
+          Ingresar
+        </button>
+
+        <div class="text-center">
+          <p class="text-white-50 small mb-0">
+            ¿Olvidaste tu contraseña?
+          </p>
+          <small class="text-warning fw-bold">
+            Contáctate con tu administrador
+          </small>
+        </div>
+
+      </form>
+    </div>
   </div>
 </div>

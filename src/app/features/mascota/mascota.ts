@@ -4,14 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { MascotaDTO, MascotaResponseDTO } from '../../models/mascota.model';
 import { MascotaService } from '../../services/mascota.service';
 import { ClienteService } from '../../services/cliente.service';
+import { ConsultaService } from '../../services/consulta.service'; // Importar
 import { ClienteResponseDTO } from '../../models/cliente.model';
+import { ConsultaResponse } from '../../models/consulta.model'; // Importar
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-registrar-mascota',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './mascota.html'
+  templateUrl: './mascota.html', // Asegúrate de que coincida con el nombre del archivo
+  styleUrls: ['./mascota.scss']   // Asegúrate de que coincida con el nombre del archivo
 })
 export class MascotaComponent implements OnInit {
   dniCliente: string = '';
@@ -26,6 +29,11 @@ export class MascotaComponent implements OnInit {
   };
 
   mascotas: MascotaResponseDTO[] = [];
+  listaMascotasCompleta: MascotaResponseDTO[] = []; // Para filtrado local
+  
+  // Filtros
+  filtroEspecie: string = '';
+  dniFiltro: string = '';
 
   // Variables para paginación
   paginaActual = 1;
@@ -36,7 +44,8 @@ export class MascotaComponent implements OnInit {
 
   constructor(
     private mascotaService: MascotaService,
-    private clienteService: ClienteService
+    private clienteService: ClienteService,
+    private consultaService: ConsultaService
   ) {}
 
   ngOnInit(): void {
@@ -44,11 +53,28 @@ export class MascotaComponent implements OnInit {
   }
 
   buscarClientePorDni(): void {
+    if (!this.dniCliente || this.dniCliente.length !== 8) {
+         Swal.fire('Atención', 'Ingrese un DNI válido de 8 dígitos', 'warning');
+         return;
+    }
+
     this.clienteService.buscarPorDni(this.dniCliente).subscribe({
       next: (data) => {
         this.clienteEncontrado = data;
         this.mascota.clienteId = data.id;
-        Swal.fire('Cliente encontrado', `${data.nombres} ${data.apellidos}`, 'success');
+        
+        // Usamos un Toast pequeño en lugar de un popup grande para mejor UX
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        });
+        Toast.fire({
+          icon: 'success',
+          title: `Cliente: ${data.nombres} ${data.apellidos}`
+        });
       },
       error: () => {
         this.clienteEncontrado = null;
@@ -82,10 +108,83 @@ export class MascotaComponent implements OnInit {
     this.mascotaService.listarTodas().subscribe({
       next: (data) => {
         this.mascotas = data;
+        this.listaMascotasCompleta = data; // Guardamos copia original
         this.paginaActual = 1;
       },
       error: (err) => console.error('Error al cargar mascotas', err)
     });
+  }
+
+  // --- LÓGICA DE FILTROS ---
+
+  get especiesUnicas(): string[] {
+    // Extraer especies únicas de la lista completa (filtrando nulos/undefined)
+    const especies = this.listaMascotasCompleta
+      .map(m => m.especie)
+      .filter((e): e is string => !!e); // Type Guard para asegurar string
+    return [...new Set(especies)].sort();
+  }
+
+  filtrar(): void {
+    let resultado = [...this.listaMascotasCompleta];
+
+    // 1. Filtro por Especie (Local)
+    if (this.filtroEspecie) {
+      resultado = resultado.filter(m => m.especie === this.filtroEspecie);
+    }
+
+    this.mascotas = resultado;
+    this.paginaActual = 1;
+    this.paginaActual = 1;
+  }
+
+  // --- HISTORIAL ---
+  historialVisible: boolean = false;
+  mascotaHistorial: MascotaResponseDTO | null = null;
+  historialConsultas: ConsultaResponse[] = [];
+
+  verHistorial(m: MascotaResponseDTO): void {
+    this.mascotaHistorial = m;
+    this.historialVisible = true;
+    this.consultaService.obtenerHistorialPorMascota(m.id).subscribe({
+      next: (data: ConsultaResponse[]) => {
+        this.historialConsultas = data;
+      },
+      error: () => {
+        Swal.fire('Error', 'No se pudo cargar el historial', 'error');
+        this.historialVisible = false;
+      }
+    });
+  }
+
+  cerrarHistorial(): void {
+    this.historialVisible = false;
+    this.mascotaHistorial = null;
+    this.historialConsultas = [];
+  }
+
+  buscarMascotasCliente(): void {
+    if (!this.dniFiltro || this.dniFiltro.trim().length !== 8) {
+       Swal.fire('Atención', 'Ingrese un DNI de 8 dígitos para buscar', 'warning');
+       return;
+    }
+
+    this.mascotaService.buscarPorDni(this.dniFiltro).subscribe({
+      next: (data) => {
+        this.mascotas = data;
+        this.listaMascotasCompleta = data; // Ahora el "universo" es solo este cliente
+        this.filtroEspecie = ''; // Reseteamos filtro de especie
+        this.paginaActual = 1;
+        Swal.fire('Resultados', `Se encontraron ${data.length} mascotas`, 'success');
+      },
+      error: () => Swal.fire('Error', 'No se encontraron resultados o hubo un error', 'error')
+    });
+  }
+
+  limpiarFiltros(): void {
+    this.dniFiltro = '';
+    this.filtroEspecie = '';
+    this.cargarMascotas(); // Recarga todo desde el backend
   }
 
   cancelarEdicion(): void {
@@ -124,7 +223,6 @@ export class MascotaComponent implements OnInit {
     });
   }
 
-
   eliminarMascota(id: number): void {
     Swal.fire({
       title: '¿Estás seguro?',
@@ -132,7 +230,9 @@ export class MascotaComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
     }).then(result => {
       if (result.isConfirmed) {
         this.mascotaService.eliminar(id).subscribe({
@@ -150,9 +250,12 @@ export class MascotaComponent implements OnInit {
   }
 
   editarMascota(m: MascotaResponseDTO): void {
+    // Primero buscamos el cliente para llenar la info visualmente
     this.clienteService.buscarPorId(m.clienteId).subscribe({
       next: (cliente) => {
         this.clienteEncontrado = cliente;
+        
+        // Llenamos el formulario
         this.mascota = {
           nombre: m.nombre,
           especie: m.especie,
@@ -160,8 +263,11 @@ export class MascotaComponent implements OnInit {
           edad: m.edad,
           clienteId: m.clienteId
         };
+        
         this.editando = m;
-        Swal.fire('Modo Edición', `Editando a ${m.nombre}`, 'info');
+        
+        // Scroll suave hacia arriba para ver el formulario
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       error: () => {
         Swal.fire('Error', 'No se pudo obtener el cliente asociado', 'error');
@@ -178,7 +284,11 @@ export class MascotaComponent implements OnInit {
       clienteId: 0
     };
     this.dniCliente = '';
-    this.clienteEncontrado = null;
+    // Nota: No reseteamos clienteEncontrado aquí si queremos seguir registrando mascotas para el mismo cliente,
+    // pero según tu lógica original sí lo hacías, así que lo mantengo:
+    // this.clienteEncontrado = null; 
+    // (Opcional: puedes comentar la línea de abajo si quieres registrar varias mascotas al mismo dueño seguidas)
+    this.clienteEncontrado = null; 
   }
 
   // --- PAGINACIÓN ---

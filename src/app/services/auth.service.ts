@@ -33,6 +33,24 @@ export class AuthService {
     return this.http.post<any>(this.vendedorUrl, dto);
   }
 
+  // --- CRUD USUARIOS ---
+
+  listarUsuarios(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.registerUrl.replace('/admin', '')}`);
+  }
+
+  actualizarUsuario(id: number, usuario: UsuarioDTO): Observable<any> {
+    return this.http.put(`${this.registerUrl.replace('/admin', '')}/${id}`, usuario);
+  }
+
+  eliminarUsuario(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.registerUrl.replace('/admin', '')}/${id}`);
+  }
+
+  cambiarPassword(id: number, password: string): Observable<any> {
+    return this.http.put(`${this.registerUrl.replace('/admin', '')}/${id}/password`, { password });
+  }
+
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }

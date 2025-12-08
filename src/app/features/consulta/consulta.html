@@ -109,7 +109,27 @@
   </div>
 
   <div class="card shadow p-4">
-    <h3 class="text-secondary mb-3">📋 Consultas Registradas</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="text-secondary m-0">📋 Consultas Registradas</h3>
+
+      <!-- Búsqueda por DNI -->
+      <div class="d-flex gap-2">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por DNI del Cliente..."
+          [(ngModel)]="dniBusqueda"
+          (keyup.enter)="buscarPorDni()"
+          style="max-width: 250px;"
+        />
+        <button class="btn btn-primary" (click)="buscarPorDni()">
+          🔍 Buscar
+        </button>
+        <button class="btn btn-outline-secondary" (click)="limpiarBusqueda()">
+          Limpiar
+        </button>
+      </div>
+    </div>
 
     <div *ngIf="consultas.length > 0; else noConsultas" class="table-responsive">
       <table class="table table-bordered table-hover align-middle">

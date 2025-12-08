@@ -1,41 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Cliente } from '../../models/cliente.model';
 import { ClienteService } from '../../services/cliente.service';
-
-// Angular Material
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-
 import Swal from 'sweetalert2';
+
+// Definimos la interfaz aquí mismo si no la tienes en un archivo separado
+export interface Cliente {
+  id?: number;
+  nombres: string;
+  apellidos: string;
+  dni: string;
+  telefono?: string;
+  direccion?: string;
+}
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatTableModule,
-    MatIconModule
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './clientes.html',
   styleUrls: ['./clientes.scss']
 })
 export class ClientesComponent implements OnInit {
   clientes: Cliente[] = [];
-  nuevoCliente: Cliente = this.nuevoClienteInicial();
+  
+  // Objeto inicial con todos los campos de tu BD
+  nuevoCliente: Cliente = {
+    nombres: '',
+    apellidos: '',
+    dni: '',
+    telefono: '',
+    direccion: ''
+  };
+
   modoEditar = false;
-  clienteEditandoId: number | null = null;
-  modo: 'registro' | 'lista' = 'registro';
   mensajeExito: string = '';
   mensajeError: string = '';
+
   constructor(private clienteService: ClienteService) {}
 
   ngOnInit(): void {
@@ -44,53 +45,58 @@ export class ClientesComponent implements OnInit {
 
   listar(): void {
     this.clienteService.listar().subscribe({
-      next: data => this.clientes = data,
-      error: err => Swal.fire('Error', 'No se pudieron cargar los clientes.', 'error')
+      next: (data) => this.clientes = data,
+      error: (err) => this.mostrarError('Error al cargar clientes')
     });
   }
 
   guardar(): void {
-    if (!this.nuevoCliente.nombres || !this.nuevoCliente.dni || this.nuevoCliente.dni.length !== 8) {
-      Swal.fire('Error', 'Debe ingresar un nombre y un DNI válido (8 dígitos).', 'warning');
+    // 1. Validaciones básicas
+    if (!this.nuevoCliente.nombres || !this.nuevoCliente.apellidos) {
+      this.mostrarError('Nombre y Apellidos son obligatorios');
+      return;
+    }
+    if (!this.nuevoCliente.dni || this.nuevoCliente.dni.length !== 8) {
+      this.mostrarError('El DNI debe tener 8 dígitos');
       return;
     }
 
-    if (this.modoEditar && this.clienteEditandoId !== null) {
-      this.clienteService.actualizar(this.clienteEditandoId, this.nuevoCliente).subscribe({
+    // 2. Lógica Guardar/Editar
+    if (this.modoEditar && this.nuevoCliente.id) {
+      this.clienteService.actualizar(this.nuevoCliente.id, this.nuevoCliente).subscribe({
         next: () => {
-          Swal.fire('Actualizado', 'Cliente actualizado correctamente.', 'success');
+          this.mostrarExito('Cliente actualizado correctamente');
           this.listar();
           this.reset();
         },
-        error: err => Swal.fire('Error', 'No se pudo actualizar el cliente.', 'error')
+        error: () => this.mostrarError('No se pudo actualizar')
       });
     } else {
       this.clienteService.crear(this.nuevoCliente).subscribe({
-        next: (clienteCreado) => {
-          Swal.fire('Registrado', 'Cliente registrado correctamente.', 'success');
-          this.clientes.push(clienteCreado);
+        next: (resp) => {
+          this.mostrarExito('Cliente registrado correctamente');
+          this.clientes.push(resp); // O this.listar()
           this.reset();
         },
-        error: err => Swal.fire('Error', 'No se pudo registrar el cliente.', 'error')
+        error: () => this.mostrarError('No se pudo registrar')
       });
     }
   }
 
   editar(cliente: Cliente): void {
     this.modoEditar = true;
-    this.clienteEditandoId = cliente.id!;
+    // Copiamos el objeto para no modificar la tabla directamente mientras editamos
     this.nuevoCliente = { ...cliente };
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   eliminar(id: number): void {
     Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción no se puede deshacer.',
+      title: '¿Eliminar cliente?',
+      text: "Esta acción no se puede deshacer",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#aaa',
+      confirmButtonColor: '#dc3545',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
     }).then((result) => {
@@ -98,53 +104,40 @@ export class ClientesComponent implements OnInit {
         this.clienteService.eliminar(id).subscribe({
           next: () => {
             this.clientes = this.clientes.filter(c => c.id !== id);
-            Swal.fire('Eliminado', 'Cliente eliminado correctamente.', 'success');
+            Swal.fire('Eliminado', 'El cliente ha sido eliminado.', 'success');
           },
-          error: err => {
-            // Opción 1: Detectar por mensaje del backend (mensaje genérico SQL)
-            if (err.status === 500 && err.error?.message?.includes('foreign key constraint')) {
-              Swal.fire(
-                'Error',
-                'No se puede eliminar el cliente porque tiene mascotas registradas.',
-                'error'
-              );
-            }
-
-            // Opción 2: Detectar si el backend devuelve status 409 con un mensaje claro
-            else if (err.status === 409) {
-              Swal.fire(
-                'Error',
-                err.error, // Mensaje personalizado enviado desde Spring
-                'error'
-              );
-            }
-
-            // Error genérico
-            else {
-              Swal.fire(
-                'Error',
-                'No se pudo eliminar el cliente. Intenta más tarde.',
-                'error'
-              );
-            }
+          error: (err) => {
+             // Tu lógica de manejo de errores de FK aquí
+             Swal.fire('Error', 'No se pudo eliminar el cliente (posiblemente tenga mascotas asociadas).', 'error');
           }
         });
       }
     });
   }
 
-
   reset(): void {
     this.modoEditar = false;
-    this.clienteEditandoId = null;
-    this.nuevoCliente = this.nuevoClienteInicial();
+    this.nuevoCliente = {
+      nombres: '',
+      apellidos: '',
+      dni: '',
+      telefono: '',
+      direccion: ''
+    };
+    this.mensajeExito = '';
+    this.mensajeError = '';
   }
 
-  private nuevoClienteInicial(): Cliente {
-    return {
-      nombres: '',
-      correo: '',
-      dni: ''
-    };
+  // Helpers para mensajes visuales
+  mostrarExito(msg: string) {
+    this.mensajeExito = msg;
+    this.mensajeError = '';
+    setTimeout(() => this.mensajeExito = '', 4000);
+  }
+
+  mostrarError(msg: string) {
+    this.mensajeError = msg;
+    this.mensajeExito = '';
+    setTimeout(() => this.mensajeError = '', 4000);
   }
 }

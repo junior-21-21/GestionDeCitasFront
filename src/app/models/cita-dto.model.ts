@@ -4,4 +4,5 @@ export interface CitaDTO {
   motivo: string;
   mascotaId: number;
   veterinarioId: number;
+  duracionMinutos?: number;
 }

@@ -32,4 +32,8 @@ export class ConsultaService {
   buscarPorDni(dni: string): Observable<ConsultaResponse[]> {
     return this.http.get<ConsultaResponse[]>(`${this.url}/por-dni/${dni}`);
   }
+
+  obtenerHistorialPorMascota(mascotaId: number): Observable<ConsultaResponse[]> {
+    return this.http.get<ConsultaResponse[]>(`${this.url}/historial/mascota/${mascotaId}`);
+  }
 }

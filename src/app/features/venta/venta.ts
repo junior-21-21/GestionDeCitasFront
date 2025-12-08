@@ -11,10 +11,12 @@ import { VentaDTO, VentaResponseDTO } from '../../models/venta.model';
 import Swal from 'sweetalert2';
 
 
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-venta',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './venta.html',
   styleUrls: ['./venta.scss']
 })

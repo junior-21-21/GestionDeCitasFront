@@ -1,89 +1,148 @@
-<div class="container mt-4">
-  <h2>Registro de Venta</h2>
-
-  <div class="mb-3">
-    <label class="form-label">Buscar Cliente por DNI</label>
-    <input class="form-control" [(ngModel)]="busquedaDni" placeholder="Ingrese DNI">
-    <button class="btn btn-primary mt-2" (click)="buscarClientePorDni()">Buscar</button>
-  </div>
-
-  <div *ngIf="ventaNueva.clienteId !== 0" class="alert alert-success">
-    Cliente seleccionado: <strong>{{ getClienteNombreDni() }}</strong>
-  </div>
-
-  <hr>
-
-  <h4>Agregar Medicamentos</h4>
-  <div class="row mb-3" *ngFor="let m of medicamentos">
-    <div class="col-md-4">
-      <strong>{{ m.nombre }}</strong> - {{ m.descripcion }}
+<div class="container mt-4 mb-5 fade-in">
+  
+  <h2 class="premium-title">Registro de Venta</h2>
+  
+  <!-- CARD: Buscar Cliente -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <span><mat-icon>person_search</mat-icon> Información del Cliente</span>
     </div>
-    <div class="col-md-2">Stock: {{ m.stock }}</div>
-    <div class="col-md-2">Precio: {{ m.precio | currency:'USD' }}</div>
-    <div class="col-md-2">
-      <input type="number" [(ngModel)]="m.cantidadAsociar" class="form-control" min="1" [max]="m.stock">
-    </div>
-    <div class="col-md-2">
-      <button class="btn btn-success" (click)="agregarMedicamento(m)">Agregar</button>
+    <div class="card-body">
+      <label class="form-label text-muted small text-uppercase fw-bold">Buscar Cliente por DNI</label>
+      <div class="d-flex gap-2">
+        <input class="form-control" [(ngModel)]="busquedaDni" placeholder="Ingrese DNI (8 dígitos)">
+        <button class="btn btn-primary" (click)="buscarClientePorDni()">Buscar</button>
+      </div>
+
+      <div *ngIf="ventaNueva.clienteId !== 0" class="alert alert-success mt-3 fade-in">
+        <mat-icon class="me-2">check_circle</mat-icon>
+        Cliente seleccionado: <strong>{{ getClienteNombreDni() }}</strong>
+      </div>
     </div>
   </div>
 
-  <h4>Detalle de Venta</h4>
-  <table class="table table-bordered" *ngIf="ventaNueva.detalles.length > 0">
-    <thead>
-    <tr>
-      <th>Medicamento</th>
-      <th>Cantidad</th>
-      <th>Precio Unitario</th> <th>Subtotal</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let detalle of ventaNueva.detalles">
-      <td>{{ getNombreMedicamento(detalle.medicamentoId) }}</td>
-      <td>{{ detalle.cantidad }}</td>
-      <td>{{ getPrecioMedicamento(detalle.medicamentoId) | currency:'USD' }}</td>
-      <td>{{ getSubtotalDetalle(detalle) | currency:'USD' }}</td>
-    </tr>
-    </tbody>
-  </table>
-
-  <div class="mt-3">
-    <strong>Total:</strong> {{ getTotalVentaNueva() | currency:'USD' }}
+  <!-- CARD: Medicamentos -->
+  <div class="card mb-4">
+    <div class="card-header text-primary">
+      <span><mat-icon>medication</mat-icon> Catálogo de Medicamentos</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Stock</th>
+              <th>Precio</th>
+              <th style="width: 150px;">Cantidad</th>
+              <th class="text-center">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of medicamentos">
+              <td>
+                <div class="fw-bold text-primary">{{ m.nombre }}</div>
+                <small class="text-muted">{{ m.descripcion }}</small>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{'bg-success': m.stock > 10, 'bg-warning text-dark': m.stock <= 10}">
+                  {{ m.stock }}
+                </span>
+              </td>
+              <td class="fw-bold">{{ m.precio | currency:'PEN':'symbol' }}</td>
+              <td>
+                <input type="number" [(ngModel)]="m.cantidadAsociar" class="form-control form-control-sm" min="1" [max]="m.stock">
+              </td>
+              <td class="text-center">
+                <button class="btn btn-success btn-sm" (click)="agregarMedicamento(m)" [disabled]="m.stock === 0">
+                  <mat-icon class="small-icon">add_shopping_cart</mat-icon> Agregar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
+  <!-- CARD: Detalle Venta -->
+  <div class="card mb-5 border-primary">
+    <div class="card-header bg-light">
+      <span><mat-icon>shopping_cart</mat-icon> Detalle de Venta</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive mb-3" *ngIf="ventaNueva.detalles.length > 0">
+        <table class="table table-bordered">
+          <thead>
+            <tr class="table-light">
+              <th>Medicamento</th>
+              <th class="text-center">Cantidad</th>
+              <th class="text-end">Precio Unit.</th> 
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detalle of ventaNueva.detalles">
+              <td>{{ getNombreMedicamento(detalle.medicamentoId) }}</td>
+              <td class="text-center">{{ detalle.cantidad }}</td>
+              <td class="text-end">{{ getPrecioMedicamento(detalle.medicamentoId) | currency:'PEN':'symbol' }}</td>
+              <td class="text-end fw-bold">{{ getSubtotalDetalle(detalle) | currency:'PEN':'symbol' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-  <button class="btn btn-primary mt-3" (click)="registrarVenta()">Registrar Venta</button>
+      <div *ngIf="ventaNueva.detalles.length === 0" class="text-center text-muted py-4">
+        <em>No hay items en el carrito</em>
+      </div>
 
-  <hr class="my-5">
+      <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+        <div class="text-uppercase text-muted">Total a Pagar</div>
+        <div class="display-6 fw-bold text-primary">{{ getTotalVentaNueva() | currency:'PEN':'symbol' }}</div>
+      </div>
 
-  <h3>Historial de Ventas</h3>
+      <button class="btn btn-primary w-100 mt-4 py-2" (click)="registrarVenta()" [disabled]="ventaNueva.detalles.length === 0 || ventaNueva.clienteId === 0">
+        <mat-icon>check</mat-icon> Confirmar Venta
+      </button>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <h3 class="premium-title mt-5">Historial de Ventas Recientes</h3>
 
   <div *ngIf="ventas.length === 0" class="alert alert-info">
-    No hay ventas registradas.
+    <mat-icon class="me-2">info</mat-icon> No hay ventas registradas aún.
   </div>
 
-  <table class="table table-striped" *ngIf="ventas.length > 0">
-    <thead>
-    <tr>
-      <th>ID</th>
-      <th>Fecha</th>
-      <th>Cliente</th>
-      <th>Total</th>
-      <th>Recibo</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let v of ventas">
-      <td>{{ v.id }}</td>
-      <td>{{ v.fecha | date:'short' }}</td>
-      <td>{{ v.cliente.nombres }} {{ v.cliente.apellidos }}</td>
-      <td>{{ v.total | currency:'USD' }}</td>
-      <td>
-        <button class="btn btn-outline-secondary btn-sm" (click)="descargarRecibo(v.id)">
-          Descargar
-        </button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  <div class="card" *ngIf="ventas.length > 0">
+    <div class="table-responsive">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th class="text-center">Recibo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of ventas">
+            <td>#{{ v.id }}</td>
+            <td>{{ v.fecha | date:'short' }}</td>
+            <td>
+              <div class="fw-bold">{{ v.cliente.nombres }} {{ v.cliente.apellidos }}</div>
+            </td>
+            <td class="fw-bold text-success">{{ v.total | currency:'PEN':'symbol' }}</td>
+            <td class="text-center">
+              <button class="btn btn-outline-secondary btn-sm" (click)="descargarRecibo(v.id)">
+                <mat-icon class="small-icon">receipt</mat-icon> Descargar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>

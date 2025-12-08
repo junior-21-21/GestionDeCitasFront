@@ -38,6 +38,11 @@ export class MascotaService {
     return this.http.get<MascotaResponseDTO[]>(`${this.baseUrl}/por-nombre/${nombre}`, this.getHeaders());
   }
 
+  // ✅ Nueva función para buscar por DNI
+  buscarPorDni(dni: string): Observable<MascotaResponseDTO[]> {
+    return this.http.get<MascotaResponseDTO[]>(`${this.baseUrl}/por-dni/${dni}`, this.getHeaders());
+  }
+
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`, this.getHeaders());
   }

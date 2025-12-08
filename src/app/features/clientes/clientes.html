@@ -1,75 +1,165 @@
-<div class="container mt-5">
-  <!-- Mensajes -->
-  <div *ngIf="mensajeExito" class="alert alert-success shadow-sm rounded">
-    {{ mensajeExito }}
-  </div>
-  <div *ngIf="mensajeError" class="alert alert-danger shadow-sm rounded">
-    {{ mensajeError }}
-  </div>
+<div class="vet-container">
+  <div class="container py-5">
+    
+    <!-- Alertas Flotantes -->
+    <div *ngIf="mensajeExito" class="alert-float success">
+      <i class="bi bi-check-circle-fill"></i>
+      <span>{{ mensajeExito }}</span>
+    </div>
+    <div *ngIf="mensajeError" class="alert-float error">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span>{{ mensajeError }}</span>
+    </div>
 
-  <!-- Formulario de Registro/Edición -->
-  <div class="card shadow-sm p-4 mb-5">
-    <h4 class="text-primary mb-4 border-bottom pb-2">
-      {{ modoEditar ? '✏️ Editar Cliente' : '📝 Registrar Nuevo Cliente' }}
-    </h4>
-
-    <form (ngSubmit)="guardar()" #clienteForm="ngForm" class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label">Nombres</label>
-        <input type="text" class="form-control" [(ngModel)]="nuevoCliente.nombres" name="nombres" required />
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Correo</label>
-        <input type="email" class="form-control" [(ngModel)]="nuevoCliente.correo" name="correo" />
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">DNI</label>
-        <input type="text" maxlength="8" minlength="8" class="form-control" [(ngModel)]="nuevoCliente.dni" name="dni" required />
-      </div>
-
-      <div class="col-12 d-flex justify-content-end gap-3 mt-3">
-        <button type="submit" class="btn btn-primary">
-          {{ modoEditar ? 'Actualizar' : 'Registrar' }}
-        </button>
-        <button type="button" class="btn btn-outline-danger" (click)="reset()">Cancelar</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Lista de Clientes -->
-  <div class="card shadow-sm p-4">
-    <h4 class="text-secondary mb-4 border-bottom pb-2">📋 Lista de Clientes</h4>
-
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover align-middle rounded shadow-sm">
-        <thead class="table-light">
-        <tr>
-          <th class="text-primary">Nombre</th>
-          <th class="text-primary">Correo</th>
-          <th class="text-primary">DNI</th>
-          <th class="text-primary">Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let cliente of clientes">
-          <td>{{ cliente.nombres }}</td>
-          <td>{{ cliente.correo }}</td>
-          <td>{{ cliente.dni }}</td>
-          <td>
-            <div class="d-flex gap-2">
-              <button class="btn btn-sm btn-warning" (click)="editar(cliente)" title="Editar cliente">
-                <i class="bi bi-pencil-fill"></i>
-              </button>
-              <button class="btn btn-sm btn-danger" (click)="eliminar(cliente.id!)" title="Eliminar cliente">
-                <i class="bi bi-trash-fill"></i>
-              </button>
+    <div class="row g-5">
+      
+      <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+      <div class="col-lg-4">
+        <div class="card-vet form-card h-100">
+          <!-- Header con Gradiente -->
+          <div class="card-header-vet">
+            <div class="icon-box">
+              <i class="bi" [ngClass]="modoEditar ? 'bi-pencil-square' : 'bi-person-plus-fill'"></i>
             </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+            <h5 class="mb-0">{{ modoEditar ? 'Editar Cliente' : 'Nuevo Cliente' }}</h5>
+          </div>
+
+          <div class="card-body p-4">
+            <form (ngSubmit)="guardar()" #clienteForm="ngForm">
+              
+              <!-- Nombres -->
+              <div class="form-group mb-3">
+                <label>Nombres</label>
+                <div class="input-group-vet">
+                  <span class="icon"><i class="bi bi-person-fill"></i></span>
+                  <input type="text" [(ngModel)]="nuevoCliente.nombres" name="nombres" placeholder="Ej. Junior" required />
+                </div>
+              </div>
+
+              <!-- Apellidos -->
+              <div class="form-group mb-3">
+                <label>Apellidos</label>
+                <div class="input-group-vet">
+                  <span class="icon"><i class="bi bi-person-badge-fill"></i></span>
+                  <input type="text" [(ngModel)]="nuevoCliente.apellidos" name="apellidos" placeholder="Ej. Pérez" required />
+                </div>
+              </div>
+
+              <!-- Fila DNI y Teléfono -->
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <div class="form-group">
+                    <label>DNI</label>
+                    <div class="input-group-vet">
+                      <input type="text" maxlength="8" class="text-center" [(ngModel)]="nuevoCliente.dni" name="dni" placeholder="8 dígitos" required />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="form-group">
+                    <label>Teléfono</label>
+                    <div class="input-group-vet">
+                      <span class="icon"><i class="bi bi-phone"></i></span>
+                      <input type="text" [(ngModel)]="nuevoCliente.telefono" name="telefono" placeholder="999..." />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dirección -->
+              <div class="form-group mb-4">
+                <label>Dirección</label>
+                <div class="input-group-vet">
+                  <span class="icon"><i class="bi bi-geo-alt-fill"></i></span>
+                  <input type="text" [(ngModel)]="nuevoCliente.direccion" name="direccion" placeholder="Av. Principal 123" />
+                </div>
+              </div>
+
+              <!-- Botones -->
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn-vet primary">
+                  {{ modoEditar ? 'Guardar Cambios' : 'Registrar Cliente' }}
+                </button>
+                <button *ngIf="modoEditar" type="button" class="btn-vet secondary" (click)="reset()">
+                  Cancelar Edición
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA: TABLA -->
+      <div class="col-lg-8">
+        <div class="card-vet table-card h-100">
+          <div class="card-header-simple">
+            <div class="d-flex align-items-center">
+              <i class="bi bi-journal-medical text-primary me-2 fs-4"></i>
+              <h5 class="mb-0 text-dark fw-bold">Directorio de Clientes</h5>
+            </div>
+            <span class="badge-count">{{ clientes.length }} Clientes</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th class="ps-4">Cliente / Dirección</th>
+                  <th>Teléfono</th>
+                  <th>DNI</th>
+                  <th class="text-center pe-4">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cliente of clientes">
+                  <!-- Cliente Info -->
+                  <td class="ps-4">
+                    <div class="client-name">{{ cliente.nombres }} {{ cliente.apellidos }}</div>
+                    <div class="client-address" *ngIf="cliente.direccion">
+                      <i class="bi bi-geo-alt me-1"></i>{{ cliente.direccion }}
+                    </div>
+                  </td>
+                  
+                  <!-- Teléfono -->
+                  <td>
+                    <div class="phone-badge" *ngIf="cliente.telefono">
+                      <i class="bi bi-whatsapp"></i> {{ cliente.telefono }}
+                    </div>
+                    <span class="text-muted small fst-italic" *ngIf="!cliente.telefono">--</span>
+                  </td>
+
+                  <!-- DNI -->
+                  <td>
+                    <span class="dni-badge">{{ cliente.dni }}</span>
+                  </td>
+                  
+                  <!-- Acciones -->
+                  <td class="text-center pe-4">
+                    <div class="action-buttons">
+                        <button class="btn-icon edit" (click)="editar(cliente)" title="Editar">
+                          <i class="bi bi-pencil-fill"></i>
+                        </button>
+                        <button class="btn-icon delete" (click)="eliminar(cliente.id!)" title="Eliminar">
+                          <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </div>
+                  </td>
+                </tr>
+                
+                <!-- Estado Vacío -->
+                <tr *ngIf="clientes.length === 0">
+                  <td colspan="4" class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>No hay clientes registrados aún.</p>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

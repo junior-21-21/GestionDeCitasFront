@@ -1,14 +1,14 @@
 export interface Cliente {
-  id?: number;
   nombres: string;
-  apellidos: string;  // Nuevo
+  apellidos: string;
   dni: string;
-  telefono?: string;  // Nuevo
-  direccion?: string; // Nuevo
-  // Eliminamos 'correo' porque no está en tu tabla
+  tipoDocumento?: string; // DNI, RUC
+  razonSocial?: string;
+  telefono?: string;
+  direccion?: string;
+  email?: string;
 }
 export interface ClienteResponseDTO {
-  id: number;
   nombres: string;
   apellidos: string;
   dni: string;

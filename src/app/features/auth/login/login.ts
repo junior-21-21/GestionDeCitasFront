@@ -28,16 +28,16 @@ import Swal from 'sweetalert2';
   styleUrls: ['./login.scss']
 })
 export class LoginComponent {
-  dto: LoginDTO = { username: '', password: '' };
+  dto: LoginDTO = { email: '', password: '' };
 
   constructor(private authService: AuthService, private router: Router) {}
 
   login() {
-    if (!this.dto.username || !this.dto.password) {
+    if (!this.dto.email || !this.dto.password) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos requeridos',
-        text: 'Debe ingresar usuario y contraseña',
+        text: 'Debe ingresar correo electronico y contrasena',
       });
       return;
     }
@@ -47,21 +47,74 @@ export class LoginComponent {
         Swal.fire({
           icon: 'success',
           title: 'Bienvenido',
-          text: 'Inicio de sesión exitoso',
+          text: 'Inicio de sesion exitoso',
           timer: 1500,
           showConfirmButton: false,
         });
-        this.router.navigate(['/ventas']);
+        this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (err) => {
+        const body = err.error;
+
+        // Cuenta inhabilitada manualmente
+        if (body?.error === 'CUENTA_INHABILITADA') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Cuenta Inhabilitada',
+            html: `
+              <p style="margin-bottom:12px">${body.mensaje}</p>
+              <p style="font-size:13px;color:#64748b">
+                Correo de contacto:<br>
+                <strong>clinicaveterinariapetyzoos@gmail.com</strong>
+              </p>
+            `,
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#334155'
+          });
+          return;
+        }
+
+        // Cuenta bloqueada por fuerza bruta
+        if (body?.error === 'CUENTA_BLOQUEADA') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Cuenta Bloqueada',
+            html: `
+              <p style="margin-bottom:12px">${body.mensaje}</p>
+              <p style="font-size:13px;color:#64748b">
+                Correo de contacto:<br>
+                <strong>clinicaveterinariapetyzoos@gmail.com</strong>
+              </p>
+            `,
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#dc2626'
+          });
+          return;
+        }
+
+        // Credenciales incorrectas con intentos restantes
+        if (body?.error === 'CREDENCIALES_INCORRECTAS') {
+          const restantes = body.intentosRestantes;
+          Swal.fire({
+            icon: 'error',
+            title: 'Credenciales incorrectas',
+            html: `
+              <p>Verifique su correo electronico y contrasena.</p>
+              <p style="color:#dc2626;font-weight:600;margin-top:8px">
+                Le quedan <strong>${restantes}</strong> intento(s) antes del bloqueo.
+              </p>
+            `,
+          });
+          return;
+        }
+
+        // Error generico
         Swal.fire({
           icon: 'error',
-          title: 'Credenciales incorrectas',
-          text: 'Verifique su usuario y contraseña',
+          title: 'Error de inicio de sesion',
+          text: body?.mensaje || 'Verifique su correo electronico y contrasena',
         });
       }
     });
   }
-
-  // Método eliminado por solicitud de rediseño premium
 }

@@ -18,12 +18,13 @@
       <form (ngSubmit)="login()">
         
         <div class="mb-3">
-          <label class="form-label text-white fw-semibold small ms-1">Usuario</label>
+          <label class="form-label text-white fw-semibold small ms-1">Correo Electrónico</label>
           <input 
-            [(ngModel)]="dto.username" 
-            name="username" 
+            [(ngModel)]="dto.email" 
+            name="email" 
+            type="email"
             class="form-control vet-input" 
-            placeholder="Ej. admin@vet.com"
+            placeholder="Ej. admin@petizoos.com"
             required 
           />
         </div>

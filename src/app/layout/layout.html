@@ -2,36 +2,58 @@
 <app-spinner></app-spinner>
 
 <!-- BARRA SUPERIOR (TOOLBAR) -->
-<mat-toolbar class="main-toolbar shadow-sm sticky-top">
-  <!-- Botón Menú Hamburger -->
-  <button mat-icon-button (click)="toggleSidebar()" class="me-3 text-white toggle-btn">
-    <mat-icon>menu</mat-icon>
+<mat-toolbar class="main-toolbar">
+  <button mat-icon-button (click)="toggleSidebar()" class="toggle-btn">
+    <mat-icon>{{ isCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
   </button>
   
-  <span class="d-flex align-items-center logo-text">
-    <mat-icon class="me-2 logo-icon">pets</mat-icon> 
-    <span class="brand-name">Clínica Veterinaria</span>
+  <span class="logo-section">
+    <img src="logo_petyzoos.png" alt="PetyZoos" class="logo-img">
+    <span class="brand-name">
+        <span class="c-p">P</span>
+        <span class="c-e">e</span>
+        <span class="c-t">t</span>
+        <span class="c-y">y</span>
+        <span class="c-z">z</span>
+        <span class="c-o1">o</span>
+        <span class="c-o2">o</span>
+        <span class="c-s">s</span>
+    </span>
   </span>
   
-  <span class="flex-grow-1"></span>
+  <span class="spacer"></span>
 
-  <!-- Información de Usuario -->
-  <div *ngIf="usuario" class="d-flex align-items-center user-info">
-    <span class="d-none d-sm-block me-3 text-user">Hola, {{ usuario.nombres }}</span>
-    <button mat-icon-button [matMenuTriggerFor]="menuUser" class="text-white avatar-btn">
-      <div class="avatar-circle-sm">
+  <!-- Info usuario -->
+  <div *ngIf="usuario" class="user-section">
+    <span class="user-greeting">Hola, {{ usuario.nombres }}</span>
+    <button mat-icon-button [matMenuTriggerFor]="menuUser" class="avatar-btn">
+      <img *ngIf="imagenPerfil" [src]="imagenPerfil" class="avatar-toolbar-img">
+      <div *ngIf="!imagenPerfil" class="avatar-sm">
         {{ usuario?.nombres?.charAt(0) || 'U' }}
       </div>
     </button>
     
-    <mat-menu #menuUser="matMenu" xPosition="before">
-      <div class="px-3 py-2 border-bottom d-sm-none">
-        <span class="small text-muted">Usuario:</span><br>
-        <strong>{{ usuario.nombres }}</strong>
+    <mat-menu #menuUser="matMenu" xPosition="before" class="user-menu-panel">
+      <div class="menu-profile-header" (click)="$event.stopPropagation()">
+        <div class="menu-avatar">
+          <img *ngIf="imagenPerfil" [src]="imagenPerfil" class="menu-avatar-img">
+          <span *ngIf="!imagenPerfil" class="menu-avatar-letra">{{ usuario?.nombres?.charAt(0) }}</span>
+        </div>
+        <div class="menu-user-info">
+          <strong>{{ usuario.nombres }}</strong>
+          <small>{{ usuario.email }}</small>
+          <span class="menu-role">{{ rolLabel }}</span>
+        </div>
       </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/perfil">
+        <mat-icon>account_circle</mat-icon>
+        <span>Mi Perfil</span>
+      </button>
+      <mat-divider></mat-divider>
       <button mat-menu-item (click)="logout()">
         <mat-icon color="warn">logout</mat-icon>
-        <span>Cerrar Sesión</span>
+        <span>Cerrar Sesion</span>
       </button>
     </mat-menu>
   </div>
@@ -40,109 +62,156 @@
 <!-- CONTENEDOR PRINCIPAL -->
 <mat-sidenav-container class="sidenav-container" autosize>
   
-  <!-- SIDEBAR (MENÚ LATERAL) -->
+  <!-- SIDEBAR -->
   <mat-sidenav #sidenav
                [opened]="true" 
                mode="side"
-               class="app-sidenav shadow-sm"
+               class="app-sidenav"
                [class.collapsed]="isCollapsed">
     
-    <div class="d-flex flex-column h-100 sidebar-content">
+    <div class="sidebar-inner">
       
-      <!-- Encabezado del Sidebar (Perfil) -->
-      <div class="sidenav-header d-flex flex-column align-items-center justify-content-center py-4">
-        <div class="avatar-circle mb-2 shadow-sm" [class.small-avatar]="isCollapsed">
-          {{ usuario?.nombres?.charAt(0) || 'V' }}
+      <!-- Perfil -->
+      <div class="sidebar-profile">
+        <div class="avatar-circle" [class.avatar-small]="isCollapsed">
+          <img *ngIf="imagenPerfil" [src]="imagenPerfil" class="sidebar-avatar-img">
+          <span *ngIf="!imagenPerfil">{{ usuario?.nombres?.charAt(0) || 'U' }}</span>
         </div>
-        
-        <div class="user-details fade-in" *ngIf="!isCollapsed">
-          <div class="fw-bold text-primary text-truncate">{{ usuario?.nombres }}</div>
-          <small class="text-muted text-uppercase role-badge">Admin</small>
+        <div class="profile-info" *ngIf="!isCollapsed">
+          <span class="profile-name">{{ usuario?.nombres }}</span>
+          <span class="profile-role">{{ rolLabel }}</span>
         </div>
       </div>
 
-      <mat-divider class="mx-3 mb-2" *ngIf="!isCollapsed"></mat-divider>
+      <div class="sidebar-divider" *ngIf="!isCollapsed"></div>
 
-      <!-- Lista de Navegación -->
-      <mat-nav-list class="pt-2 flex-grow-1 nav-list">
-        
-        <!-- HEADER GESTIÓN -->
-        <h3 mat-subheader class="section-header" *ngIf="!isCollapsed">Gestión</h3>
-        <mat-divider *ngIf="isCollapsed" class="mb-2 mx-3"></mat-divider>
+      <!-- Navegacion -->
+      <nav class="sidebar-nav">
 
-        <!-- Enlaces -->
-        <a mat-list-item routerLink="/citas" routerLinkActive="active-link" 
-           [matTooltip]="isCollapsed ? 'Citas' : ''" matTooltipPosition="right">
-          <mat-icon matListItemIcon>calendar_today</mat-icon>
-          <span matListItemTitle *ngIf="!isCollapsed">Citas</span>
+        <span class="nav-section-label" *ngIf="!isCollapsed">MENU</span>
+
+        <a routerLink="/dashboard" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Dashboard' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>dashboard</mat-icon>
+          <span *ngIf="!isCollapsed">Dashboard</span>
         </a>
 
-        <a mat-list-item routerLink="/clientes" routerLinkActive="active-link"
-           [matTooltip]="isCollapsed ? 'Clientes' : ''" matTooltipPosition="right">
-          <mat-icon matListItemIcon>person</mat-icon>
-          <span matListItemTitle *ngIf="!isCollapsed">Clientes</span>
+        <a routerLink="/citas" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Citas' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>calendar_today</mat-icon>
+          <span *ngIf="!isCollapsed">Citas</span>
         </a>
 
-        <a mat-list-item routerLink="/mascotas" routerLinkActive="active-link"
-           [matTooltip]="isCollapsed ? 'Mascotas' : ''" matTooltipPosition="right">
-          <mat-icon matListItemIcon>pets</mat-icon>
-          <span matListItemTitle *ngIf="!isCollapsed">Mascotas</span>
+        <a routerLink="/consultas" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Diagnósticos' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>medical_services</mat-icon>
+          <span *ngIf="!isCollapsed">Diagnósticos</span>
         </a>
 
-        <a mat-list-item routerLink="/consultas" routerLinkActive="active-link"
-           [matTooltip]="isCollapsed ? 'Consultas' : ''" matTooltipPosition="right">
-          <mat-icon matListItemIcon>medical_services</mat-icon>
-          <span matListItemTitle *ngIf="!isCollapsed">Consultas</span>
-        </a>
-        
-        <a mat-list-item routerLink="/ventas" routerLinkActive="active-link"
-           [matTooltip]="isCollapsed ? 'Ventas' : ''" matTooltipPosition="right">
-          <mat-icon matListItemIcon>point_of_sale</mat-icon>
-          <span matListItemTitle *ngIf="!isCollapsed">Ventas</span>
+        <a routerLink="/historial-clinico" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Historial Clínico' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>history</mat-icon>
+          <span *ngIf="!isCollapsed">Historial Clínico</span>
         </a>
 
-        <!-- Sección Admin -->
+        <a routerLink="/estupefacientes" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Estupefacientes' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>menu_book</mat-icon>
+          <span *ngIf="!isCollapsed">Estupefacientes</span>
+        </a>
+
+        <a *ngIf="!esVeterinario()" routerLink="/clientes" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Clientes' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>person</mat-icon>
+          <span *ngIf="!isCollapsed">Clientes</span>
+        </a>
+
+        <a *ngIf="!esVeterinario()" routerLink="/mascotas" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Pacientes' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>pets</mat-icon>
+          <span *ngIf="!isCollapsed">Pacientes</span>
+        </a>
+
+        <a *ngIf="!esVeterinario()" routerLink="/ventas" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Ventas' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>point_of_sale</mat-icon>
+          <span *ngIf="!isCollapsed">Ventas</span>
+        </a>
+
+        <!-- Seccion Admin -->
         <ng-container *ngIf="esAdmin()">
-          <mat-divider class="my-3 mx-3" *ngIf="!isCollapsed"></mat-divider>
-          <h3 mat-subheader class="section-header" *ngIf="!isCollapsed">Admin</h3>
-          <mat-divider *ngIf="isCollapsed" class="my-2 mx-3"></mat-divider>
+          <div class="sidebar-divider"></div>
+          <span class="nav-section-label" *ngIf="!isCollapsed">ADMIN</span>
 
-          <a mat-list-item routerLink="/medicamentos" routerLinkActive="active-link"
-             [matTooltip]="isCollapsed ? 'Medicamentos' : ''" matTooltipPosition="right">
-            <mat-icon matListItemIcon>medication</mat-icon>
-            <span matListItemTitle *ngIf="!isCollapsed">Medicamentos</span>
+          <a routerLink="/especialidades" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Especialidades' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>verified</mat-icon>
+            <span *ngIf="!isCollapsed">Especialidades</span>
           </a>
 
-          <a mat-list-item routerLink="/veterinarios" routerLinkActive="active-link"
-             [matTooltip]="isCollapsed ? 'Veterinarios' : ''" matTooltipPosition="right">
-            <mat-icon matListItemIcon>badge</mat-icon>
-            <span matListItemTitle *ngIf="!isCollapsed">Veterinarios</span>
+          <a routerLink="/productos" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Inventario' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>inventory</mat-icon>
+            <span *ngIf="!isCollapsed">Inventario</span>
           </a>
 
-          <a mat-list-item routerLink="/usuarios" routerLinkActive="active-link"
-             [matTooltip]="isCollapsed ? 'Usuarios' : ''" matTooltipPosition="right">
-            <mat-icon matListItemIcon>manage_accounts</mat-icon>
-            <span matListItemTitle *ngIf="!isCollapsed">Usuarios</span>
+          <a routerLink="/categorias" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Categorías' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>category</mat-icon>
+            <span *ngIf="!isCollapsed">Categorías</span>
+          </a>
+
+          <a routerLink="/veterinarios" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Veterinarios' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>badge</mat-icon>
+            <span *ngIf="!isCollapsed">Veterinarios</span>
+          </a>
+
+          <a routerLink="/usuarios" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Usuarios' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>manage_accounts</mat-icon>
+            <span *ngIf="!isCollapsed">Usuarios</span>
+          </a>
+
+          <a routerLink="/reportes" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Reportes' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>analytics</mat-icon>
+            <span *ngIf="!isCollapsed">Reportes</span>
           </a>
         </ng-container>
 
-      </mat-nav-list>
+      </nav>
 
-      <!-- Botón de Salir -->
-      <div class="footer-actions p-3">
-        <button mat-button color="warn" class="w-100 logout-btn" (click)="logout()"
-                [matTooltip]="isCollapsed ? 'Cerrar Sesión' : ''" matTooltipPosition="right">
-          <mat-icon>power_settings_new</mat-icon> 
-          <span *ngIf="!isCollapsed" class="ms-2">Salir</span>
-        </button>
+      <!-- Footer: Logout -->
+      <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
+        <a class="nav-item logout-item" (click)="logout()"
+           [matTooltip]="isCollapsed ? 'Cerrar Sesion' : ''" matTooltipPosition="right">
+          <mat-icon>power_settings_new</mat-icon>
+          <span *ngIf="!isCollapsed">Cerrar Sesion</span>
+        </a>
       </div>
 
     </div>
   </mat-sidenav>
 
-  <!-- CONTENIDO DE LAS PÁGINAS -->
-  <mat-sidenav-content class="content-wrapper">
-    <div class="container-fluid p-4 fade-in-content">
+  <!-- CONTENIDO -->
+  <mat-sidenav-content class="content-area">
+    <div class="page-content">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>

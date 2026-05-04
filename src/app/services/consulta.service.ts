@@ -4,11 +4,12 @@ import { Observable } from 'rxjs';
 
 import { Consulta, ConsultaDTO } from '../models/consulta.model';
 import { ConsultaResponse } from '../models/consulta-response.model';
-import { ConsultaMedicamentoResponse } from '../models/consulta.model'; // ✅ IMPORTAR INTERFAZ
+import { ConsultaProductoResponse } from '../models/consulta.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ConsultaService {
-  private url = 'http://localhost:8080/api/consultas';
+  private url = `${environment.apiUrl}/consultas`;
 
   constructor(private http: HttpClient) {}
 
@@ -20,20 +21,29 @@ export class ConsultaService {
     return this.http.get<ConsultaResponse[]>(this.url);
   }
 
-  buscarPorId(id: number): Observable<Consulta> {
-    return this.http.get<Consulta>(`${this.url}/${id}`);
+  buscarPorCodigo(codigoConsulta: string): Observable<Consulta> {
+    return this.http.get<Consulta>(`${this.url}/${codigoConsulta}`);
   }
 
-  // ✅ CORREGIDO: usar this.url en lugar de cadena fija
-  obtenerMedicamentosPorConsulta(consultaId: number): Observable<ConsultaMedicamentoResponse[]> {
-    return this.http.get<ConsultaMedicamentoResponse[]>(`${this.url}/${consultaId}/medicamentos`);
+  obtenerProductosPorConsulta(codigoConsulta: string): Observable<ConsultaProductoResponse[]> {
+    return this.http.get<ConsultaProductoResponse[]>(`${this.url}/${codigoConsulta}/productos`);
   }
 
   buscarPorDni(dni: string): Observable<ConsultaResponse[]> {
     return this.http.get<ConsultaResponse[]>(`${this.url}/por-dni/${dni}`);
   }
 
-  obtenerHistorialPorMascota(mascotaId: number): Observable<ConsultaResponse[]> {
-    return this.http.get<ConsultaResponse[]>(`${this.url}/historial/mascota/${mascotaId}`);
+  obtenerHistorialPorPaciente(codigoPaciente: string): Observable<ConsultaResponse[]> {
+    return this.http.get<ConsultaResponse[]>(`${this.url}/historial/paciente/${codigoPaciente}`);
+  }
+
+  listarConsultasHoy(): Observable<ConsultaResponse[]> {
+    return this.http.get<ConsultaResponse[]>(`${this.url}/hoy`);
+  }
+
+  descargarRecetaPdf(codigoConsulta: string): Observable<Blob> {
+    return this.http.get(`${this.url}/${codigoConsulta}/receta/pdf`, {
+      responseType: 'blob'
+    });
   }
 }

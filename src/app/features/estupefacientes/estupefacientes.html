@@ -1,0 +1,63 @@
+<style>
+@media print {
+  .no-print { display: none !important; }
+  .premium-title { color: #000 !important; }
+}
+</style>
+<div class="container mt-4 mb-5 fade-in">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="premium-title mb-0"><mat-icon class="align-middle me-2">menu_book</mat-icon> Libro de Estupefacientes</h2>
+    <button class="btn btn-primary no-print" (click)="imprimir()">
+      <mat-icon class="align-middle">print</mat-icon> Imprimir Reporte
+    </button>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <p class="text-muted mb-0">
+        Registro oficial de movimientos (entradas y salidas) de medicamentos controlados.
+      </p>
+    </div>
+  </div>
+
+  <div class="table-responsive bg-white rounded shadow-sm">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-dark">
+        <tr>
+          <th>Fecha y Hora</th>
+          <th>Tipo</th>
+          <th>Producto</th>
+          <th>Lote</th>
+          <th>Cant.</th>
+          <th>Usuario</th>
+          <th>Motivo / Referencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of movimientos">
+          <td>{{ m.fechaHora | date:'short' }}</td>
+          <td>
+            <span class="badge" 
+                  [ngClass]="{
+                    'bg-success': m.tipoMovimiento === 'ENTRADA_COMPRA',
+                    'bg-danger': m.tipoMovimiento === 'SALIDA_VENTA' || m.tipoMovimiento === 'SALIDA_CLINICA',
+                    'bg-warning text-dark': m.tipoMovimiento === 'AJUSTE_MERMA' || m.tipoMovimiento === 'AJUSTE_CADUCIDAD'
+                  }">
+              {{ m.tipoMovimiento }}
+            </span>
+          </td>
+          <td class="fw-bold text-primary">{{ m.producto.nombre }}</td>
+          <td>{{ m.lote ? m.lote.numeroLote : 'N/A' }}</td>
+          <td class="fw-bold">{{ m.cantidad }}</td>
+          <td>{{ m.usuario.nombres }} {{ m.usuario.apellidos }}</td>
+          <td>{{ m.motivoAjuste ? m.motivoAjuste : (m.tipoMovimiento === 'SALIDA_VENTA' ? 'Venta POS' : 'Consulta Médica') }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="movimientos.length === 0" class="text-center p-4 text-muted">
+      <mat-icon class="display-4 mb-3 d-block mx-auto text-secondary">history_toggle_off</mat-icon>
+      <p>No hay registros de movimientos para medicamentos controlados.</p>
+    </div>
+  </div>
+</div>

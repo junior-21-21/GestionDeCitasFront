@@ -1,12 +1,13 @@
 export interface CitaResponseDTO {
-  id: number;
+  codigoCita: string;
   fecha: string;
   hora: string;
   motivo: string;
   estado: string;
-  nombreMascota: string;
+  nombrePaciente: string;
   nombreVeterinario: string;
-  mascotaId?: number;
-  veterinarioId?: number;
+  pacienteCodigo?: string;
+  veterinarioDni?: string;
   duracionMinutos?: number;
+  codigoConsulta?: string;
 }

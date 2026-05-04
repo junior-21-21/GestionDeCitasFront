@@ -1,0 +1,110 @@
+<div class="perfil-container">
+
+  <!-- Header del perfil -->
+  <div class="perfil-header">
+    <div class="avatar-wrapper" (click)="fileInput.click()">
+      <img *ngIf="imagenPerfil" [src]="imagenPerfil" class="avatar-img" alt="Foto de perfil">
+      <div *ngIf="!imagenPerfil" class="avatar-letra">{{ inicialNombre }}</div>
+      <div class="avatar-overlay">
+        <mat-icon>camera_alt</mat-icon>
+      </div>
+      <input #fileInput type="file" accept="image/*" (change)="onImageSelected($event)" hidden>
+    </div>
+    <div class="perfil-header-info">
+      <h1>{{ nombres }}</h1>
+      <p class="perfil-email">{{ email }}</p>
+      <span class="perfil-rol-badge">{{ rolLabel }}</span>
+    </div>
+  </div>
+
+  <!-- Seccion: Datos personales -->
+  <div class="perfil-card">
+    <div class="card-title-row">
+      <mat-icon class="card-title-icon">person</mat-icon>
+      <h2>Datos Personales</h2>
+    </div>
+    <div class="card-divider"></div>
+
+    <div class="form-group">
+      <label>Nombre completo</label>
+      <div class="input-wrapper">
+        <mat-icon class="input-icon">badge</mat-icon>
+        <input type="text" [(ngModel)]="nombres" placeholder="Tu nombre completo">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Correo electronico</label>
+      <div class="input-wrapper disabled">
+        <mat-icon class="input-icon">email</mat-icon>
+        <input type="email" [value]="email" disabled>
+        <mat-icon class="lock-icon" matTooltip="El correo no se puede modificar">lock</mat-icon>
+      </div>
+      <span class="field-hint">El correo es tu credencial de acceso y no se puede cambiar</span>
+    </div>
+
+    <div class="card-actions">
+      <button class="btn-primary" (click)="guardarDatos()">
+        <mat-icon>save</mat-icon>
+        Guardar Cambios
+      </button>
+    </div>
+  </div>
+
+  <!-- Seccion: Cambiar contrasena -->
+  <div class="perfil-card">
+    <div class="card-title-row">
+      <mat-icon class="card-title-icon">lock</mat-icon>
+      <h2>Cambiar Contrasena</h2>
+    </div>
+    <div class="card-divider"></div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nueva contrasena</label>
+        <div class="input-wrapper">
+          <mat-icon class="input-icon">vpn_key</mat-icon>
+          <input [type]="mostrarPassNuevo ? 'text' : 'password'" 
+                 [(ngModel)]="passwordNuevo" 
+                 (ngModelChange)="evaluarFuerza($event)"
+                 placeholder="Minimo 6 caracteres">
+          <button class="icon-btn" (click)="mostrarPassNuevo = !mostrarPassNuevo" type="button" tabindex="-1">
+            <mat-icon>{{ mostrarPassNuevo ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+
+        <!-- Password Strength Indicator -->
+        <div class="strength-indicator" *ngIf="passwordNuevo">
+          <div class="bars">
+            <div class="bar" [ngClass]="{'bg-weak': fuerzaPassword >= 1}"></div>
+            <div class="bar" [ngClass]="{'bg-medium': fuerzaPassword >= 2}"></div>
+            <div class="bar" [ngClass]="{'bg-strong': fuerzaPassword >= 3}"></div>
+          </div>
+          <div class="strength-text" 
+               [ngClass]="{'text-weak': fuerzaPassword === 1, 'text-medium': fuerzaPassword === 2, 'text-strong': fuerzaPassword === 3}">
+            {{ textoFuerza }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Confirmar contrasena</label>
+        <div class="input-wrapper">
+          <mat-icon class="input-icon">vpn_key</mat-icon>
+          <input [type]="mostrarPassConfirm ? 'text' : 'password'" [(ngModel)]="passwordConfirm" placeholder="Repite la contrasena">
+          <button class="icon-btn" (click)="mostrarPassConfirm = !mostrarPassConfirm" type="button">
+            <mat-icon>{{ mostrarPassConfirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-actions">
+      <button class="btn-warn" (click)="cambiarPassword()">
+        <mat-icon>lock_reset</mat-icon>
+        Cambiar Contrasena
+      </button>
+    </div>
+  </div>
+
+</div>

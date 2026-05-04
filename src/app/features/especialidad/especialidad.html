@@ -1,58 +1,152 @@
-<div class="container py-5">
-  <h2 class="text-center mb-4 text-primary">Gestión de Especialidades</h2>
-
-  <div class="card shadow-sm mb-4">
-    <div class="card-body">
-      <h5 class="card-title text-secondary">Registrar Nueva Especialidad</h5>
-      <form (ngSubmit)="registrar()">
-        <div class="input-group">
-          <input
-            type="text"
-            [(ngModel)]="nuevaEspecialidad.nombre"
-            name="nombre"
-            required
-            placeholder="Nombre de especialidad"
-            class="form-control form-control-lg border-0 shadow-sm"
-          />
-          <button type="submit" class="btn btn-primary btn-lg ms-2">
-            <i class="bi bi-plus-circle-fill me-2"></i>Registrar
-          </button>
-        </div>
-      </form>
+<div class="container-fluid p-4 fade-in-content">
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="text-dark fw-bold mb-0">Gestión de Especialidades</h2>
+      <p class="text-muted mb-0">Administra las especialidades médicas de la clínica.</p>
     </div>
   </div>
 
-  <div *ngIf="especialidades.length > 0; else noEspecialidades" class="card shadow-sm">
-    <div class="card-body">
-      <h5 class="card-title text-secondary">Especialidades Registradas</h5>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="bg-light">
-          <tr>
-            <th scope="col" class="text-secondary">ID</th>
-            <th scope="col" class="text-secondary">Nombre</th>
-            <th scope="col" class="text-secondary">Acciones</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr *ngFor="let esp of especialidades">
-            <td>{{ esp.id }}</td>
-            <td>{{ esp.nombre }}</td>
-            <td>
-              <button (click)="eliminar(esp.id!)" class="btn btn-outline-danger btn-sm">
-                <i class="bi bi-trash-fill"></i> Eliminar
+  <div class="row g-4">
+    <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+    <div class="col-lg-4">
+      <div class="card-vet shadow-sm h-100">
+        <div class="card-header-simple">
+          <h5 class="mb-0 text-dark fw-bold">
+            {{ modoEdicion ? 'Editar Especialidad' : 'Nueva Especialidad' }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="text-center mb-4">
+            <img src="https://postgradoveterinaria.com/wp-content/uploads/especialidades-veterinarias.jpg" 
+                 alt="Veterinary Illustration" 
+                 class="img-fluid rounded" 
+                 style="max-height: 180px; object-fit: contain;">
+          </div>
+          <form (ngSubmit)="registrar()">
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-muted">NOMBRE DE LA ESPECIALIDAD</label>
+              <input type="text" 
+                     class="form-control form-control-lg bg-light border-0" 
+                     [(ngModel)]="nuevaEspecialidad.nombre" 
+                     name="nombre" 
+                     placeholder="Ej. Cardiología"
+                     required />
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-lg fw-bold shadow-sm"
+                      [ngClass]="modoEdicion ? 'btn-warning text-white' : 'btn-primary'">
+                <i class="bi" [ngClass]="modoEdicion ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i>
+                {{ modoEdicion ? 'ACTUALIZAR' : 'GUARDAR' }}
               </button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+
+              <button *ngIf="modoEdicion" 
+                      type="button" 
+                      (click)="cancelarEdicion()"
+                      class="btn btn-secondary btn-lg fw-bold shadow-sm">
+                <i class="bi bi-x-circle me-2"></i>CANCELAR
+              </button>
+            </div>
+          </form>
+          
+          <div class="mt-4 p-3 bg-light rounded text-center">
+            <small class="text-muted">
+              <i class="bi bi-info-circle me-1"></i>
+              {{ modoEdicion ? 'Modificando el nombre de la especialidad.' : 'Las especialidades registradas aparecerán disponibles para asignar a los veterinarios.' }}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: LISTADO -->
+    <div class="col-lg-8">
+      <div class="card-vet table-card h-100">
+        <div class="card-header-simple d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-list-check text-primary me-2 fs-4"></i>
+            <h5 class="mb-0 text-dark fw-bold">Listado</h5>
+          </div>
+          <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill">
+            {{ especialidadesFiltradas.length }} Registros
+          </span>
+        </div>
+
+        <!-- Buscador -->
+        <div class="p-3 bg-light border-bottom">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0 text-muted">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" 
+                   class="form-control border-start-0 ps-0" 
+                   placeholder="Buscar especialidad..." 
+                   [(ngModel)]="filtroBusqueda" 
+                   (keyup)="filtrar()">
+          </div>
+        </div>
+
+        <div class="p-4" style="background-color: #f8f9fa;">
+          
+          <div class="row g-3" *ngIf="especialidadesFiltradas.length > 0; else emptyState">
+            <div class="col-md-6 col-xl-4" *ngFor="let esp of especialidadesFiltradas">
+              <div class="specialty-card p-4">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="specialty-icon-wrapper me-3">
+                    <i class="bi" [ngClass]="obtenerIcono(esp.nombre)"></i>
+                  </div>
+                  <div>
+                    <h5 class="specialty-name mb-1">{{ esp.nombre }}</h5>
+                    <span class="text-muted small">ID: #{{ esp.id }}</span>
+                  </div>
+                </div>
+
+                <!-- Veterinarios List -->
+                <div class="mb-3">
+                  <h6 class="text-uppercase text-muted small fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                    <i class="bi bi-people-fill me-1"></i> Veterinarios
+                  </h6>
+                  
+                  <div *ngIf="esp.veterinarios && esp.veterinarios.length > 0; else noVets">
+                    <ul class="list-unstyled mb-0">
+                      <li *ngFor="let vet of esp.veterinarios" class="d-flex align-items-center mb-1 text-dark small">
+                        <i class="bi bi-person-badge text-primary me-2"></i>
+                        <span>{{ vet.nombres }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <ng-template #noVets>
+                    <span class="badge bg-light text-muted fw-normal border">Sin asignar</span>
+                  </ng-template>
+                </div>
+                
+                <div class="specialty-actions">
+                  <button (click)="editar(esp)" 
+                          class="btn btn-icon btn-primary-soft" 
+                          title="Editar">
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  <button (click)="eliminar(esp.id!)" 
+                          class="btn btn-icon btn-danger-soft" 
+                          title="Eliminar">
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #emptyState>
+            <div class="text-center py-5">
+              <i class="bi bi-inbox empty-state-icon"></i>
+              <h5 class="text-muted fw-bold">No se encontraron especialidades</h5>
+              <p class="text-muted mb-0">Intenta con otra búsqueda o agrega una nueva.</p>
+            </div>
+          </ng-template>
+
+        </div>
       </div>
     </div>
   </div>
-
-  <ng-template #noEspecialidades>
-    <div class="alert alert-info shadow-sm text-center" role="alert">
-      <i class="bi bi-info-circle-fill me-2"></i>No hay especialidades registradas.
-    </div>
-  </ng-template>
 </div>

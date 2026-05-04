@@ -1,5 +1,4 @@
 <div class="container py-4">
-  
   <!-- Encabezado y Buscador -->
   <div class="card shadow-sm border-0 mb-4">
     <div class="card-body p-4">
@@ -8,14 +7,24 @@
         Agendamiento de Citas
       </h4>
 
-      <div class="alert alert-light border d-flex align-items-center mb-0 text-muted">
+      <div
+        class="alert alert-light border d-flex align-items-center mb-0 text-muted"
+      >
         <i class="bi bi-info-circle me-2 fs-5 text-primary"></i>
         <div>
           <span class="fw-bold text-dark">Guía Rápida:</span>
           <ul class="mb-0 ps-3 small mt-1">
-            <li>Haga clic en un <strong>espacio vacío</strong> para agendar.</li>
-            <li>Haga clic en una <strong>cita existente</strong> para Atender (Comprobante), Reprogramar o Cancelar.</li>
-            <li>Las citas <span class="badge bg-success">REALIZADAS</span> no se pueden modificar.</li>
+            <li>
+              Haga clic en un <strong>espacio vacío</strong> para agendar.
+            </li>
+            <li>
+              Haga clic en una <strong>cita existente</strong> para Atender
+              (Comprobante), Reprogramar o Cancelar.
+            </li>
+            <li>
+              Las citas <span class="badge bg-success">REALIZADAS</span> no se
+              pueden modificar.
+            </li>
           </ul>
         </div>
       </div>
@@ -28,121 +37,258 @@
       <full-calendar [options]="calendarOptions"></full-calendar>
     </div>
   </div>
-
 </div>
 
-
 <!-- MODAL DE REGISTRO / EDICIÓN -->
-<div class="modal fade show d-block" *ngIf="mostrarModal" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
+<div
+  class="modal fade show d-block"
+  *ngIf="mostrarModal"
+  tabindex="-1"
+  role="dialog"
+  style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px)"
+>
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content border-0 shadow-lg">
-      
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">
-          <i class="bi" [ngClass]="esReprogramacion ? 'bi-arrow-repeat' : 'bi-calendar-plus'"></i>
+          <i
+            class="bi"
+            [ngClass]="esReprogramacion ? 'bi-arrow-repeat' : 'bi-calendar-plus'"
+          ></i>
           {{ esReprogramacion ? 'Reprogramar Cita' : 'Nueva Cita' }}
         </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="cerrarModal()"
+        ></button>
       </div>
 
       <div class="modal-body p-4">
-        
-        <!-- Paso 1: Buscar Dueño/Mascota (Solo si es nueva cita, para simplificar reprogramación) -->
-        <div class="mb-4 p-3 bg-light rounded text-center border" *ngIf="!esReprogramacion">
-          <label class="form-label fw-bold text-uppercase text-secondary small">1. Buscar Paciente</label>
-          <div class="input-group">
-            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-            <input type="text" 
-                   class="form-control" 
-                   placeholder="Ingrese DNI del dueño..." 
-                   [(ngModel)]="dniBusqueda"
-                   (keyup.enter)="buscarMascotas()">
-            <button class="btn btn-primary" (click)="buscarMascotas()" [disabled]="buscandoMascotas">
-              {{ buscandoMascotas ? '...' : 'Buscar' }}
+        <!-- Paso 1: Buscar Dueño/Paciente -->
+        <div class="mb-4 p-3 bg-light rounded border" *ngIf="!esReprogramacion">
+          <label class="form-label fw-bold text-uppercase text-secondary small"
+            >1. Buscar Paciente</label
+          >
+          <div class="input-group mb-2">
+            <span class="input-group-text bg-white"
+              ><i class="bi bi-search"></i
+            ></span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Ingrese DNI (8 dígitos) y presione ENTER o espere..."
+              [(ngModel)]="dniBusqueda"
+              (ngModelChange)="buscarCliente()"
+              (keyup.enter)="buscarCliente()"
+              autocomplete="off"
+              maxlength="8"
+            />
+            <button
+              class="btn btn-primary"
+              (click)="buscarCliente()"
+              [disabled]="buscandoCliente"
+            >
+              {{ buscandoCliente ? '...' : 'Buscar' }}
             </button>
+            
+            <!-- Lista de Sugerencias -->
+            <ul *ngIf="clientesSugeridos.length > 0" class="list-group position-absolute w-100 shadow" style="top: 100%; z-index: 1000;">
+              <li *ngFor="let cliente of clientesSugeridos" 
+                  class="list-group-item list-group-item-action cursor-pointer"
+                  (click)="seleccionarCliente(cliente)">
+                <strong>{{ cliente.dni }}</strong> - {{ cliente.nombres }} {{ cliente.apellidos }}
+              </li>
+            </ul>
+          </div>
+
+          <!-- Resultado Búsqueda -->
+          <div
+            *ngIf="nombreClienteEncontrado"
+            class="alert alert-success d-flex align-items-center mb-0 py-2"
+          >
+            <i class="bi bi-person-check-fill fs-4 me-2"></i>
+            <div>
+              <small class="d-block text-muted">Cliente Encontrado:</small>
+              <span class="fw-bold">{{ nombreClienteEncontrado }}</span>
+            </div>
+          </div>
+
+          <div
+            *ngIf="clienteNoEncontrado && dniBusqueda.length === 8"
+            class="alert alert-warning d-flex align-items-center justify-content-between mb-0 py-2"
+          >
+            <div class="d-flex align-items-center">
+              <i class="bi bi-person-x-fill fs-4 me-2"></i>
+              <div>
+                <span class="fw-bold">Cliente no registrado</span>
+                <small class="d-block">¿Desea registrarlo ahora?</small>
+              </div>
+            </div>
+            <a
+              routerLink="/clientes"
+              (click)="cerrarModal()"
+              class="btn btn-sm btn-outline-dark fw-bold"
+            >
+              <i class="bi bi-person-plus-fill"></i> Registrar
+            </a>
           </div>
         </div>
 
         <form (ngSubmit)="guardarCita()" class="row g-3">
-          
-          <!-- Selección de Mascota -->
+          <!-- Selección de Paciente -->
           <div class="col-md-12" *ngIf="!esReprogramacion">
-            <label class="form-label fw-semibold">Paciente (Mascota) <span class="text-danger">*</span></label>
-            <select class="form-select" [(ngModel)]="nuevaCita.mascotaId" name="mascotaId" required
-                    [disabled]="mascotas.length === 0">
+            <label class="form-label fw-semibold"
+              >Paciente (Paciente) <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-select"
+              [(ngModel)]="nuevaCita.pacienteCodigo"
+              name="pacienteCodigo"
+              required
+              [disabled]="pacientes.length === 0"
+            >
               <option value="0" disabled selected>
-                {{ mascotas.length > 0 ? 'Seleccione una mascota...' : '--- Busque por DNI primero ---' }}
+                {{ pacientes.length > 0 ? 'Seleccione una Paciente...' : '---
+                Busque por DNI primero ---' }}
               </option>
-              <option *ngFor="let m of mascotas" [value]="m.id">
-                {{ m.nombre }} ({{ m.raza }})
+              <option *ngFor="let m of pacientes" [value]="m.codigoPaciente">
+                {{ m.nombre }} ({{ m.especie }} - {{ m.raza }})
               </option>
             </select>
           </div>
 
           <div class="col-md-12" *ngIf="esReprogramacion">
-             <div class="alert alert-warning">
-               <i class="bi bi-exclamation-triangle-fill me-1"></i>
-               <strong>Nota:</strong> Para reprogramar, debe re-ingresar los datos de mascota y veterinario si no se cargaron automáticamente.
-             </div>
-             <!-- Reutilizamos el select si es necesario, pero idealmente se poblaría. Para MPV, el usuario rellena. -->
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i>
+              <strong>Nota:</strong> Para reprogramar, debe re-ingresar los
+              datos de Paciente y veterinario si no se cargaron automáticamente.
+            </div>
+            <!-- Reutilizamos el select si es necesario, pero idealmente se poblaría. Para MPV, el usuario rellena. -->
           </div>
-
 
           <!-- Fecha y Hora -->
           <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
-            <input type="date" class="form-control bg-light" [(ngModel)]="nuevaCita.fecha" name="fecha" required />
+            <label class="form-label fw-semibold"
+              >Fecha <span class="text-danger">*</span></label
+            >
+            <input
+              type="date"
+              class="form-control bg-light"
+              [(ngModel)]="nuevaCita.fecha"
+              name="fecha"
+              required
+            />
           </div>
 
           <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold">Hora <span class="text-danger">*</span></label>
-            <input type="time" class="form-control" [(ngModel)]="nuevaCita.hora" name="hora" required min="08:00" max="20:00" />
+            <label class="form-label fw-semibold"
+              >Hora <span class="text-danger">*</span></label
+            >
+            <input
+              type="time"
+              class="form-control"
+              [(ngModel)]="nuevaCita.hora"
+              name="hora"
+              required
+              min="08:00"
+              max="20:00"
+            />
           </div>
 
           <div class="col-12 col-md-4">
-            <label class="form-label fw-semibold">Duración Est. <span class="text-danger">*</span></label>
-            <select class="form-select" [(ngModel)]="nuevaCita.duracionMinutos" name="duracion" required>
-               <option *ngFor="let d of duraciones" [value]="d.value">{{ d.label }}</option>
+            <label class="form-label fw-semibold"
+              >Duración Est. <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-select"
+              [(ngModel)]="nuevaCita.duracionMinutos"
+              name="duracion"
+              required
+            >
+              <option *ngFor="let d of duraciones" [value]="d.value">
+                {{ d.label }}
+              </option>
             </select>
           </div>
 
           <!-- Filtro Especialidad y Veterinario -->
           <div class="col-12 col-md-6">
             <label class="form-label fw-semibold">Especialidad (Filtro)</label>
-            <select class="form-select" [(ngModel)]="especialidadSeleccionada" name="especialidad" (change)="filtrarVeterinarios()">
+            <select
+              class="form-select"
+              [(ngModel)]="especialidadSeleccionada"
+              name="especialidad"
+              (change)="filtrarVeterinarios()"
+            >
               <option value="">Todas</option>
-              <option *ngFor="let e of especialidades" [value]="e.nombre">{{ e.nombre }}</option>
+              <option *ngFor="let e of especialidades" [value]="e.nombre">
+                {{ e.nombre }}
+              </option>
             </select>
           </div>
 
           <div class="col-12 col-md-6">
-            <label class="form-label fw-semibold">Veterinario <span class="text-danger">*</span></label>
-            <select class="form-select" [(ngModel)]="nuevaCita.veterinarioId" name="veterinarioId" required>
-              <option value="0" disabled selected>Seleccione un doctor...</option>
-              <option *ngFor="let v of veterinariosFiltrados" [value]="v.id">
-                {{ v.nombres }} {{ v.apellidos }} ({{ v.especialidad || 'General' }})
+            <label class="form-label fw-semibold"
+              >Veterinario <span class="text-danger">*</span></label
+            >
+            <select
+              class="form-select"
+              [(ngModel)]="nuevaCita.veterinarioDni"
+              name="veterinarioDni"
+              required
+            >
+              <option value="0" disabled selected>
+                Seleccione un doctor...
+              </option>
+              <option *ngFor="let v of veterinariosFiltrados" [value]="v.dni">
+                {{ v.nombres }} {{ v.apellidos }} ({{ v.especialidad ||
+                'General' }})
               </option>
             </select>
-            <small class="text-danger" *ngIf="veterinariosFiltrados.length === 0 && especialidadSeleccionada">
+            <small
+              class="text-danger"
+              *ngIf="veterinariosFiltrados.length === 0 && especialidadSeleccionada"
+            >
               No hay veterinarios con esta especialidad.
             </small>
           </div>
 
           <!-- Motivo -->
           <div class="col-12">
-            <label class="form-label fw-semibold">Motivo de consulta <span class="text-danger">*</span></label>
-            <textarea class="form-control" rows="2" placeholder="Ej. Vacunación, Fiebre, Control..." [(ngModel)]="nuevaCita.motivo" name="motivo" required></textarea>
+            <label class="form-label fw-semibold"
+              >Motivo de consulta <span class="text-danger">*</span></label
+            >
+            <textarea
+              class="form-control"
+              rows="2"
+              placeholder="Ej. Vacunación, Fiebre, Control..."
+              [(ngModel)]="nuevaCita.motivo"
+              name="motivo"
+              required
+            ></textarea>
           </div>
 
           <div class="col-12 text-end mt-4 pt-3 border-top">
-            <button type="button" class="btn btn-secondary me-2" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn btn-success px-4" 
-                    [disabled]="(nuevaCita.mascotaId === 0 && !esReprogramacion) || nuevaCita.veterinarioId === 0 || !nuevaCita.motivo">
-              <i class="bi" [ngClass]="esReprogramacion ? 'bi-save' : 'bi-check-circle'"></i> 
+            <button
+              type="button"
+              class="btn btn-secondary me-2"
+              (click)="cerrarModal()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="btn btn-success px-4"
+              [disabled]="(nuevaCita.pacienteCodigo === '' && !esReprogramacion) || nuevaCita.veterinarioDni === '' || !nuevaCita.motivo"
+            >
+              <i
+                class="bi"
+                [ngClass]="esReprogramacion ? 'bi-save' : 'bi-check-circle'"
+              ></i>
               {{ esReprogramacion ? 'Guardar Cambios' : 'Confirmar Cita' }}
             </button>
           </div>
-
         </form>
       </div>
     </div>

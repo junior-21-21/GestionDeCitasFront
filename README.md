@@ -1,11 +1,3 @@
-# 🏥 VeterinariaStandalone 🐾
-
-✨ **Una Solución Moderna para la Gestión Veterinaria**
-
-**Derechos de Autor Reservados © 2025 Junior-21-21. Todos los derechos reservados.**
-Numero de contacto Junior 🇵🇪 +51900048717 
-
----
 # 🐾 Sistema de Gestión Veterinaria - Frontend
 
 > **Edición Premium** | Diseño Glassmorphism | Experiencia de Usuario Fluida
@@ -13,7 +5,6 @@ Numero de contacto Junior 🇵🇪 +51900048717
 Este proyecto es una aplicación web moderna construida con **Angular**, diseñada para administrar integralmente una clínica veterinaria. Se distingue por su **interfaz visual de alto impacto**, seguridad robusta y flujos de trabajo optimizados para el personal médico y administrativo.
 
 ---
-
 ## ✨ Características Destacadas
 
 ### 🔐 1. Seguridad y Acceso

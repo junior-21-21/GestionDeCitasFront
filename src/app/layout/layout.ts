@@ -1,6 +1,7 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 // Módulos de Angular Material necesarios
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -22,8 +23,8 @@ import { SpinnerComponent } from '../shared/components/spinner/spinner.component
 @Component({
   selector: 'app-layout',
   standalone: true,
-  templateUrl: './layout.html', // Asegúrate de que coincida con tu archivo HTML
-  styleUrls: ['./layout.scss'], // Asegúrate de que coincida con tu archivo SCSS
+  templateUrl: './layout.html',
+  styleUrls: ['./layout.scss'],
   imports: [
     CommonModule,
     RouterModule,
@@ -38,22 +39,67 @@ import { SpinnerComponent } from '../shared/components/spinner/spinner.component
     SpinnerComponent
   ]
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit, OnDestroy {
   
   // Referencia al componente visual del Sidebar para poder abrirlo/cerrarlo
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
   usuario: any;
+  rolLabel: string = '';
+  imagenPerfil: string | null = null;
 
   // Estado del sidebar: por defecto colapsado (solo iconos)
   isCollapsed: boolean = true;
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private authService: AuthService,
     private router: Router
   ) {
-    // Obtenemos la información del usuario logueado al iniciar
     this.usuario = this.authService.getUsuario();
+    this.imagenPerfil = this.usuario ? localStorage.getItem('perfil-imagen-' + this.usuario.id) : null;
+
+    // Determinar el label del rol
+    if (this.authService.isAdmin()) {
+      this.rolLabel = 'Administrador';
+    } else if (this.authService.isRecepcionista()) {
+      this.rolLabel = 'Recepcionista';
+    } else if (this.authService.isVeterinario()) {
+      this.rolLabel = 'Veterinario';
+    }
+  }
+
+  ngOnInit(): void {
+    // Cargar imagen desde backend al iniciar (persistencia produccion)
+    if (this.usuario?.id) {
+      this.authService.obtenerImagen(this.usuario.id).subscribe({
+        next: (res: any) => {
+          if (res?.imagen) {
+            this.authService.actualizarImagenLocal(res.imagen);
+          }
+        }
+      });
+    }
+
+    // Suscripción reactiva a cambios de imagen (reemplaza polling con setInterval)
+    this.subscriptions.push(
+      this.authService.imagenPerfil$.subscribe(img => {
+        this.imagenPerfil = img;
+      })
+    );
+
+    // Suscripción reactiva a cambios del usuario
+    this.subscriptions.push(
+      this.authService.usuario$.subscribe(user => {
+        if (user) {
+          this.usuario = user;
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   // Método para alternar entre expandido y colapsado
@@ -70,15 +116,14 @@ export class LayoutComponent {
       showCancelButton: true,
       confirmButtonText: 'Sí, salir',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#d33', // Rojo para acción destructiva
-      cancelButtonColor: '#3085d6', // Azul para cancelar
-      reverseButtons: true // Pone el botón de cancelar a la izquierda (mejor UX)
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      reverseButtons: true
     }).then(result => {
       if (result.isConfirmed) {
         this.authService.logout();
         this.router.navigate(['/login']);
         
-        // Pequeña notificación toast (opcional)
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -93,8 +138,15 @@ export class LayoutComponent {
     });
   }
 
-  // Verificar si es administrador para mostrar opciones extra
   esAdmin(): boolean {
     return this.authService.isAdmin();
+  }
+
+  esVeterinario(): boolean {
+    return this.authService.isVeterinario();
+  }
+
+  esRecepcionista(): boolean {
+    return this.authService.isRecepcionista();
   }
 }

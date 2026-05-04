@@ -1,17 +1,17 @@
 export interface ConsultaResponse {
-  id: number;
+  codigoConsulta: string;
   fecha: string;
   motivo: string;
+  peso?: number;
+  observaciones?: string;
   diagnostico: string;
   tratamiento: string;
-  nombreMascota: string;
+  nombrePaciente: string;
   nombreVeterinario: string;
-
-  // 🔽 Nueva propiedad: lista de medicamentos asociados
-  medicamentos?: MedicamentoAsociado[];
+  productos?: ProductoAsociado[];
 }
 
-export interface MedicamentoAsociado {
-  nombreMedicamento: string;
+export interface ProductoAsociado {
+  nombreProducto: string;
   cantidad: number;
 }

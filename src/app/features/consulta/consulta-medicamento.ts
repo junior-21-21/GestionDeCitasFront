@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
 
-import { ConsultaMedicamentoService } from '../../services/consulta-medicamento.service';
-import { MedicamentoService } from '../../services/medicamento.service';
-import { ConsultaMedicamentoDTO, ConsultaMedicamentoResponse } from '../../models/consulta.model';
-import { Medicamento } from '../../models/medicamento.model';
+import { ConsultaProductoService } from '../../services/consulta-producto.service';
+import { ProductoService } from '../../services/producto.service';
+import { ConsultaProductoDTO, ConsultaProductoResponse } from '../../models/consulta.model';
+import { ProductoDTO } from '../../models/producto.model';
 
 @Component({
   selector: 'app-consulta-medicamento',
@@ -18,45 +17,42 @@ import { Medicamento } from '../../models/medicamento.model';
   styleUrls: ['./consulta-medicamento.scss']
 })
 export class ConsultaMedicamentoComponent implements OnInit {
-  dto: ConsultaMedicamentoDTO = {
-    consultaId: 0,
-    medicamentoId: 0,
+  dto: ConsultaProductoDTO = {
+    codigoConsulta: '',
+    codigoBarras: '',
     cantidad: 1,
+    indicaciones: ''
   };
 
-  medicamentos: Medicamento[] = [];
+  productos: ProductoDTO[] = [];
   filtro: string = '';
 
-  medicamentosAsociados: ConsultaMedicamentoResponse[] = [];
+  productosAsociados: ConsultaProductoResponse[] = [];
 
   constructor(
-    private servicio: ConsultaMedicamentoService,
-    private medicamentoService: MedicamentoService,
+    private servicio: ConsultaProductoService,
+    private productoService: ProductoService,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.dto.consultaId = +id;
+    if (id) this.dto.codigoConsulta = id;
 
-    // Primero cargar medicamentos, luego asociados para asegurar que medicamentos ya están disponibles
-    this.medicamentoService.listar().subscribe({
+    this.productoService.listarTodos().subscribe({
       next: (data) => {
-        this.medicamentos = data;
-        // Inicializar cantidadAsociar para cada medicamento (evita errores de undefined)
-        this.medicamentos.forEach(m => (m as any).cantidadAsociar = 1);
-
-        // Cargar los medicamentos ya asociados luego de tener la lista completa
-        this.cargarMedicamentosAsociados();
+        this.productos = data;
+        this.productos.forEach(p => (p as any).cantidadAsociar = 1);
+        this.cargarProductosAsociados();
       },
-      error: () => Swal.fire('Error', 'No se pudo cargar los medicamentos', 'error'),
+      error: () => Swal.fire('Error', 'No se pudo cargar los productos', 'error'),
     });
   }
 
-  cargarMedicamentosAsociados(): void {
-    this.servicio.listarMedicamentosPorConsulta(this.dto.consultaId).subscribe({
-      next: (data) => this.medicamentosAsociados = data,
-      error: () => Swal.fire('Error', 'No se pudieron cargar los medicamentos recetados', 'error'),
+  cargarProductosAsociados(): void {
+    this.servicio.obtenerProductosPorConsulta(this.dto.codigoConsulta).subscribe({
+      next: (data) => this.productosAsociados = data,
+      error: () => Swal.fire('Error', 'No se pudieron cargar los productos asociados', 'error'),
     });
   }
 
@@ -64,47 +60,47 @@ export class ConsultaMedicamentoComponent implements OnInit {
     this.filtro = this.filtro.trim();
   }
 
-  get medicamentosFiltrados(): Medicamento[] {
+  get productosFiltrados(): ProductoDTO[] {
     const f = this.filtro.toLowerCase().trim();
-    if (!f) return this.medicamentos;
-    return this.medicamentos.filter(m =>
-      m.nombre.toLowerCase().includes(f) || m.id.toString().includes(f)
+    if (!f) return this.productos;
+    return this.productos.filter(p =>
+      p.nombre.toLowerCase().includes(f) || (p.codigoBarras && p.codigoBarras.toString().includes(f))
     );
   }
 
-  // Método para buscar medicamento por id y mostrar nombre en tabla de asociados
-  getMedicamento(id: number): Medicamento | undefined {
-    return this.medicamentos.find(m => m.id === id);
+  getProducto(codigoBarras: string): ProductoDTO | undefined {
+    return this.productos.find(p => p.codigoBarras === codigoBarras);
   }
 
-  asociarMedicamento(med: Medicamento): void {
-    const cantidadAsociar = (med as any).cantidadAsociar;
+  asociarProducto(prod: ProductoDTO): void {
+    const cantidadAsociar = (prod as any).cantidadAsociar;
     if (!cantidadAsociar || cantidadAsociar < 1) {
       Swal.fire('Advertencia', 'Ingrese una cantidad válida', 'warning');
       return;
     }
-    if (cantidadAsociar > med.stock) {
-      Swal.fire('Advertencia', `Stock insuficiente. Solo hay ${med.stock}`, 'warning');
+    if (prod.tipoInventario !== 'SERVICIO' && cantidadAsociar > prod.stockActual) {
+      Swal.fire('Advertencia', `Stock insuficiente. Solo hay ${prod.stockActual}`, 'warning');
       return;
     }
 
-    const dto: ConsultaMedicamentoDTO = {
-      consultaId: this.dto.consultaId,
-      medicamentoId: med.id,
+    const dto: ConsultaProductoDTO = {
+      codigoConsulta: this.dto.codigoConsulta,
+      codigoBarras: prod.codigoBarras,
       cantidad: cantidadAsociar,
+      indicaciones: this.dto.indicaciones || 'Indicaciones generales'
     };
 
-    this.servicio.registrar(dto).subscribe({
+    this.servicio.agregarProducto(dto).subscribe({
       next: () => {
-        Swal.fire('Éxito', 'Medicamento asociado correctamente', 'success');
-        // Actualizar stock local
-        med.stock -= cantidadAsociar;
-        // Reset cantidad
-        (med as any).cantidadAsociar = 1;
-        // Recargar medicamentos asociados
-        this.cargarMedicamentosAsociados();
+        Swal.fire('Éxito', 'Producto/Servicio asociado correctamente', 'success');
+        if (prod.tipoInventario !== 'SERVICIO') {
+          prod.stockActual -= cantidadAsociar;
+        }
+        (prod as any).cantidadAsociar = 1;
+        this.dto.indicaciones = '';
+        this.cargarProductosAsociados();
       },
-      error: (err) => Swal.fire('Error', err.error?.mensaje || 'Error al asociar medicamento', 'error'),
+      error: (err) => Swal.fire('Error', err.error?.mensaje || 'Error al asociar producto', 'error'),
     });
   }
 }

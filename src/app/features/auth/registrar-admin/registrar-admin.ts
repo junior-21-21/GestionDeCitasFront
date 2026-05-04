@@ -24,14 +24,14 @@ import { AuthService } from '../../../services/auth.service';
     MatInputModule,
     MatButtonModule,
     MatCardModule,
-    MatSnackBarModule // ✅ Agregado para usar MatSnackBar correctamente
+    MatSnackBarModule
   ],
   templateUrl: './registrar-admin.html',
   styleUrls: ['./registrar-admin.scss']
 })
 export class RegistrarAdminComponent {
   dto: UsuarioDTO = {
-    username: '',
+    email: '',
     password: '',
     nombres: ''
   };
@@ -46,6 +46,45 @@ export class RegistrarAdminComponent {
   ) {}
 
   registrar() {
+    // Validar campos obligatorios
+    const errores: string[] = [];
+    if (!this.dto.nombres?.trim()) errores.push('Nombres');
+    if (!this.dto.email?.trim()) errores.push('Correo Electrónico');
+    if (!this.dto.password?.trim()) errores.push('Contraseña');
+
+    if (errores.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        html: `Debes llenar los siguientes campos:<br><b>${errores.join(', ')}</b>`,
+        confirmButtonColor: '#3085d6'
+      });
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.dto.email)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Correo inválido',
+        text: 'Por favor ingresa un correo electrónico válido',
+        confirmButtonColor: '#3085d6'
+      });
+      return;
+    }
+
+    // Validar longitud de contraseña
+    if (this.dto.password!.length < 6) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Contraseña muy corta',
+        text: 'La contraseña debe tener al menos 6 caracteres',
+        confirmButtonColor: '#3085d6'
+      });
+      return;
+    }
+
     this.loading = true;
     this.authService.registrarAdmin(this.dto).subscribe({
       next: () => {
@@ -53,7 +92,7 @@ export class RegistrarAdminComponent {
         Swal.fire({
           icon: 'success',
           title: '¡Registro exitoso!',
-          text: 'Administrador registrado correctamente',
+          text: 'Administrador registrado. Se enviaron las credenciales al correo.',
           confirmButtonColor: '#3085d6'
         }).then(() => {
           this.router.navigate(['/login']);

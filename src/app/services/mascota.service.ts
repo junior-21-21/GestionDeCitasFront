@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { MascotaDTO, MascotaResponseDTO, Mascota } from '../models/mascota.model';
+import { PacienteDTO, PacienteResponseDTO, Paciente } from '../models/mascota.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class MascotaService {
-  private baseUrl = 'http://localhost:8080/api/mascotas';
+  private baseUrl = `${environment.apiUrl}/pacientes`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
@@ -18,36 +19,43 @@ export class MascotaService {
     };
   }
 
-  registrar(dto: MascotaDTO): Observable<MascotaResponseDTO> {
-    return this.http.post<MascotaResponseDTO>(this.baseUrl, dto, this.getHeaders());
+  registrar(dto: PacienteDTO): Observable<PacienteResponseDTO> {
+    return this.http.post<PacienteResponseDTO>(this.baseUrl, dto, this.getHeaders());
   }
 
-  listar(): Observable<Mascota[]> {
-    return this.http.get<Mascota[]>(this.baseUrl, this.getHeaders());
+
+  listarTodas(): Observable<PacienteResponseDTO[]> {
+    return this.http.get<PacienteResponseDTO[]>(this.baseUrl, this.getHeaders());
   }
 
-  listarTodas(): Observable<MascotaResponseDTO[]> {
-    return this.http.get<MascotaResponseDTO[]>(this.baseUrl, this.getHeaders());
+  listarPorCliente(clienteDni: string): Observable<PacienteResponseDTO[]> {
+    return this.http.get<PacienteResponseDTO[]>(`${this.baseUrl}/cliente/${clienteDni}`, this.getHeaders());
   }
 
-  listarPorCliente(clienteId: number): Observable<MascotaResponseDTO[]> {
-    return this.http.get<MascotaResponseDTO[]>(`${this.baseUrl}/cliente/${clienteId}`, this.getHeaders());
+  buscarPorNombre(nombre: string): Observable<PacienteResponseDTO[]> {
+    return this.http.get<PacienteResponseDTO[]>(`${this.baseUrl}/por-nombre/${nombre}`, this.getHeaders());
   }
 
-  buscarPorNombre(nombre: string): Observable<MascotaResponseDTO[]> {
-    return this.http.get<MascotaResponseDTO[]>(`${this.baseUrl}/por-nombre/${nombre}`, this.getHeaders());
+  buscarPorDni(dni: string): Observable<PacienteResponseDTO[]> {
+    return this.http.get<PacienteResponseDTO[]>(`${this.baseUrl}/por-dni/${dni}`, this.getHeaders());
   }
 
-  // ✅ Nueva función para buscar por DNI
-  buscarPorDni(dni: string): Observable<MascotaResponseDTO[]> {
-    return this.http.get<MascotaResponseDTO[]>(`${this.baseUrl}/por-dni/${dni}`, this.getHeaders());
+  eliminar(codigoPaciente: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${codigoPaciente}`, this.getHeaders());
   }
 
-  eliminar(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`, this.getHeaders());
+  actualizar(codigoPaciente: string, paciente: PacienteDTO): Observable<PacienteResponseDTO> {
+    return this.http.put<PacienteResponseDTO>(`${this.baseUrl}/${codigoPaciente}`, paciente, this.getHeaders());
   }
 
-  actualizar(id: number, mascota: MascotaDTO): Observable<MascotaResponseDTO> {
-    return this.http.put<MascotaResponseDTO>(`${this.baseUrl}/${id}`, mascota, this.getHeaders());
+  buscarPorCodigo(codigo: string): Observable<PacienteResponseDTO> {
+    return this.http.get<PacienteResponseDTO>(`${this.baseUrl}/${codigo}`, this.getHeaders());
+  }
+
+  descargarCredencialPdf(codigoPaciente: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${codigoPaciente}/credencial/pdf`, {
+      headers: this.getHeaders().headers,
+      responseType: 'blob'
+    });
   }
 }

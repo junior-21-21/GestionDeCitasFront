@@ -3,14 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VentaService } from '../../services/venta.service';
 import { ClienteService } from '../../services/cliente.service';
-import { MedicamentoService } from '../../services/medicamento.service';
+import { ProductoService } from '../../services/producto.service';
 import { Cliente } from '../../models/cliente.model';
-import { Medicamento } from '../../models/medicamento.model';
+import { ProductoDTO } from '../../models/producto.model';
 import { VentaDTO, VentaResponseDTO } from '../../models/venta.model';
 
 import Swal from 'sweetalert2';
-
-
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -23,24 +21,30 @@ import { MatIconModule } from '@angular/material/icon';
 export class VentaComponent implements OnInit {
   ventas: VentaResponseDTO[] = [];
   clientes: Cliente[] = [];
-  medicamentos: Medicamento[] = [];
+  productos: ProductoDTO[] = [];
   busquedaDni: string = '';
 
   ventaNueva: VentaDTO = {
-    clienteId: 0,
+    clienteDni: '',
+    tipoComprobante: 'BOLETA',
+    metodoPago: 'EFECTIVO',
+    recetaMedica: '',
     detalles: []
   };
+  
+  // Barcode scanner input
+  codigoBarrasScanner: string = '';
 
   constructor(
     private ventaService: VentaService,
     private clienteService: ClienteService,
-    private medicamentoService: MedicamentoService
+    private productoService: ProductoService
   ) {}
 
   ngOnInit() {
     this.cargarVentas();
     this.cargarClientes();
-    this.cargarMedicamentos();
+    this.cargarProductos();
   }
 
   cargarVentas() {
@@ -55,96 +59,117 @@ export class VentaComponent implements OnInit {
     });
   }
 
-  cargarMedicamentos() {
-    this.medicamentoService.listar().subscribe(data => {
-      // Asegúrate de que cada medicamento tenga 'cantidadAsociar' para el input
-      this.medicamentos = data.map(m => ({ ...m, cantidadAsociar: 0 }));
+  cargarProductos() {
+    this.productoService.listarTodos().subscribe(data => {
+      this.productos = data.map(p => ({ ...p, cantidadAsociar: 0 }));
     });
   }
 
   buscarClientePorDni() {
     if (!this.busquedaDni) {
-      alert('Ingrese un DNI');
+      alert(this.ventaNueva.tipoComprobante === 'FACTURA' ? 'Ingrese un RUC' : 'Ingrese un DNI');
       return;
     }
     this.clienteService.buscarPorDni(this.busquedaDni).subscribe({
       next: (cliente) => {
-        this.ventaNueva.clienteId = cliente.id;
+        this.ventaNueva.clienteDni = cliente.dni;
       },
       error: () => alert('Cliente no encontrado')
     });
   }
 
-agregarMedicamento(medicamento: Medicamento) {
-  if (!medicamento.cantidadAsociar || medicamento.cantidadAsociar <= 0) {
-    Swal.fire('Cantidad inválida', 'Ingrese una cantidad mayor a cero', 'warning');
-    return;
+  onEscanearCodigo() {
+    if (!this.codigoBarrasScanner) return;
+    
+    const producto = this.productos.find(p => p.codigoBarras === this.codigoBarrasScanner);
+    
+    if (producto) {
+      // Si el producto existe, añadir automáticamente 1 al carrito
+      (producto as any).cantidadAsociar = 1;
+      this.agregarProducto(producto);
+    } else {
+      Swal.fire('No encontrado', `No se encontró producto con código: ${this.codigoBarrasScanner}`, 'warning');
+    }
+    
+    // Limpiar el campo para el siguiente escaneo
+    this.codigoBarrasScanner = '';
   }
 
-  const detalleExistente = this.ventaNueva.detalles.find(
-    d => d.medicamentoId === medicamento.id
-  );
+  agregarProducto(producto: ProductoDTO) {
+    if (!(producto as any).cantidadAsociar || (producto as any).cantidadAsociar <= 0) {
+      Swal.fire('Cantidad inválida', 'Ingrese una cantidad mayor a cero', 'warning');
+      return;
+    }
 
-  if (detalleExistente) {
-    detalleExistente.cantidad += medicamento.cantidadAsociar;
-  } else {
-    this.ventaNueva.detalles.push({
-      medicamentoId: medicamento.id,
-      cantidad: medicamento.cantidadAsociar
+    const detalleExistente = this.ventaNueva.detalles.find(
+      d => d.codigoBarras === producto.codigoBarras
+    );
+
+    if (detalleExistente) {
+      detalleExistente.cantidad += (producto as any).cantidadAsociar;
+    } else {
+      this.ventaNueva.detalles.push({
+        codigoBarras: producto.codigoBarras,
+        cantidad: (producto as any).cantidadAsociar
+      });
+    }
+
+    // Limpia el input de cantidad
+    (producto as any).cantidadAsociar = 0;
+
+    // Muestra notificación de éxito
+    Swal.fire({
+      title: 'Agregado',
+      text: `Se agregó "${producto.nombre}" a la venta`,
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
     });
   }
 
-  // Limpia el input de cantidad
-  medicamento.cantidadAsociar = 0;
-
-  // Muestra notificación de éxito
-  Swal.fire({
-    title: 'Agregado',
-    text: `Se agregó "${medicamento.nombre}" a la venta`,
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false,
-    toast: true,
-    position: 'top-end'
-  });
-}
-
-registrarVenta() {
-  if (this.ventaNueva.clienteId === 0) {
-    Swal.fire('Advertencia', 'Seleccione un cliente', 'warning');
-    return;
-  }
-
-  if (this.ventaNueva.detalles.length === 0) {
-    Swal.fire('Advertencia', 'Agregue al menos un medicamento', 'warning');
-    return;
-  }
-
-  this.ventaService.registrarVenta(this.ventaNueva).subscribe({
-    next: (ventaCreada) => {
-      Swal.fire({
-        icon: 'success',
-        title: 'Venta registrada',
-        text: `ID de la venta: ${ventaCreada.id}`,
-        confirmButtonText: 'Aceptar'
-      });
-      this.ventaNueva = { clienteId: 0, detalles: [] };
-      this.cargarVentas();
-    },
-    error: () => {
-      Swal.fire('Error', 'Ocurrió un error al registrar la venta', 'error');
+  registrarVenta() {
+    if (this.ventaNueva.clienteDni === '') {
+      Swal.fire('Advertencia', 'Seleccione un cliente', 'warning');
+      return;
     }
-  });
-}
 
+    if (this.ventaNueva.detalles.length === 0) {
+      Swal.fire('Advertencia', 'Agregue al menos un producto', 'warning');
+      return;
+    }
 
-  descargarRecibo(idVenta: number) {
-    this.ventaService.obtenerReciboPDF(idVenta).subscribe({
+    if (this.requiereReceta && (!this.ventaNueva.recetaMedica || this.ventaNueva.recetaMedica.trim() === '')) {
+      Swal.fire('Advertencia', 'Debe ingresar el Nro de Receta Médica para los medicamentos controlados', 'warning');
+      return;
+    }
+
+    this.ventaService.registrarVenta(this.ventaNueva).subscribe({
+      next: (ventaCreada) => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Venta registrada',
+          text: `Comprobante ${ventaCreada.serie}-${ventaCreada.correlativo} generado exitosamente.`,
+          confirmButtonText: 'Aceptar'
+        });
+        this.ventaNueva = { clienteDni: '', tipoComprobante: 'BOLETA', metodoPago: 'EFECTIVO', recetaMedica: '', detalles: [] };
+        this.busquedaDni = '';
+        this.cargarVentas();
+      },
+      error: () => {
+        Swal.fire('Error', 'Ocurrió un error al registrar la venta', 'error');
+      }
+    });
+  }
+
+  descargarRecibo(codigoVenta: string) {
+    this.ventaService.obtenerReciboPDF(codigoVenta).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `recibo_venta_${idVenta}.pdf`;
+        a.download = `recibo_venta_${codigoVenta}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
       },
@@ -153,32 +178,47 @@ registrarVenta() {
   }
 
   getClienteNombreDni(): string {
-    const cliente = this.clientes.find(c => c.id === this.ventaNueva.clienteId);
-    return cliente ? `${cliente.nombres} (${cliente.dni})` : '';
+    const cliente = this.clientes.find(c => c.dni === this.ventaNueva.clienteDni);
+    if (!cliente) return '';
+    if (this.ventaNueva.tipoComprobante === 'FACTURA' && cliente.razonSocial) {
+      return `${cliente.razonSocial} (RUC: ${cliente.dni})`;
+    }
+    return `${cliente.nombres} ${cliente.apellidos} (DNI: ${cliente.dni})`;
   }
 
-  getNombreMedicamento(id: number): string {
-    const med = this.medicamentos.find(m => m.id === id);
-    return med ? med.nombre : 'Desconocido';
+  getNombreProducto(codigoBarras: string): string {
+    const prod = this.productos.find(p => p.codigoBarras === codigoBarras);
+    return prod ? prod.nombre : 'Desconocido';
   }
 
-  // --- NUEVOS MÉTODOS AÑADIDOS / MODIFICADOS ---
-
-  // Método para obtener el precio de un medicamento dado su ID
-  getPrecioMedicamento(medicamentoId: number): number {
-    const medicamento = this.medicamentos.find(m => m.id === medicamentoId);
-    return medicamento ? medicamento.precio : 0; // Devuelve 0 si no se encuentra
+  getPrecioProducto(codigoBarras: string): number {
+    const prod = this.productos.find(p => p.codigoBarras === codigoBarras);
+    return prod ? prod.precioVenta : 0;
   }
 
-  // Método para calcular el subtotal de un detalle de venta
   getSubtotalDetalle(detalle: any): number {
-    const precio = this.getPrecioMedicamento(detalle.medicamentoId);
+    const precio = this.getPrecioProducto(detalle.codigoBarras);
     return precio * detalle.cantidad;
   }
 
   getTotalVentaNueva(): number {
     return this.ventaNueva.detalles.reduce((total, d) => {
-      return total + this.getSubtotalDetalle(d); // Reutiliza el método del subtotal
+      return total + this.getSubtotalDetalle(d);
     }, 0);
+  }
+
+  getSubtotalCalculado(): number {
+    return this.getTotalVentaNueva() / 1.18;
+  }
+
+  getIgvCalculado(): number {
+    return this.getTotalVentaNueva() - this.getSubtotalCalculado();
+  }
+
+  get requiereReceta(): boolean {
+    return this.ventaNueva.detalles.some(d => {
+      const p = this.productos.find(prod => prod.codigoBarras === d.codigoBarras);
+      return p ? !!p.isControlado : false;
+    });
   }
 }

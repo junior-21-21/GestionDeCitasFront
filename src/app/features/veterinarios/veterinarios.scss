@@ -1,41 +1,689 @@
-form {
-  margin-bottom: 1rem;
+// =========================================
+//  VETERINARIOS - PREMIUM STYLES
+// =========================================
+
+$primary: #3f51b5;
+$primary-dark: #303f9f;
+$primary-light: #7986cb;
+$secondary: #ff4081;
+$success: #00c853;
+$danger: #d32f2f;
+$text-main: #263238;
+$text-muted: #607d8b;
+$bg-soft: #f5f7fa;
+$shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08);
+$shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.12);
+$radius: 16px;
+
+// --- CONTAINER ---
+.vet-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2rem;
+}
 
-  input, select {
-    padding: 0.5rem;
-    flex: 1;
-  }
+// =========================================
+//  FORM CARD
+// =========================================
+.vet-form-card {
+  background: white;
+  border-radius: $radius;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
 
-  button {
-    padding: 0.5rem 1rem;
-    background-color: #00796b;
-    color: white;
-    border: none;
-    border-radius: 5px;
+  &:hover {
+    box-shadow: $shadow-hover;
   }
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+// --- FORM HEADER ---
+.vet-form-header {
+  background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
+  padding: 1.5rem 2rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 
-  th, td {
-    padding: 0.6rem;
-    border: 1px solid #ccc;
+  .header-icon {
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+
+    svg {
+      color: white;
+    }
   }
 
-  th {
-    background-color: #eeeeee;
-  }
-
-  button {
-    background-color: #d32f2f;
+  h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
     color: white;
-    padding: 0.3rem 0.7rem;
-    border: none;
-    border-radius: 4px;
+    flex: 1;
   }
+
+  .header-subtitle {
+    width: 100%;
+    margin: -0.25rem 0 0 0;
+    padding-left: 68px;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+}
+
+// --- FORM BODY ---
+.vet-form-body {
+  padding: 2rem;
+}
+
+.form-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// --- PHOTO COLUMN ---
+.form-col-photo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .photo-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.photo-upload-zone {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 2px dashed #d0d5dd;
+  border-radius: $radius;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: $bg-soft;
+  overflow: hidden;
+  position: relative;
+
+  &:hover {
+    border-color: $primary-light;
+    background: rgba($primary, 0.03);
+
+    .photo-placeholder svg {
+      transform: translateY(-3px);
+    }
+  }
+
+  &.drag-over {
+    border-color: $primary;
+    background: rgba($primary, 0.08);
+    border-style: solid;
+    transform: scale(1.02);
+  }
+
+  &.has-preview {
+    border-style: solid;
+    border-color: $success;
+    border-width: 3px;
+  }
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+
+  svg {
+    color: $primary-light;
+    opacity: 0.6;
+    transition: transform 0.3s ease;
+  }
+
+  .upload-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $text-main;
+  }
+
+  .upload-subtext {
+    font-size: 0.8rem;
+    color: $text-muted;
+  }
+
+  .upload-format {
+    font-size: 0.7rem;
+    color: #bdbdbd;
+    margin-top: 0.25rem;
+  }
+}
+
+// --- DATA COLUMN ---
+.form-col-data {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+
+  @media (max-width: 576px) {
+    flex-direction: column;
+  }
+}
+
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text-main;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    svg {
+      color: $primary-light;
+    }
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 10px;
+    border: 1.5px solid #e0e0e0;
+    padding: 0.7rem 1rem;
+    font-size: 0.92rem;
+    background-color: #fafbfc;
+    transition: all 0.25s ease;
+
+    &::placeholder {
+      color: #bdbdbd;
+    }
+
+    &:focus {
+      background: white;
+      border-color: $primary;
+      box-shadow: 0 0 0 4px rgba($primary, 0.1);
+      outline: none;
+    }
+  }
+}
+
+// --- PDF UPLOAD ---
+.pdf-upload-zone {
+  border: 2px dashed #d0d5dd;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: $bg-soft;
+
+  &:hover {
+    border-color: $primary-light;
+    background: rgba($primary, 0.03);
+  }
+}
+
+.pdf-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: $text-muted;
+
+  svg {
+    color: $primary-light;
+    opacity: 0.6;
+  }
+
+  span {
+    font-size: 0.85rem;
+  }
+}
+
+.pdf-selected {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  svg:first-child {
+    color: $danger;
+  }
+
+  span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: $text-main;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// --- FORM ACTIONS ---
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-registrar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease !important;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba($primary, 0.35) !important;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-cancelar {
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+}
+
+// =========================================
+//  TABLE CARD
+// =========================================
+.vet-table-card {
+  background: white;
+  border-radius: $radius;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.table-header {
+  padding: 1.25rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+
+  h4 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+
+    svg {
+      color: $primary;
+    }
+  }
+
+  .table-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .badge-count {
+    background: rgba($primary, 0.1);
+    color: $primary;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}
+
+// --- EXPORT BUTTON ---
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #2e7d32, #1b5e20) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0.45rem 0.9rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(#2e7d32, 0.3);
+
+  &:hover {
+    background: linear-gradient(135deg, #388e3c, #2e7d32) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(#2e7d32, 0.4);
+  }
+}
+
+// --- FILTER BAR ---
+.filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: #fafbfc;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: white;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  transition: all 0.25s ease;
+  flex: 1;
+  min-width: 150px;
+  max-width: 280px;
+
+  svg {
+    color: $text-muted;
+    flex-shrink: 0;
+  }
+
+  &:focus-within {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.1);
+
+    svg {
+      color: $primary;
+    }
+  }
+}
+
+.filter-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.85rem;
+  width: 100%;
+  color: $text-main;
+
+  &::placeholder {
+    color: #bdbdbd;
+  }
+}
+
+.filter-select {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.85rem;
+  width: 100%;
+  color: $text-main;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.btn-clear-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba($danger, 0.08) !important;
+  color: $danger !important;
+  border: 1px solid rgba($danger, 0.2) !important;
+  border-radius: 8px !important;
+  padding: 0.4rem 0.75rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba($danger, 0.15) !important;
+  }
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  margin: 0;
+
+  thead th {
+    background: #f8f9fa;
+    color: $text-muted;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 0.9rem 1rem;
+    border-bottom: 2px solid #e9ecef;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 0.8rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f5f5f5;
+  }
+
+  .vet-row {
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #f8faff;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+// --- AVATAR ---
+.avatar-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8eaf6;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba($primary, 0.25);
+  }
+}
+
+.avatar-placeholder {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    color: $primary-light;
+  }
+}
+
+// --- NAME CELL ---
+.name-cell {
+  font-weight: 600;
+  color: $text-main;
+}
+
+// --- INFO CHIPS ---
+.info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  white-space: nowrap;
+
+  &.phone-chip {
+    background: rgba(#00b0ff, 0.08);
+    color: #0277bd;
+
+    svg { color: #0277bd; }
+  }
+
+  &.email-chip {
+    background: rgba($secondary, 0.08);
+    color: #c51162;
+
+    svg { color: #c51162; }
+  }
+
+  &.dni-chip {
+    background: rgba(#ff6f00, 0.08);
+    color: #e65100;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+  }
+}
+
+// --- BADGE ESPECIALIDAD ---
+.badge-especialidad {
+  background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary-light, 0.15));
+  color: $primary-dark;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+// --- TITULO BUTTON ---
+.btn-titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba($danger, 0.08) !important;
+  color: $danger !important;
+  border: 1px solid rgba($danger, 0.2) !important;
+  border-radius: 6px !important;
+  padding: 0.3rem 0.65rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    background: rgba($danger, 0.15) !important;
+    transform: translateY(-1px);
+  }
+}
+
+// --- ACTION BUTTONS ---
+.action-buttons {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+}
+
+.btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(#ffa000, 0.1) !important;
+  color: #e65100 !important;
+  border: 1px solid rgba(#ffa000, 0.25) !important;
+  border-radius: 6px !important;
+  padding: 0.35rem 0.65rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    background: rgba(#ffa000, 0.2) !important;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-danger {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.3rem !important;
+  border-radius: 6px !important;
+  padding: 0.35rem 0.65rem !important;
+  font-size: 0.78rem !important;
+}
+
+// --- EMPTY STATE ---
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem !important;
+
+  svg {
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    margin: 0;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
+}
+
+.text-muted {
+  color: #bdbdbd;
+  font-size: 0.85rem;
 }

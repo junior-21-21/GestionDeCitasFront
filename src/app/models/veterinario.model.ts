@@ -1,12 +1,17 @@
 export interface VeterinarioDTO {
   nombres: string;
-  cmp: string;
+  dni: string;
+  celular: string;
+  correo: string;
   especialidadId: number;
 }
 
 export interface VeterinarioResponseDTO {
-  id: number;
+  dni: string;
   nombres: string;
-  cmp: string;
+  celular: string;
+  correo: string;
+  fotoUrl: string;
+  tituloUrl: string;
   especialidad: string;
 }

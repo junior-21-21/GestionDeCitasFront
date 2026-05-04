@@ -3,10 +3,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Cliente, ClienteResponseDTO } from '../models/cliente.model';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ClienteService {
-  private baseUrl = 'http://localhost:8080/api/clientes';
+  private baseUrl = `${environment.apiUrl}/clientes`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -26,24 +27,23 @@ export class ClienteService {
     return this.http.post<Cliente>(this.baseUrl, cliente, this.getHeaders());
   }
 
-  obtener(id: number): Observable<Cliente> {
-    return this.http.get<Cliente>(`${this.baseUrl}/${id}`, this.getHeaders());
+  obtener(dni: string): Observable<Cliente> {
+    return this.http.get<Cliente>(`${this.baseUrl}/${dni}`, this.getHeaders());
   }
 
-  actualizar(id: number, cliente: Cliente): Observable<Cliente> {
-    return this.http.put<Cliente>(`${this.baseUrl}/${id}`, cliente, this.getHeaders());
+  actualizar(dni: string, cliente: Cliente): Observable<Cliente> {
+    return this.http.put<Cliente>(`${this.baseUrl}/${dni}`, cliente, this.getHeaders());
   }
 
-  eliminar(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`, this.getHeaders());
+  eliminar(dni: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${dni}`, this.getHeaders());
   }
 
-  // ✅ Método que te faltaba
   buscarPorDni(dni: string): Observable<ClienteResponseDTO> {
-    return this.http.get<ClienteResponseDTO>(`${this.baseUrl}/por-dni/${dni}`, this.getHeaders());
+    return this.http.get<ClienteResponseDTO>(`${this.baseUrl}/${dni}`, this.getHeaders());
   }
 
-  buscarPorId(id: number): Observable<ClienteResponseDTO> {
-    return this.http.get<ClienteResponseDTO>(`${this.baseUrl}/${id}`, this.getHeaders());
+  buscarPorDniParcial(dni: string): Observable<ClienteResponseDTO[]> {
+    return this.http.get<ClienteResponseDTO[]>(`${this.baseUrl}/buscar/${dni}`, this.getHeaders());
   }
 }

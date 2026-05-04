@@ -50,8 +50,21 @@
                 <div class="col-6">
                   <div class="form-group">
                     <label>DNI</label>
-                    <div class="input-group-vet">
-                      <input type="text" maxlength="8" class="text-center" [(ngModel)]="nuevoCliente.dni" name="dni" placeholder="8 dígitos" required />
+                    <div class="input-group-vet d-flex">
+                      <input type="text" maxlength="8" class="text-center flex-grow-1" 
+                             [(ngModel)]="nuevoCliente.dni" 
+                             name="dni" 
+                             placeholder="8 dígitos" 
+                             (keyup.enter)="buscarDniExterno()"
+                             required 
+                             style="border-top-right-radius: 0; border-bottom-right-radius: 0;" />
+                      <button type="button" 
+                              class="btn btn-primary px-3" 
+                              (click)="buscarDniExterno()"
+                              [disabled]="buscandoDniExterno"
+                              style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                        <i class="bi" [ngClass]="buscandoDniExterno ? 'bi-hourglass-split' : 'bi-search'"></i>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -97,7 +110,26 @@
               <i class="bi bi-journal-medical text-primary me-2 fs-4"></i>
               <h5 class="mb-0 text-dark fw-bold">Directorio de Clientes</h5>
             </div>
-            <span class="badge-count">{{ clientes.length }} Clientes</span>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-sm btn-success" (click)="exportarExcel()">
+                <i class="bi bi-file-earmark-excel-fill me-1"></i>Exportar
+              </button>
+              <span class="badge-count">{{ clientesFiltrados.length }} Clientes</span>
+            </div>
+          </div>
+
+          <!-- Buscador -->
+          <div class="p-3 bg-light border-bottom">
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+              </span>
+              <input type="text" 
+                     class="form-control border-start-0 ps-0" 
+                     placeholder="Buscar por DNI o Nombres..." 
+                     [(ngModel)]="filtroBusqueda" 
+                     (keyup)="filtrar()">
+            </div>
           </div>
 
           <div class="table-responsive">
@@ -111,7 +143,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let cliente of clientes">
+                <tr *ngFor="let cliente of clientesFiltrados">
                   <!-- Cliente Info -->
                   <td class="ps-4">
                     <div class="client-name">{{ cliente.nombres }} {{ cliente.apellidos }}</div>
@@ -139,7 +171,7 @@
                         <button class="btn-icon edit" (click)="editar(cliente)" title="Editar">
                           <i class="bi bi-pencil-fill"></i>
                         </button>
-                        <button class="btn-icon delete" (click)="eliminar(cliente.id!)" title="Eliminar">
+                        <button class="btn-icon delete" (click)="eliminar(cliente.dni)" title="Eliminar">
                           <i class="bi bi-trash-fill"></i>
                         </button>
                     </div>
@@ -147,7 +179,7 @@
                 </tr>
                 
                 <!-- Estado Vacío -->
-                <tr *ngIf="clientes.length === 0">
+                <tr *ngIf="clientesFiltrados.length === 0">
                   <td colspan="4" class="empty-state">
                     <i class="bi bi-inbox"></i>
                     <p>No hay clientes registrados aún.</p>

@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MascotaDTO, MascotaResponseDTO } from '../../models/mascota.model';
+import { PacienteDTO, PacienteResponseDTO } from '../../models/mascota.model';
 import { MascotaService } from '../../services/mascota.service';
 import { ClienteService } from '../../services/cliente.service';
 import { ConsultaService } from '../../services/consulta.service'; // Importar
 import { ClienteResponseDTO } from '../../models/cliente.model';
 import { ConsultaResponse } from '../../models/consulta.model'; // Importar
+import { ReporteService } from '../../services/reporte.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -20,16 +21,23 @@ export class MascotaComponent implements OnInit {
   dniCliente: string = '';
   clienteEncontrado: ClienteResponseDTO | null = null;
 
-  mascota: MascotaDTO = {
+  mascota: PacienteDTO = {
     nombre: '',
     especie: '',
     raza: '',
     edad: 0,
-    clienteId: 0
+    peso: undefined,
+    clienteDni: ''
   };
 
-  mascotas: MascotaResponseDTO[] = [];
-  listaMascotasCompleta: MascotaResponseDTO[] = []; // Para filtrado local
+  // Autocomplete Clientes
+  clientesTotales: ClienteResponseDTO[] = [];
+  clientesFiltrados: ClienteResponseDTO[] = [];
+  busquedaClienteTexto: string = '';
+  mostrarSugerencias: boolean = false;
+
+  mascotas: PacienteResponseDTO[] = [];
+  listaMascotasCompleta: PacienteResponseDTO[] = []; // Para filtrado local
   
   // Filtros
   filtroEspecie: string = '';
@@ -40,16 +48,62 @@ export class MascotaComponent implements OnInit {
   itemsPorPagina = 5;
 
   // Controla si estamos editando y qué mascota editamos
-  editando: MascotaResponseDTO | null = null;
+  editando: PacienteResponseDTO | null = null;
 
   constructor(
     private mascotaService: MascotaService,
     private clienteService: ClienteService,
-    private consultaService: ConsultaService
+    private consultaService: ConsultaService,
+    private reporteService: ReporteService
   ) {}
 
   ngOnInit(): void {
     this.cargarMascotas();
+    this.cargarClientes();
+  }
+
+  cargarClientes(): void {
+    this.clienteService.listar().subscribe({
+      next: (data) => {
+        this.clientesTotales = data;
+      },
+      error: () => console.error('Error al cargar clientes para autocompletado')
+    });
+  }
+
+  filtrarClientesSugerencias(): void {
+    const texto = this.busquedaClienteTexto.toLowerCase().trim();
+    if (!texto) {
+      this.clientesFiltrados = [];
+      this.mostrarSugerencias = false;
+      return;
+    }
+    this.clientesFiltrados = this.clientesTotales.filter(c => 
+      c.nombres.toLowerCase().includes(texto) ||
+      c.apellidos.toLowerCase().includes(texto) ||
+      c.dni.includes(texto)
+    ).slice(0, 5); // Limitar a 5 sugerencias
+    this.mostrarSugerencias = this.clientesFiltrados.length > 0;
+  }
+
+  seleccionarClienteSugerencia(cliente: ClienteResponseDTO): void {
+    this.clienteEncontrado = cliente;
+    this.mascota.clienteDni = cliente.dni;
+    this.busquedaClienteTexto = `${cliente.nombres} ${cliente.apellidos}`;
+    this.mostrarSugerencias = false;
+    
+    // Feedback visual
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    });
+    Toast.fire({
+      icon: 'success',
+      title: `Cliente Seleccionado: ${cliente.nombres} ${cliente.apellidos}`
+    });
   }
 
   buscarClientePorDni(): void {
@@ -61,7 +115,7 @@ export class MascotaComponent implements OnInit {
     this.clienteService.buscarPorDni(this.dniCliente).subscribe({
       next: (data) => {
         this.clienteEncontrado = data;
-        this.mascota.clienteId = data.id;
+        this.mascota.clienteDni = data.dni;
         
         // Usamos un Toast pequeño en lugar de un popup grande para mejor UX
         const Toast = Swal.mixin({
@@ -78,7 +132,7 @@ export class MascotaComponent implements OnInit {
       },
       error: () => {
         this.clienteEncontrado = null;
-        this.mascota.clienteId = 0;
+        this.mascota.clienteDni = '';
         Swal.fire('Error', 'Cliente no encontrado', 'error');
       }
     });
@@ -94,12 +148,35 @@ export class MascotaComponent implements OnInit {
       next: (nuevaMascota) => {
         Swal.fire('Registrado', 'Mascota registrada correctamente ✅', 'success');
         this.mascotas.unshift(nuevaMascota); // Insertar al inicio
+        
+        // Auto-descargar credencial
+        if (nuevaMascota.codigoPaciente) {
+          this.descargarCredencial(nuevaMascota.codigoPaciente);
+        }
+
         this.resetFormulario();
         this.paginaActual = 1;
       },
       error: err => {
         console.error(err);
-        Swal.fire('Error', `Error al registrar mascota: ${err.error}`, 'error');
+        let msg = 'Error desconocido';
+        
+        if (err.error) {
+          if (typeof err.error === 'string') {
+            msg = err.error;
+          } else if (err.error.errors && Array.isArray(err.error.errors)) {
+            // Error de validacion de Spring Boot
+            msg = err.error.errors.map((e: any) => e.defaultMessage || e.field).join(', ');
+          } else if (err.error.message) {
+            msg = err.error.message;
+          } else {
+            msg = JSON.stringify(err.error);
+          }
+        } else if (err.message) {
+          msg = err.message;
+        }
+        
+        Swal.fire('Error', `Error al registrar mascota: ${msg}`, 'error');
       }
     });
   }
@@ -112,6 +189,27 @@ export class MascotaComponent implements OnInit {
         this.paginaActual = 1;
       },
       error: (err) => console.error('Error al cargar mascotas', err)
+    });
+  }
+
+  exportarExcel(): void {
+    this.reporteService.exportarPacientes();
+  }
+
+  descargarCredencial(codigoPaciente: string): void {
+    this.mascotaService.descargarCredencialPdf(codigoPaciente).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `credencial_${codigoPaciente}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error al descargar credencial', err);
+        Swal.fire('Error', 'No se pudo generar la credencial PDF', 'error');
+      }
     });
   }
 
@@ -140,13 +238,13 @@ export class MascotaComponent implements OnInit {
 
   // --- HISTORIAL ---
   historialVisible: boolean = false;
-  mascotaHistorial: MascotaResponseDTO | null = null;
+  mascotaHistorial: PacienteResponseDTO | null = null;
   historialConsultas: ConsultaResponse[] = [];
 
-  verHistorial(m: MascotaResponseDTO): void {
+  verHistorial(m: PacienteResponseDTO): void {
     this.mascotaHistorial = m;
     this.historialVisible = true;
-    this.consultaService.obtenerHistorialPorMascota(m.id).subscribe({
+    this.consultaService.obtenerHistorialPorPaciente(m.codigoPaciente).subscribe({
       next: (data: ConsultaResponse[]) => {
         this.historialConsultas = data;
       },
@@ -196,20 +294,21 @@ export class MascotaComponent implements OnInit {
   actualizar(): void {
     if (!this.editando) return;
 
-    const dto: MascotaDTO = {
+    const dto: PacienteDTO = {
       nombre: this.mascota.nombre,
       especie: this.mascota.especie,
       raza: this.mascota.raza,
       edad: this.mascota.edad,
-      clienteId: this.mascota.clienteId
+      peso: this.mascota.peso,
+      clienteDni: this.mascota.clienteDni
     };
 
-    this.mascotaService.actualizar(this.editando.id, dto).subscribe({
+    this.mascotaService.actualizar(this.editando.codigoPaciente, dto).subscribe({
       next: (mascotaActualizada) => {
         Swal.fire('Actualizado', 'Mascota actualizada correctamente', 'success');
 
         // Actualizar la lista en memoria
-        this.mascotas = this.mascotas.filter(m => m.id !== mascotaActualizada.id);
+        this.mascotas = this.mascotas.filter(m => m.codigoPaciente !== mascotaActualizada.codigoPaciente);
         this.mascotas.unshift(mascotaActualizada); // insertarlo como primero
 
         this.editando = null;
@@ -223,7 +322,7 @@ export class MascotaComponent implements OnInit {
     });
   }
 
-  eliminarMascota(id: number): void {
+  eliminarMascota(codigoPaciente: string): void {
     Swal.fire({
       title: '¿Estás seguro?',
       text: 'Esta acción eliminará la mascota permanentemente.',
@@ -235,7 +334,7 @@ export class MascotaComponent implements OnInit {
       cancelButtonColor: '#3085d6'
     }).then(result => {
       if (result.isConfirmed) {
-        this.mascotaService.eliminar(id).subscribe({
+        this.mascotaService.eliminar(codigoPaciente).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'Mascota eliminada correctamente', 'success');
             this.cargarMascotas();
@@ -249,10 +348,10 @@ export class MascotaComponent implements OnInit {
     });
   }
 
-  editarMascota(m: MascotaResponseDTO): void {
+  editarMascota(m: PacienteResponseDTO): void {
     // Primero buscamos el cliente para llenar la info visualmente
-    this.clienteService.buscarPorId(m.clienteId).subscribe({
-      next: (cliente) => {
+    this.clienteService.buscarPorDni(m.clienteDni).subscribe({
+      next: (cliente: ClienteResponseDTO) => {
         this.clienteEncontrado = cliente;
         
         // Llenamos el formulario
@@ -261,8 +360,11 @@ export class MascotaComponent implements OnInit {
           especie: m.especie,
           raza: m.raza,
           edad: m.edad,
-          clienteId: m.clienteId
+          peso: m.peso,
+          clienteDni: m.clienteDni
         };
+        
+        this.busquedaClienteTexto = `${cliente.nombres} ${cliente.apellidos}`;
         
         this.editando = m;
         
@@ -281,9 +383,12 @@ export class MascotaComponent implements OnInit {
       especie: '',
       raza: '',
       edad: 0,
-      clienteId: 0
+      peso: undefined,
+      clienteDni: ''
     };
     this.dniCliente = '';
+    this.busquedaClienteTexto = '';
+    this.mostrarSugerencias = false;
     // Nota: No reseteamos clienteEncontrado aquí si queremos seguir registrando mascotas para el mismo cliente,
     // pero según tu lógica original sí lo hacías, así que lo mantengo:
     // this.clienteEncontrado = null; 
@@ -292,7 +397,7 @@ export class MascotaComponent implements OnInit {
   }
 
   // --- PAGINACIÓN ---
-  get mascotasPaginadas(): MascotaResponseDTO[] {
+  get mascotasPaginadas(): PacienteResponseDTO[] {
     const inicio = (this.paginaActual - 1) * this.itemsPorPagina;
     return this.mascotas.slice(inicio, inicio + this.itemsPorPagina);
   }

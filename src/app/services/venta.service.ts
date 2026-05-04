@@ -3,14 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { VentaDTO, VentaResponseDTO } from '../models/venta.model';
-import { Medicamento } from '../models/medicamento.model';
 import { Cliente } from '../models/cliente.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VentaService {
-  private url = 'http://localhost:8080/api/ventas';
+  private url = `${environment.apiUrl}/ventas`;
 
   constructor(private http: HttpClient) {}
 
@@ -22,8 +22,8 @@ export class VentaService {
     return this.http.get<VentaResponseDTO[]>(this.url);
   }
 
-  obtenerReciboPDF(idVenta: number): Observable<Blob> {
-    const url = `${this.url}/recibo/${idVenta}`;
+  obtenerReciboPDF(codigoVenta: string): Observable<Blob> {
+    const url = `${this.url}/recibo/${codigoVenta}`;
     return this.http.get(url, { responseType: 'blob' });
   }
 }

@@ -14,7 +14,8 @@ export class AuthInterceptor implements HttpInterceptor {
     const excludedUrls = [
       '/api/auth/login',
       '/api/auth/register',
-      '/api/usuarios/admin' // 🔴 Excluir esta ruta del token
+      '/api/usuarios/admin',
+      'apisperu.com' // Excluir API externa
     ];
 
     const shouldExclude = excludedUrls.some(url => req.url.includes(url));

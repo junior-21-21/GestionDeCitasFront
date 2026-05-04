@@ -17,14 +17,14 @@ import { MatIconModule } from '@angular/material/icon';
 export class ConfiguracionComponent {
   // Lista de usuarios y roles
   usuarios: any[] = []; // Se recomienda usar una interfaz UsuarioResponse
-  rolesDisponibles = ['ADMIN', 'VENDEDOR', 'VETERINARIO'];
+  rolesDisponibles = ['ADMIN', 'RECEPCIONISTA', 'VETERINARIO'];
 
   // Estado del formulario
   usuarioSeleccionado: UsuarioDTO = {
-    username: '',
+    email: '',
     password: '',
     nombres: '',
-    roles: ['VENDEDOR'] // Rol por defecto
+    rol: 'RECEPCIONISTA' // Rol por defecto
   };
 
   modoEdicion = false;
@@ -34,6 +34,10 @@ export class ConfiguracionComponent {
   passwordModalVisible = false;
   newPassword = '';
   usuarioPasswordId: number | undefined;
+
+  // Visibilidad de contraseñas
+  mostrarPassNuevo = false;
+  mostrarPassCambio = false;
 
   constructor(private authService: AuthService, private router: Router) {
     this.cargarUsuarios();
@@ -53,7 +57,7 @@ export class ConfiguracionComponent {
 
   abrirCrear() {
     this.modoEdicion = false;
-    this.usuarioSeleccionado = { username: '', password: '', nombres: '', roles: ['VENDEDOR'] };
+    this.usuarioSeleccionado = { email: '', password: '', nombres: '', rol: 'RECEPCIONISTA' };
     this.modalVisible = true;
   }
 
@@ -62,10 +66,10 @@ export class ConfiguracionComponent {
     // Copia profunda para no mutar la tabla directamente
     this.usuarioSeleccionado = { 
         id: u.id,
-        username: u.username,
+        email: u.email,
         nombres: u.nombres,
-        // Adaptar roles si vienen como objetos
-        roles: u.roles ? u.roles.map((r: any) => r.nombre) : []
+        // Adaptar rol si viene incrustado (es objeto o string)
+        rol: u.rol ? (u.rol.nombre || u.rol) : ''
     };
     this.modalVisible = true;
   }
@@ -82,21 +86,26 @@ export class ConfiguracionComponent {
         error: () => Swal.fire('Error', 'No se pudo actualizar', 'error')
       });
     } else {
-      // Crear
-      // Dependiendo del rol, llamamos a registrarAdmin o registrarVendedor, 
-      // o usamos un endpoint genérico si el backend lo soporta.
-      // Por simplicidad, usaremos 'registrarVendedor' si es vendedor, o lógica especial.
-      // MEJOR: El backend 'registrarVendedor' asigna rol VENDEDOR automaticamente.
-      // Si queremos flexibilidad total, necesitamos un endpoint 'crearUsuario' que reciba roles.
-      // Por ahora usaremos registrarVendedor como base.
-      
-      this.authService.registrarVendedor(this.usuarioSeleccionado).subscribe({
+      // Validar campos obligatorios
+      if (!this.usuarioSeleccionado.nombres?.trim() || 
+          !this.usuarioSeleccionado.email?.trim() || 
+          !this.usuarioSeleccionado.password?.trim()) {
+        Swal.fire('Campos incompletos', 'Debes llenar todos los campos para crear un usuario', 'warning');
+        return;
+      }
+
+      // Usar el nuevo endpoint que respeta los roles seleccionados
+      this.authService.crearUsuario(this.usuarioSeleccionado).subscribe({
         next: () => {
-          Swal.fire('Creado', 'Usuario creado correctamente', 'success');
+          Swal.fire('Creado', 'Usuario creado correctamente. Se enviaron las credenciales al correo.', 'success');
           this.modalVisible = false;
           this.cargarUsuarios();
         },
-        error: () => Swal.fire('Error', 'No se pudo crear', 'error')
+        error: (err) => {
+          let msg = typeof err.error === 'string' ? err.error : 
+                    (err.error?.text || err.error?.message || 'No se pudo crear el usuario');
+          Swal.fire('Error', msg, 'error');
+        }
       });
     }
   }
@@ -137,7 +146,69 @@ export class ConfiguracionComponent {
               Swal.fire('Éxito', 'Contraseña actualizada', 'success');
               this.passwordModalVisible = false;
           },
-          error: () => Swal.fire('Error', 'No se pudo cambiar la contraseña', 'error')
+          error: (err) => {
+              console.error('SERVER ERROR:', err);
+              // Si falla al parsear un texto plano como JSON, err.error.text tiene el string
+              let msg = typeof err.error === 'string' ? err.error : 
+                        (err.error?.text || err.error?.message || err.message || 'Error al cambiar contraseña.');
+              if (msg === 'Http failure during parsing for http://localhost:8080/api/usuarios/1/password' && err.error?.text) {
+                  msg = err.error.text;
+              }
+              Swal.fire('Error', msg, 'error');
+          }
       });
+  }
+
+  desbloquearUsuario(u: any) {
+    Swal.fire({
+      title: '¿Desbloquear cuenta?',
+      text: `Se desbloqueará la cuenta de ${u.nombres}`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, desbloquear',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.desbloquearCuenta(u.id).subscribe({
+            next: () => {
+                Swal.fire('Desbloqueado', 'La cuenta ha sido desbloqueada', 'success');
+                this.cargarUsuarios();
+            },
+            error: (err) => {
+                const msg = typeof err.error === 'string' ? err.error : 'No se pudo desbloquear la cuenta';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+      }
+    });
+  }
+
+  cambiarEstado(u: any) {
+    // Si no viene en el backend, por defecto será true
+    const estadoActual = u.habilitada !== false;
+    const nuevoEstado = !estadoActual;
+    const accion = nuevoEstado ? 'habilitar' : 'inhabilitar';
+    
+    Swal.fire({
+      title: `¿${accion.charAt(0).toUpperCase() + accion.slice(1)} cuenta?`,
+      text: `Se va a ${accion} la cuenta de ${u.nombres}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: `Sí, ${accion}`,
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.cambiarEstadoCuenta(u.id, nuevoEstado).subscribe({
+            next: () => {
+                Swal.fire('Éxito', `La cuenta ha sido ${nuevoEstado ? 'habilitada' : 'inhabilitada'}`, 'success');
+                this.cargarUsuarios();
+            },
+            error: (err) => {
+                const msg = typeof err.error === 'string' ? err.error : `No se pudo ${accion} la cuenta`;
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+      }
+    });
   }
 }

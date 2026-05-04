@@ -1,11 +1,30 @@
-<div class="dashboard-container">
-  <h1>Bienvenido a la Clínica Veterinaria 🐾</h1>
-  <p>Selecciona una opción del menú para comenzar.</p>
+<div class="home-container" [ngClass]="rolClass">
 
-  <div class="info-cards">
-    <div class="card">📋 Consultas</div>
-    <div class="card">💉 Medicamentos</div>
-    <div class="card">🧑‍⚕️ Veterinarios</div>
-    <div class="card">💰 Ventas</div>
+  <!-- Columna izquierda: Texto -->
+  <div class="home-left">
+    <div class="welcome-badge">
+      <span>{{ rolBadge }}</span>
+    </div>
+
+    <h1 class="home-title">
+      Bienvenido(a) a<br>
+      <span class="highlight">Petyzoos</span>
+    </h1>
+
+    <p class="home-greeting">
+      {{ saludo }}, <strong>{{ nombreUsuario }}</strong>
+    </p>
+
+    <p class="home-description">{{ mensajeRol }}</p>
+
+    <p class="home-slogan">"No solo son mascotas, son familia"</p>
+
+    <div class="home-date">{{ fechaActual }}</div>
   </div>
+
+  <!-- Columna derecha: Ilustracion -->
+  <div class="home-right">
+    <img src="vet_welcome.png" alt="Bienvenida Clinica Veterinaria" class="home-illustration">
+  </div>
+
 </div>

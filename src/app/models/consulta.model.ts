@@ -1,44 +1,49 @@
 export interface ConsultaDTO {
   fecha: string;
   motivo: string;
+  peso?: number;
+  observaciones?: string;
   diagnostico: string;
   tratamiento: string;
-  mascotaId: number;
-  veterinarioId: number;
-  citaId?: number;
+  pacienteCodigo: string;
+  veterinarioDni: string;
+  citaCodigo?: string;
 }
 
 export interface ConsultaResponse {
-  id: number;
+  codigoConsulta: string;
   fecha: string;
   motivo: string;
+  peso?: number;
+  observaciones?: string;
   diagnostico: string;
   tratamiento: string;
-  nombreMascota: string;
+  nombrePaciente: string;
   nombreVeterinario: string;
 }
 
 export interface Consulta {
-  id: number;
+  codigoConsulta: string;
   fecha: string;
   motivo: string;
+  peso?: number;
+  observaciones?: string;
   diagnostico: string;
   tratamiento: string;
-  mascotaId: number;
-  veterinarioId: number;
+  pacienteCodigo: string;
+  veterinarioDni: string;
 }
 
-export interface ConsultaMedicamentoDTO {
-  consultaId: number;
-  medicamentoId: number;
+export interface ConsultaProductoDTO {
+  codigoConsulta: string;
+  codigoBarras: string;
   cantidad: number;
+  indicaciones: string;
 }
 
-export interface ConsultaMedicamentoResponse {
-  consultaId: number;
-  medicamentoId: number;
+export interface ConsultaProductoResponse {
+  codigoConsulta: string;
+  codigoBarras: string;
   cantidad: number;
-  nombreMedicamento: string;
-  descripcionMedicamento: string;
-  precioMedicamento: number;
+  indicaciones: string;
 }

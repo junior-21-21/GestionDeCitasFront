@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -9,13 +9,15 @@ import { MascotaService } from '../../services/mascota.service';
 import { VeterinarioService } from '../../services/veterinario.service';
 import { AuthService } from '../../services/auth.service';
 import { EspecialidadService } from '../../services/especialidad.service';
-import { ClienteService } from '../../services/cliente.service'; // Added ClienteService
+import { ClienteService } from '../../services/cliente.service';
+import { AnimationService } from '../../services/animation.service';
 import { CitaDTO } from '../../models/cita-dto.model';
 import { ClienteResponseDTO } from '../../models/cliente.model'; // Importante para el tipo
 import { CitaResponseDTO } from '../../models/cita-response.model';
 import { ConsultaService } from '../../services/consulta.service';
 import Swal from 'sweetalert2';
 import { FullCalendarModule } from '@fullcalendar/angular';
+import { MatIconModule } from '@angular/material/icon';
 import {
   CalendarOptions,
   EventClickArg,
@@ -29,11 +31,11 @@ import esLocale from '@fullcalendar/core/locales/es';
 @Component({
   selector: 'app-citas',
   standalone: true,
-  imports: [CommonModule, FormsModule, FullCalendarModule],
+  imports: [CommonModule, FormsModule, FullCalendarModule, MatIconModule],
   templateUrl: './citas.html',
   styleUrls: ['./citas.scss'],
 })
-export class CitasComponent implements OnInit {
+export class CitasComponent implements OnInit, AfterViewInit {
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: 'timeGridWeek',
@@ -104,6 +106,15 @@ export class CitasComponent implements OnInit {
     { label: '45 min', value: 45 },
     { label: '1 hora', value: 60 },
   ];
+  citasCompletadas: number = 0;
+
+  // IA Pets
+  roamingPets: any[] = [
+    { id: 1, type: 'dog', x: -100, y: 50, targetX: 100, targetY: 50, speed: 1.2, direction: 1, size: 45, state: 'walking', waitTime: 0, yOffset: 0 },
+    { id: 2, type: 'cat', x: -100, y: 70, targetX: 50, targetY: 70, speed: 0.8, direction: 1, size: 35, state: 'resting', waitTime: 60, yOffset: 0 },
+    { id: 3, type: 'dog', x: -100, y: 60, targetX: 200, targetY: 60, speed: 1.5, direction: 1, size: 40, state: 'walking', waitTime: 0, yOffset: 0 }
+  ];
+  animationFrameId: number = 0;
 
   constructor(
     private citaService: CitaService,
@@ -114,7 +125,13 @@ export class CitasComponent implements OnInit {
     private clienteService: ClienteService,
     private consultaService: ConsultaService,
     private router: Router,
+    private anim: AnimationService
   ) {}
+
+  ngAfterViewInit(): void {
+    // Animación de entrada del encabezado y calendario
+    this.anim.pageEnter('.citas-container, .calendar-wrapper, .fc', 100);
+  }
 
   ngOnInit(): void {
     this.cargarVeterinarios();
@@ -312,31 +329,65 @@ export class CitasComponent implements OnInit {
     const esRealizada = cita.estado === 'REALIZADA';
 
     Swal.fire({
-      title: `Cita ${cita.codigoCita}`,
       html: `
-        <div class="text-start">
-          <p><strong>Paciente:</strong> ${cita.nombrePaciente}</p>
-          <p><strong>Veterinario:</strong> ${cita.nombreVeterinario}</p>
-          <p><strong>Motivo:</strong> ${cita.motivo}</p>
-          <p><strong>Estado:</strong> <span class="badge ${this.getBadgeClass(cita.estado)}">${cita.estado}</span></p>
+        <div class="text-start p-2">
+          <div class="d-flex align-items-center mb-4">
+            <div class="icon-wrapper me-3" style="width: 48px; height: 48px; background: #e6fcf5; color: #0ca678; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+              🐾
+            </div>
+            <div>
+              <h3 class="m-0 fw-bold text-dark fs-4">Detalle de Consulta</h3>
+              <p class="text-muted m-0 small">Cita #${cita.codigoCita}</p>
+            </div>
+          </div>
+          
+          <div class="mb-3 p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+            <div class="row mb-2">
+              <div class="col-4 text-muted small fw-bold text-uppercase">Paciente</div>
+              <div class="col-8 fw-semibold text-dark">${cita.nombrePaciente}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-4 text-muted small fw-bold text-uppercase">Doctor</div>
+              <div class="col-8 fw-semibold text-dark">${cita.nombreVeterinario}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-4 text-muted small fw-bold text-uppercase">Motivo</div>
+              <div class="col-8 text-dark">${cita.motivo}</div>
+            </div>
+            <div class="row">
+              <div class="col-4 text-muted small fw-bold text-uppercase">Estado</div>
+              <div class="col-8">
+                <span class="badge ${this.getBadgeClass(cita.estado)} px-3 py-2 rounded-pill">${cita.estado}</span>
+              </div>
+            </div>
+          </div>
         </div>
       `,
       showDenyButton: !esRealizada,
       showCancelButton: true,
       showConfirmButton: !esRealizada && cita.estado !== 'CANCELADA',
-      confirmButtonText: 'Atender',
-      denyButtonText: 'Cancelar',
-      cancelButtonText: esRealizada ? 'Cerrar' : 'Cerrar',
+      confirmButtonText: '<i class="bi bi-play-circle me-1"></i> Atender',
+      denyButtonText: '<i class="bi bi-x-circle me-1"></i> Cancelar Cita',
+      cancelButtonText: 'Cerrar',
+      background: '#ffffff',
+      padding: '1rem',
+      customClass: {
+        popup: 'rounded-4 shadow-lg border-0',
+        confirmButton: 'btn btn-primary px-4 py-2 rounded-3 shadow-sm fw-bold',
+        denyButton: 'btn btn-danger px-4 py-2 rounded-3 shadow-sm fw-bold ms-2',
+        cancelButton: 'btn btn-light px-4 py-2 rounded-3 text-secondary fw-bold ms-2'
+      },
+      buttonsStyling: false,
       footer: esRealizada
         ? `
-          <div class="d-flex gap-2 justify-content-center">
-            <button id="btn-ver-diagnostico" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Ver Diagnóstico</button>
-            <button id="btn-descargar-pdf" class="btn btn-sm btn-outline-danger"><i class="bi bi-file-pdf"></i> Comprobante</button>
+          <div class="d-flex gap-3 justify-content-center w-100 py-2">
+            <button id="btn-ver-diagnostico" class="btn btn-primary px-4 py-2 rounded-3 shadow-sm fw-bold"><i class="bi bi-eye me-2"></i> Ver Diagnóstico</button>
+            <button id="btn-descargar-pdf" class="btn btn-outline-dark px-4 py-2 rounded-3 fw-bold"><i class="bi bi-file-pdf me-2"></i> Comprobante</button>
           </div>
         `
         : cita.estado === 'CANCELADA'
-          ? '<button id="btn-eliminar" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Liberar Horario</button>'
-          : '<button id="btn-reprogramar" class="btn btn-sm btn-outline-warning"><i class="bi bi-calendar-event"></i> Reprogramar</button>',
+          ? '<div class="w-100 text-center py-2"><button id="btn-eliminar" class="btn btn-outline-danger px-4 py-2 rounded-3 fw-bold"><i class="bi bi-trash me-2"></i> Liberar Horario</button></div>'
+          : '<div class="w-100 text-center py-2"><button id="btn-reprogramar" class="btn btn-outline-warning px-4 py-2 rounded-3 fw-bold text-dark"><i class="bi bi-calendar-event me-2"></i> Reprogramar Horario</button></div>',
     }).then((result) => {
       if (result.isConfirmed) {
         this.router.navigate(['/consultas'], {
@@ -497,19 +548,41 @@ export class CitasComponent implements OnInit {
 
           if (response && response.codigoCita) {
             Swal.fire({
-              title: 'Éxito',
-              text: 'Cita registrada correctamente. ¿Desea ver el comprobante?',
+              title: '¡Cita Registrada! 🎉',
+              html: '<p style="color: #64748b; font-size: 16px; margin-top: 5px;">La consulta ha sido agendada con éxito en el sistema.<br><br>¿Deseas generar el comprobante en este momento?</p>',
               icon: 'success',
+              iconColor: '#20c997',
               showCancelButton: true,
-              confirmButtonText: '👁️ Ver Comprobante',
-              cancelButtonText: 'Cerrar',
+              confirmButtonText: '<i class="bi bi-file-earmark-text me-2"></i> Ver Comprobante',
+              cancelButtonText: 'Ahora no',
+              background: '#ffffff',
+              color: '#0f172a',
+              padding: '2rem',
+              customClass: {
+                popup: 'rounded-4 shadow-lg border-0',
+                title: 'fs-3 fw-bold',
+                confirmButton: 'btn btn-success btn-lg px-4 py-2 rounded-3 shadow-sm fw-bold',
+                cancelButton: 'btn btn-light btn-lg px-4 py-2 rounded-3 text-secondary fw-bold ms-3'
+              },
+              buttonsStyling: false
             }).then((result) => {
               if (result.isConfirmed) {
                 this.verComprobante(response.codigoCita);
               }
             });
           } else {
-            Swal.fire('Éxito', 'Cita registrada correctamente', 'success');
+            Swal.fire({
+              title: '¡Éxito!',
+              html: '<p style="color: #64748b; font-size: 16px;">La cita ha quedado registrada correctamente.</p>',
+              icon: 'success',
+              iconColor: '#20c997',
+              padding: '2rem',
+              customClass: {
+                popup: 'rounded-4 shadow-lg border-0',
+                confirmButton: 'btn btn-success btn-lg px-4 py-2 rounded-3 shadow-sm fw-bold'
+              },
+              buttonsStyling: false
+            });
           }
         },
       });

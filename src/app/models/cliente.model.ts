@@ -5,8 +5,13 @@ export interface Cliente {
   tipoDocumento?: string; // DNI, RUC
   razonSocial?: string;
   telefono?: string;
-  direccion?: string;
+  calle?: string;
+  numero?: string;
+  distrito?: string;
+  provincia?: string;
+  telefonos?: { numero: string; tipo: string }[];
   email?: string;
+  puntosFidelidad?: number;
 }
 export interface ClienteResponseDTO {
   nombres: string;

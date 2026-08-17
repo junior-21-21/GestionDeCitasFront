@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -9,5 +10,9 @@ import { RouterOutlet } from '@angular/router';
   styleUrls: ['./app.scss'] // ✅ corregido aquí
 })
 export class App {
-  protected title = 'sistema-ventas-front';
+  title = 'PetyZoos Frontend';
+
+  constructor(private themeService: ThemeService) {
+    // El servicio se inicializa automáticamente en su constructor (loadTheme)
+  }
 }

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, QueryList, ElementRef, ViewChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { DashboardService, DashboardStats } from './dashboard.service';
+import { AnimationService } from '../../services/animation.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,41 +11,80 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
-export class DashboardComponent implements OnInit {
-  nombreUsuario = '';
-  rolClass = 'admin';
-  rolBadge = '';
-  saludo = '';
-  mensajeRol = '';
-  fechaActual = '';
+export class DashboardComponent implements OnInit, AfterViewInit {
+  fechaActual: Date = new Date();
+  usuario: any = null;
+  rolLabel: string = 'ADMINISTRADOR';
 
-  constructor(private authService: AuthService) {}
+  periodoSeleccionado: string = 'hoy';
+  stats: DashboardStats | null = null;
+  loadingStats: boolean = true;
 
-  ngOnInit(): void {
-    const usuario = this.authService.getUsuario();
-    this.nombreUsuario = usuario?.nombres || 'Usuario';
+  @ViewChildren('statNumber') statNumbers!: QueryList<ElementRef>;
 
-    const hora = new Date().getHours();
-    if (hora < 12) this.saludo = 'Buenos dias';
-    else if (hora < 18) this.saludo = 'Buenas tardes';
-    else this.saludo = 'Buenas noches';
+  constructor(
+    private dashboardService: DashboardService,
+    private anim: AnimationService
+  ) {}
 
-    this.fechaActual = new Date().toLocaleDateString('es-PE', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
-
-    if (this.authService.isAdmin()) {
-      this.rolClass = 'admin';
-      this.rolBadge = 'Administrador';
-      this.mensajeRol = 'Tienes control total del sistema. Gestiona usuarios, reportes, inventario y todas las operaciones de la Clinica Veterinaria Petyzoos.';
-    } else if (this.authService.isRecepcionista()) {
-      this.rolClass = 'recepcionista';
-      this.rolBadge = 'Recepcionista';
-      this.mensajeRol = 'Administra las citas, registra clientes y gestiona las ventas del dia. Que tengas un excelente turno en Petyzoos!';
-    } else if (this.authService.isVeterinario()) {
-      this.rolClass = 'veterinario';
-      this.rolBadge = 'Veterinario';
-      this.mensajeRol = 'Revisa las citas asignadas para hoy y atiende las consultas de tus pacientes en Petyzoos. Mucho animo, Doctor!';
+  ngOnInit() {
+    const userStr = localStorage.getItem('usuario');
+    if (userStr) {
+      try {
+        this.usuario = JSON.parse(userStr);
+        if (this.usuario.roles && this.usuario.roles.length > 0) {
+          const role = this.usuario.roles[0].nombre;
+          if (role === 'ROLE_ADMIN') this.rolLabel = 'ADMINISTRADOR';
+          else if (role === 'ROLE_RECEPCIONISTA') this.rolLabel = 'RECEPCIONISTA';
+          else if (role === 'ROLE_VETERINARIO') this.rolLabel = 'VETERINARIO';
+        }
+      } catch (e) {
+        console.error('Error parseando usuario', e);
+      }
     }
+    this.cargarEstadisticas();
+  }
+
+  ngAfterViewInit() {
+    // Animar banner de bienvenida
+    this.anim.welcomeBanner('.welcome-banner', '.welcome-content', '.welcome-illustration img');
+  }
+
+  cambiarPeriodo(periodo: string) {
+    this.periodoSeleccionado = periodo;
+    this.cargarEstadisticas();
+  }
+
+  cargarEstadisticas() {
+    this.loadingStats = true;
+    this.dashboardService.getStats(this.periodoSeleccionado).subscribe({
+      next: (data) => {
+        this.stats = data;
+        this.loadingStats = false;
+        // Tras renderizar las tarjetas, animarlas
+        setTimeout(() => this.animarStats(), 50);
+      },
+      error: (err) => {
+        console.error('Error al cargar estadisticas', err);
+        this.loadingStats = false;
+      }
+    });
+  }
+
+  private animarStats() {
+    // Cards en stagger
+    this.anim.staggerIn('.stat-card', 100);
+    // Counter-up en cada número
+    setTimeout(() => {
+      this.statNumbers.forEach(ref => {
+        const val = parseInt(ref.nativeElement.getAttribute('data-value') || '0', 10);
+        if (!isNaN(val)) this.anim.countUp(ref.nativeElement, val, 1000);
+      });
+    }, 300);
+  }
+
+  getTopEspeciesKeys(): string[] {
+    if (!this.stats || !this.stats.topEspecies) return [];
+    return Object.keys(this.stats.topEspecies);
   }
 }

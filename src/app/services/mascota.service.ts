@@ -58,4 +58,10 @@ export class MascotaService {
       responseType: 'blob'
     });
   }
+
+  subirFoto(codigoPaciente: string, file: File): Observable<{url: string}> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{url: string}>(`${this.baseUrl}/foto/${codigoPaciente}`, formData, this.getHeaders());
+  }
 }

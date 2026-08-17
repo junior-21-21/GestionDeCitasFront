@@ -13,26 +13,37 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="bg-light">
           <tr>
-            <th>ID</th>
+            <th>Foto</th>
             <th>Usuario</th>
             <th>Nombres</th>
+            <th>Apellidos</th>
             <th>Rol</th>
+            <th>Estado</th>
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let u of usuarios">
-            <td>#{{ u.id }}</td>
+            <td>
+              <img *ngIf="u.fotoUrl" [src]="formatImageUrl(u.fotoUrl)" class="rounded-circle shadow-sm" width="40" height="40" style="object-fit: cover;" alt="Foto">
+              <div *ngIf="!u.fotoUrl" class="bg-primary text-white rounded-circle shadow-sm d-flex justify-content-center align-items-center" style="width: 40px; height: 40px; font-weight: bold;">
+                {{ u.nombres ? u.nombres.charAt(0) : 'U' }}
+              </div>
+            </td>
             <td>
               <span class="fw-bold text-primary">{{ u.email }}</span>
-              <span *ngIf="u.cuentaBloqueada" class="badge bg-danger ms-2" title="Bloqueado por múltiples intentos de login fallidos">Bloqueado</span>
-              <span *ngIf="u.habilitada === false" class="badge bg-dark ms-2" title="Inhabilitado manualmente por el administrador">Inhabilitado</span>
             </td>
-            <td>{{ u.nombres }}</td>
+            <td>{{ u.nombres || '-' }}</td>
+            <td>{{ u.apellidos || '-' }}</td>
             <td>
               <span class="badge bg-secondary me-1">
                 {{ u.rol?.nombre || u.rol }}
               </span>
+            </td>
+            <td>
+              <span *ngIf="u.cuentaBloqueada" class="badge bg-danger mb-1 d-block" title="Bloqueado por múltiples intentos de login fallidos">Bloqueado</span>
+              <span *ngIf="u.habilitada === false" class="badge bg-dark mb-1 d-block" title="Inhabilitado manualmente por el administrador">Inhabilitado</span>
+              <span *ngIf="!u.cuentaBloqueada && u.habilitada !== false" class="badge bg-success mb-1 d-block">Activo</span>
             </td>
             <td class="text-center">
               <button class="btn btn-sm btn-outline-secondary me-1" (click)="abrirEditar(u)" title="Editar">
@@ -73,9 +84,20 @@
         </div>
         <div class="modal-body p-4">
           <form (ngSubmit)="guardarUsuario()">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Nombres <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="usuarioSeleccionado.nombres" name="nombres" placeholder="Ej. Juan" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Apellidos</label>
+                <input type="text" class="form-control" [(ngModel)]="usuarioSeleccionado.apellidos" name="apellidos" placeholder="Ej. Pérez">
+              </div>
+            </div>
+
             <div class="mb-3">
-              <label class="form-label fw-bold">Nombres Completos <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" [(ngModel)]="usuarioSeleccionado.nombres" name="nombres" required>
+              <label class="form-label fw-bold">Foto de Perfil</label>
+              <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
             </div>
             
             <div class="mb-3">

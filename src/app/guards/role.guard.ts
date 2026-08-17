@@ -6,8 +6,8 @@ export const RoleGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Si no esta autenticado, redirigir al login
-  if (!authService.isAuthenticated()) {
+  // Si no hay una sesion valida, redirigir al login antes de cargar datos protegidos.
+  if (!authService.hasValidSession()) {
     return router.createUrlTree(['/login']);
   }
 

@@ -18,6 +18,7 @@ import { LoadingInterceptor } from './services/loading.interceptor';
 import { registerLocaleData } from '@angular/common';
 import localeEsPe from '@angular/common/locales/es-PE';
 import { LOCALE_ID } from '@angular/core';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 // Registrar el locale para Perú
 registerLocaleData(localeEsPe);
@@ -28,6 +29,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideHttpClient(withInterceptorsFromDi()),
     provideRouter(routes),
+    provideCharts(withDefaultRegisterables()),
 
     // ✅ Establecer el locale ID globalmente
     { provide: LOCALE_ID, useValue: 'es-PE' },

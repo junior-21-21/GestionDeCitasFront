@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AnimationService } from '../../../services/animation.service';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -27,10 +28,19 @@ import Swal from 'sweetalert2';
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
   dto: LoginDTO = { email: '', password: '' };
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private anim: AnimationService
+  ) {}
+
+  ngAfterViewInit() {
+    this.anim.scaleIn('.login-card, mat-card', 100);
+    this.anim.staggerIn('.mat-mdc-form-field, .login-actions', 120);
+  }
 
   login() {
     if (!this.dto.email || !this.dto.password) {
@@ -51,9 +61,19 @@ export class LoginComponent {
           timer: 1500,
           showConfirmButton: false,
         });
-        this.router.navigate(['/dashboard']);
+        if (this.authService.isAdmin()) {
+          this.router.navigate(['/dashboard']);
+        } else if (this.authService.isRecepcionista()) {
+          this.router.navigate(['/clientes']);
+        } else if (this.authService.isVeterinario()) {
+          this.router.navigate(['/citas']);
+        } else {
+          this.router.navigate(['/historial-clinico']);
+        }
       },
       error: (err) => {
+        // Shake al formulario en cualquier error
+        this.anim.shake('form, mat-card');
         const body = err.error;
 
         // Cuenta inhabilitada manualmente

@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: '/api' // Usa proxy reverso de Nginx
+  apiUrl: '/api',              // PetyZoos Backend — proxy reverso Nginx
+  inventarioApiUrl: '/api'     // Ahora unificado en el mismo backend
 };

@@ -5,7 +5,10 @@ export interface Paciente {
   nombre: string;
   especie?: string;
   raza?: string;
-  edad?: number;
+  razaId?: number;
+  especieId?: number;
+  fechaNacimiento?: string;
+  edadCalculada?: number;
   peso?: number;
   clienteDni?: string;
 }
@@ -13,11 +16,11 @@ export interface Paciente {
 // DTO para crear o editar un paciente
 export interface PacienteDTO {
   nombre: string;
-  especie?: string;
-  raza?: string;
-  edad?: number;
+  razaId: number;
+  fechaNacimiento: string;
   peso?: number;
   clienteDni: string;
+  fotoUrl?: string;
 }
 
 // Respuesta del backend
@@ -26,8 +29,12 @@ export interface PacienteResponseDTO {
   nombre: string;
   especie?: string;
   raza?: string;
-  edad?: number;
+  especieId?: number;
+  razaId?: number;
+  fechaNacimiento?: string;
+  edadCalculada?: number;
   peso?: number;
   clienteDni: string;
   clienteNombreCompleto?: string;
+  fotoUrl?: string;
 }

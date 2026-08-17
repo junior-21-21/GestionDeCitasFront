@@ -5,9 +5,7 @@ export interface ConsultaDTO {
   observaciones?: string;
   diagnostico: string;
   tratamiento: string;
-  pacienteCodigo: string;
-  veterinarioDni: string;
-  citaCodigo?: string;
+  citaCodigo: string;
 }
 
 export interface ConsultaResponse {
@@ -30,8 +28,7 @@ export interface Consulta {
   observaciones?: string;
   diagnostico: string;
   tratamiento: string;
-  pacienteCodigo: string;
-  veterinarioDni: string;
+  citaCodigo: string;
 }
 
 export interface ConsultaProductoDTO {

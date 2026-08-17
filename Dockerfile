@@ -1,40 +1,31 @@
-# ===========================================
-# PetyZoos Frontend — Multi-stage Build
-# Stage 1: Build Angular app
-# Stage 2: Serve with Nginx
-# ===========================================
-
-# --- STAGE 1: BUILD ---
-FROM node:22-alpine AS build
-
+# Etapa de construcción (Build stage)
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copiar package files primero (cache de dependencias)
+# Copiamos los archivos de dependencias
 COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
 
-# Copiar código fuente y construir
+# Instalamos las dependencias
+RUN npm ci
+
+# Copiamos el resto del código
 COPY . .
+
+# Construimos la aplicación para producción
 RUN npm run build:prod
 
-# --- STAGE 2: SERVE ---
-FROM nginx:alpine AS production
+# Etapa de servidor (Serve stage)
+FROM nginx:alpine
 
-# Eliminar config default de nginx
-RUN rm /etc/nginx/conf.d/default.conf
-
-# Copiar config personalizada
+# Copiamos la configuración de Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copiar archivos compilados de Angular
-# Angular 20 genera en dist/<project-name>/browser/
+# Copiamos los archivos estáticos construidos desde la etapa anterior
+# La ruta dist/veterinaria-standalone/browser es la estándar para Angular >= 17 con application builder
 COPY --from=build /app/dist/veterinaria-standalone/browser /usr/share/nginx/html
 
-# Puerto expuesto
+# Exponemos el puerto
 EXPOSE 80
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
-
+# Comando para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]

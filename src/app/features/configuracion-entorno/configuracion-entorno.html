@@ -1,0 +1,87 @@
+<div class="config-container">
+  <div class="config-header">
+    <h1>Configuración de Entorno</h1>
+    <p>Personaliza la paleta de colores de la clínica Petyzoos a tu gusto. Los cambios se guardan automáticamente en tu navegador.</p>
+  </div>
+
+  <div class="config-card">
+    <div class="card-header">
+      <div class="title-group">
+        <i class="material-icons">palette</i>
+        <span>Paleta de Colores</span>
+      </div>
+      <button class="btn btn-outline-primary btn-sm reset-btn" (click)="resetToDefault()">
+        <i class="material-icons">refresh</i>
+        Restaurar Original
+      </button>
+    </div>
+
+    <div class="card-body">
+      <div class="color-grid">
+        
+        <!-- Primary Color -->
+        <div class="color-item">
+          <label>Color Principal (Azul Marino)</label>
+          <div class="color-picker-wrapper">
+            <input type="color" [value]="currentTheme.primary" (input)="updateColor('primary', $event)">
+            <span class="color-hex font-data">{{ currentTheme.primary }}</span>
+          </div>
+        </div>
+
+        <!-- Primary Light -->
+        <div class="color-item">
+          <label>Fondo Secundario (Claro)</label>
+          <div class="color-picker-wrapper">
+            <input type="color" [value]="currentTheme.primaryLight" (input)="updateColor('primaryLight', $event)">
+            <span class="color-hex font-data">{{ currentTheme.primaryLight }}</span>
+          </div>
+        </div>
+
+        <!-- Accent Color -->
+        <div class="color-item">
+          <label>Color de Acento (Teal / Verde)</label>
+          <div class="color-picker-wrapper">
+            <input type="color" [value]="currentTheme.accent" (input)="updateColor('accent', $event)">
+            <span class="color-hex font-data">{{ currentTheme.accent }}</span>
+          </div>
+        </div>
+
+        <!-- Background Color -->
+        <div class="color-item">
+          <label>Color de Fondo Base</label>
+          <div class="color-picker-wrapper">
+            <input type="color" [value]="currentTheme.bg" (input)="updateColor('bg', $event)">
+            <span class="color-hex font-data">{{ currentTheme.bg }}</span>
+          </div>
+        </div>
+
+        <!-- Text Color -->
+        <div class="color-item">
+          <label>Color de Texto Principal</label>
+          <div class="color-picker-wrapper">
+            <input type="color" [value]="currentTheme.text" (input)="updateColor('text', $event)">
+            <span class="color-hex font-data">{{ currentTheme.text }}</span>
+          </div>
+        </div>
+
+        <!-- Text Muted Color -->
+        <div class="color-item">
+          <label>Color de Texto Secundario</label>
+          <div class="color-picker-wrapper">
+            <input type="color" [value]="currentTheme.textMuted" (input)="updateColor('textMuted', $event)">
+            <span class="color-hex font-data">{{ currentTheme.textMuted }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="preview-section">
+        <h3>Vista Previa Rápida</h3>
+        <div class="preview-box">
+          <p>El color principal es <span class="badge" [style.background]="currentTheme.primary" style="color: white;">Primario</span>.</p>
+          <p>Botones de acción utilizan el acento: <button class="btn btn-success" style="padding: 4px 12px; font-size: 0.8rem; margin-left: 8px;">Acción</button></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

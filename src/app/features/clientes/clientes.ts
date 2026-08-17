@@ -11,8 +11,12 @@ export interface Cliente {
   nombres: string;
   apellidos: string;
   dni: string;
-  telefono?: string;
-  direccion?: string;
+  calle?: string;
+  numero?: string;
+  distrito?: string;
+  provincia?: string;
+  telefonos?: { numero: string; tipo: string }[];
+  puntosFidelidad?: number;
 }
 
 @Component({
@@ -24,23 +28,92 @@ export interface Cliente {
 })
 export class ClientesComponent implements OnInit {
   clientes: Cliente[] = [];
-  clientesFiltrados: Cliente[] = []; // Lista para la tabla
-  filtroBusqueda: string = ''; // Texto del buscador
-  
-  // Objeto inicial con todos los campos de tu BD
+  clientesFiltrados: Cliente[] = [];
+  filtroBusqueda: string = '';
+
+  // ── Provincias y Distritos de Ayacucho ────────────────────────────────────
+  readonly provinciaDistritoMap: Record<string, string[]> = {
+    'Huamanga': [
+      'Ayacucho', 'Acocro', 'Acos Vinchos', 'Carmen Alto', 'Chiara',
+      'Jesús Nazareno', 'Ocros', 'Pacaycasa', 'Quinua', 'San José de Ticllas',
+      'San Juan Bautista', 'Santiago de Pischa', 'Socos', 'Tambillo',
+      'Vinchos', 'Andrés Avelino Cáceres Dorregaray'
+    ],
+    'Cangallo': [
+      'Cangallo', 'Chuschi', 'Los Morochucos', 'María Parado de Bellido',
+      'Paras', 'Totos'
+    ],
+    'Huanca Sancos': [
+      'Carapo', 'Sacsamarca', 'Sancos', 'Santiago de Lucanamarca'
+    ],
+    'Huanta': [
+      'Huanta', 'Ayahuanco', 'Huamanguilla', 'Iguaín', 'Llochegua',
+      'Canayre', 'Uchuraccay', 'Pucacolpa', 'Santillana'
+    ],
+    'La Mar': [
+      'San Miguel', 'Anco', 'Ayna', 'Chilcas', 'Chungui',
+      'Luis Carranza', 'Santa Rosa', 'Tambo', 'Samugari', 'Anchihuay'
+    ],
+    'Lucanas': [
+      'Puquio', 'Aucara', 'Cabana', 'Carmen Salcedo', 'Chaviña',
+      'Chipao', 'Huac-Huas', 'Laramate', 'Leoncio Prado', 'Llauta',
+      'Lucanas', 'Ocaña', 'Otoca', 'Saisa', 'San Cristóbal',
+      'San Juan', 'San Pedro', 'San Pedro de Palco', 'Sancos',
+      'Santa Ana de Huaycahuacho', 'Santa Lucía'
+    ],
+    'Parinacochas': [
+      'Coracora', 'Chumpi', 'Coronel Castañeda', 'Pacapausa',
+      'Pullo', 'Puyusca', 'San Francisco de Rivacayco', 'Upahuacho'
+    ],
+    'Páucar del Sara Sara': [
+      'Pausa', 'Colta', 'Corculla', 'Lampa', 'Marcabamba',
+      'Oyolo', 'Pararca', 'San Javier de Alpabamba',
+      'San José de Ushua', 'Sara Sara'
+    ],
+    'Sucre': [
+      'Querobamba', 'Belén', 'Chalcos', 'Chilcayoc', 'Huacaña',
+      'Morcolla', 'Paico', 'San Salvador de Quije',
+      'Santiago de Paucaray', 'Soras'
+    ],
+    'Víctor Fajardo': [
+      'Huancapi', 'Alcamenca', 'Apongo', 'Asquipata', 'Canaria',
+      'Cayara', 'Colca', 'Huamanquiquia', 'Huancaraylla',
+      'Huaya', 'Sarhua', 'Vilcanchos'
+    ],
+    'Vilcas Huamán': [
+      'Vilcas Huamán', 'Accomarca', 'Carhuanca', 'Concepción',
+      'Huambalpa', 'Independencia', 'Saurama', 'Vischongo'
+    ]
+  };
+
+  get provincias(): string[] {
+    return Object.keys(this.provinciaDistritoMap);
+  }
+
+  distritosFiltrados: string[] = [];
+
+  onProvinciaChange(): void {
+    const prov = this.nuevoCliente.provincia || '';
+    this.distritosFiltrados = this.provinciaDistritoMap[prov] ?? [];
+    this.nuevoCliente.distrito = '';
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   nuevoCliente: Cliente = {
     nombres: '',
     apellidos: '',
     dni: '',
-    telefono: '',
-    direccion: ''
+    calle: '',
+    numero: '',
+    distrito: '',
+    provincia: '',
+    telefonos: []
   };
 
   modoEditar = false;
   mensajeExito: string = '';
-
   mensajeError: string = '';
-  buscandoDniExterno: boolean = false; // Estado para el loading
+  buscandoDniExterno: boolean = false;
 
   constructor(
     private clienteService: ClienteService,
@@ -93,7 +166,7 @@ export class ClientesComponent implements OnInit {
         if (data && data.nombres) {
           this.nuevoCliente.nombres = data.nombres;
           this.nuevoCliente.apellidos = `${data.apellidoPaterno} ${data.apellidoMaterno}`;
-          this.nuevoCliente.direccion = ''; 
+          this.nuevoCliente.calle = ''; 
           
           Swal.fire({
             icon: 'success',
@@ -149,8 +222,9 @@ export class ClientesComponent implements OnInit {
 
   editar(cliente: Cliente): void {
     this.modoEditar = true;
-    // Copiamos el objeto para no modificar la tabla directamente mientras editamos
     this.nuevoCliente = { ...cliente };
+    // Al editar, cargar los distritos de la provincia guardada
+    this.distritosFiltrados = this.provinciaDistritoMap[cliente.provincia ?? ''] ?? [];
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -179,14 +253,30 @@ export class ClientesComponent implements OnInit {
     });
   }
 
+  agregarTelefono(): void {
+    if (!this.nuevoCliente.telefonos) {
+      this.nuevoCliente.telefonos = [];
+    }
+    this.nuevoCliente.telefonos.push({ numero: '', tipo: 'CELULAR' });
+  }
+
+  eliminarTelefono(index: number): void {
+    if (this.nuevoCliente.telefonos) {
+      this.nuevoCliente.telefonos.splice(index, 1);
+    }
+  }
+
   reset(): void {
     this.modoEditar = false;
     this.nuevoCliente = {
       nombres: '',
       apellidos: '',
       dni: '',
-      telefono: '',
-      direccion: ''
+      calle: '',
+      numero: '',
+      distrito: '',
+      provincia: '',
+      telefonos: []
     };
     this.mensajeExito = '';
     this.mensajeError = '';

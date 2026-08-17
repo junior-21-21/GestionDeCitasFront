@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { MatIconModule } from '@angular/material/icon';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-configuracion',
@@ -39,14 +40,13 @@ export class ConfiguracionComponent {
   mostrarPassNuevo = false;
   mostrarPassCambio = false;
 
+  archivoSeleccionado: File | null = null;
+
   constructor(private authService: AuthService, private router: Router) {
     this.cargarUsuarios();
   }
 
   cargarUsuarios() {
-    // Necesitamos un método en AuthService o UsuarioService para listar
-    // Si no existe en AuthService, lo agregaremos.
-    // Por ahora asumimos que authService tiene listarUsuarios (o creamos UsuarioService frontend)
     this.authService.listarUsuarios().subscribe({
       next: (data) => {
         this.usuarios = data;
@@ -55,22 +55,36 @@ export class ConfiguracionComponent {
     });
   }
 
+  formatImageUrl(url: string | null): string | null {
+    if (url && url.startsWith('/api')) {
+      return environment.apiUrl.replace('/api', '') + url;
+    }
+    return url;
+  }
+
+  onFileSelected(event: any) {
+    if (event.target.files && event.target.files.length > 0) {
+      this.archivoSeleccionado = event.target.files[0];
+    }
+  }
+
   abrirCrear() {
     this.modoEdicion = false;
-    this.usuarioSeleccionado = { email: '', password: '', nombres: '', rol: 'RECEPCIONISTA' };
+    this.usuarioSeleccionado = { email: '', password: '', nombres: '', apellidos: '', rol: 'RECEPCIONISTA' };
+    this.archivoSeleccionado = null;
     this.modalVisible = true;
   }
 
   abrirEditar(u: any) {
     this.modoEdicion = true;
-    // Copia profunda para no mutar la tabla directamente
     this.usuarioSeleccionado = { 
         id: u.id,
         email: u.email,
         nombres: u.nombres,
-        // Adaptar rol si viene incrustado (es objeto o string)
+        apellidos: u.apellidos,
         rol: u.rol ? (u.rol.nombre || u.rol) : ''
     };
+    this.archivoSeleccionado = null;
     this.modalVisible = true;
   }
 
@@ -79,14 +93,17 @@ export class ConfiguracionComponent {
       if(!this.usuarioSeleccionado.id) return;
       this.authService.actualizarUsuario(this.usuarioSeleccionado.id, this.usuarioSeleccionado).subscribe({
         next: () => {
-          Swal.fire('Actualizado', 'Usuario actualizado correctamente', 'success');
-          this.modalVisible = false;
-          this.cargarUsuarios();
+          if (this.archivoSeleccionado) {
+            this.subirFoto(this.usuarioSeleccionado.id!, 'Usuario actualizado correctamente');
+          } else {
+            Swal.fire('Actualizado', 'Usuario actualizado correctamente', 'success');
+            this.modalVisible = false;
+            this.cargarUsuarios();
+          }
         },
         error: () => Swal.fire('Error', 'No se pudo actualizar', 'error')
       });
     } else {
-      // Validar campos obligatorios
       if (!this.usuarioSeleccionado.nombres?.trim() || 
           !this.usuarioSeleccionado.email?.trim() || 
           !this.usuarioSeleccionado.password?.trim()) {
@@ -94,12 +111,15 @@ export class ConfiguracionComponent {
         return;
       }
 
-      // Usar el nuevo endpoint que respeta los roles seleccionados
       this.authService.crearUsuario(this.usuarioSeleccionado).subscribe({
-        next: () => {
-          Swal.fire('Creado', 'Usuario creado correctamente. Se enviaron las credenciales al correo.', 'success');
-          this.modalVisible = false;
-          this.cargarUsuarios();
+        next: (nuevoUsuario: any) => {
+          if (this.archivoSeleccionado && nuevoUsuario && nuevoUsuario.id) {
+            this.subirFoto(nuevoUsuario.id, 'Usuario creado correctamente. Se enviaron las credenciales al correo.');
+          } else {
+            Swal.fire('Creado', 'Usuario creado correctamente. Se enviaron las credenciales al correo.', 'success');
+            this.modalVisible = false;
+            this.cargarUsuarios();
+          }
         },
         error: (err) => {
           let msg = typeof err.error === 'string' ? err.error : 
@@ -108,6 +128,21 @@ export class ConfiguracionComponent {
         }
       });
     }
+  }
+
+  subirFoto(usuarioId: number, mensajeExito: string) {
+    this.authService.actualizarImagen(usuarioId, this.archivoSeleccionado!).subscribe({
+      next: () => {
+        Swal.fire('Éxito', mensajeExito + ' (Foto subida)', 'success');
+        this.modalVisible = false;
+        this.cargarUsuarios();
+      },
+      error: () => {
+        Swal.fire('Advertencia', mensajeExito + ', pero hubo un problema al subir la foto.', 'warning');
+        this.modalVisible = false;
+        this.cargarUsuarios();
+      }
+    });
   }
 
   eliminarUsuario(u: any) {

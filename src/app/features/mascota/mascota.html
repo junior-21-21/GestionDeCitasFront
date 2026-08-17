@@ -66,18 +66,24 @@
           </div>
 
           <div class="col-md-6">
-            <label class="form-label text-muted small">Especie</label>
-            <input type="text" class="form-control custom-input" [(ngModel)]="mascota.especie" name="especie" placeholder="Ej. Perro, Gato..."/>
+            <label class="form-label text-muted small">Especie <span class="text-danger">*</span></label>
+            <select class="form-select custom-input" [(ngModel)]="especieSeleccionada" name="especie" (ngModelChange)="onEspecieChange($event)" required>
+              <option [ngValue]="null" disabled>Seleccione una especie</option>
+              <option *ngFor="let esp of especies" [ngValue]="esp.id">{{ esp.nombre }}</option>
+            </select>
           </div>
 
           <div class="col-md-4">
-            <label class="form-label text-muted small">Raza</label>
-            <input type="text" class="form-control custom-input" [(ngModel)]="mascota.raza" name="raza" placeholder="Ej. Labrador"/>
+            <label class="form-label text-muted small">Raza <span class="text-danger">*</span></label>
+            <select class="form-select custom-input" [(ngModel)]="mascota.razaId" name="raza" required [disabled]="!especieSeleccionada">
+              <option [ngValue]="0" disabled>{{ especieSeleccionada ? 'Seleccione una raza' : 'Primero seleccione especie' }}</option>
+              <option *ngFor="let r of razasFiltradas" [ngValue]="r.id">{{ r.nombre }}</option>
+            </select>
           </div>
 
           <div class="col-md-4">
-            <label class="form-label text-muted small">Edad (años)</label>
-            <input type="number" class="form-control custom-input" [(ngModel)]="mascota.edad" name="edad" placeholder="0"/>
+            <label class="form-label text-muted small">Fecha de Nacimiento</label>
+            <input type="date" class="form-control custom-input" [(ngModel)]="mascota.fechaNacimiento" name="fechaNacimiento" />
           </div>
 
           <div class="col-md-4">
@@ -162,7 +168,7 @@
               <td class="ps-4 py-3 fw-bold text-primary" data-label="Nombre">{{ m.nombre }}</td>
               <td data-label="Especie"><span class="badge bg-light text-dark border">{{ m.especie || '-' }}</span></td>
               <td data-label="Raza">{{ m.raza || '-' }}</td>
-              <td data-label="Edad">{{ m.edad ?? '-' }} años</td>
+              <td data-label="Edad">{{ m.edadCalculada ?? '-' }} años</td>
               <td data-label="Peso">{{ m.peso ? m.peso + ' kg' : '-' }}</td>
               
               <!-- ACCIONES MEJORADAS -->
@@ -198,7 +204,6 @@
         <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="paginaSiguiente()" [disabled]="paginaActual === totalPaginas()">
           Siguiente <i class="bi bi-chevron-right"></i>
         </button>
-      </div>
     </div>
   </div>
 
@@ -254,4 +259,73 @@
       </div>
     </div>
   </div>
-</div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       MODAL CREDENCIAL PREMIUM
+  ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="modal-cred-overlay" *ngIf="modalCredencialVisible" (click)="cerrarModalCredencial()">
+    <div class="modal-cred-card" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-cred-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-person-vcard-fill fs-4"></i>
+          <div>
+            <div class="fw-bold">Generar Credencial</div>
+            <small class="opacity-75">{{ mascotaCredencial?.nombre }} · {{ mascotaCredencial?.codigoPaciente }}</small>
+          </div>
+        </div>
+        <button class="btn-close btn-close-white" (click)="cerrarModalCredencial()"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-cred-body">
+
+        <!-- Preview tarjeta -->
+        <div class="cred-preview-card" id="credencial-preview">
+          <div class="cred-photo-area">
+            <img *ngIf="fotoCredencialDataUrl" [src]="fotoCredencialDataUrl" alt="Foto mascota" />
+            <i *ngIf="!fotoCredencialDataUrl" class="bi bi-camera-fill cred-photo-placeholder"></i>
+          </div>
+          <div class="cred-info-area">
+            <div class="cred-clinic-name">CLÍNICA VETERINARIA PETYZOOS</div>
+            <div class="cred-clinic-sub">Av. Ramón Castilla N.° 898, Huamanga</div>
+            <div class="cred-divider"></div>
+            <div class="cred-badge">CREDENCIAL DE MASCOTA</div>
+            <div class="cred-codigo">{{ mascotaCredencial?.codigoPaciente }}</div>
+            <div class="cred-row"><span class="cred-lbl">Nombre</span><span>{{ mascotaCredencial?.nombre }}</span></div>
+            <div class="cred-row"><span class="cred-lbl">Especie</span><span>{{ mascotaCredencial?.especie || '-' }}</span></div>
+            <div class="cred-row"><span class="cred-lbl">Raza</span><span>{{ mascotaCredencial?.raza || '-' }}</span></div>
+          </div>
+          <!-- Franja inferior -->
+          <div class="cred-footer-strip">
+            <div>
+              <span class="cred-footer-lbl">PROPIETARIO: </span>
+              {{ mascotaCredencial?.clienteNombreCompleto || '-' }}
+            </div>
+            <div class="cred-mrz">{{ mascotaCredencial?.codigoPaciente }}&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+          </div>
+        </div>
+
+        <!-- Upload foto -->
+        <div class="cred-upload-area">
+          <label class="cred-upload-label" for="fotoInput">
+            <i class="bi bi-upload me-2"></i>
+            {{ fotoCredencialNombre || 'Subir foto de la mascota (opcional)' }}
+          </label>
+          <input id="fotoInput" type="file" accept="image/*" class="d-none" (change)="onFotoSeleccionada($event)" />
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-cred-footer">
+        <button class="btn btn-outline-secondary px-4" (click)="cerrarModalCredencial()">Cancelar</button>
+        <button *ngIf="fotoCredencialDataUrl" class="btn-cred-generate" (click)="generarCredencialPremium()">
+          <i class="bi bi-download me-2"></i>Descargar PDF
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

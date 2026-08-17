@@ -12,17 +12,16 @@ import { AuthService } from '../../services/auth.service';
 import { ProductoDTO } from '../../models/producto.model';
 import {
   ConsultaDTO,
-  ConsultaProductoDTO,
-  ConsultaProductoResponse,
 } from '../../models/consulta.model';
 import { VeterinarioResponseDTO } from '../../models/veterinario.model';
 import { PacienteResponseDTO } from '../../models/mascota.model';
 import Swal from 'sweetalert2';
 
-interface RecetaItem {
-  codigoBarras: string;
-  nombre: string;
-  cantidad: number;
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
+interface RecetaMedica {
+  medicamentos: string;
   indicaciones: string;
 }
 
@@ -41,9 +40,7 @@ export class ConsultasComponent implements OnInit {
     observaciones: '',
     diagnostico: '',
     tratamiento: '',
-    pacienteCodigo: '',
-    veterinarioDni: '',
-    citaCodigo: undefined,
+    citaCodigo: '',
   };
 
   // Info cards
@@ -55,14 +52,14 @@ export class ConsultasComponent implements OnInit {
   mascotas: PacienteResponseDTO[] = [];
 
   // Stepper
+  citasPendientesFull: any[] = [];
+  citasPendientes: any[] = [];
+  diasDisponibles: string[] = []; // Días que realmente tienen citas
+  fechaFiltro: string = '';
   pasoActual: number = 1;
   vieneDeCita: boolean = false;
 
-  // Receta integrada
-  productos: ProductoDTO[] = [];
-  filtroProducto: string = '';
-  recetaItems: RecetaItem[] = [];
-  indicacionesTemp: string = '';
+  recetaMedica: RecetaMedica = { medicamentos: '', indicaciones: '' };
 
   // Código de la consulta registrada (para asociar productos después)
   codigoConsultaRegistrada: string = '';
@@ -82,7 +79,7 @@ export class ConsultasComponent implements OnInit {
   ngOnInit(): void {
     this.cargarVeterinarios();
     this.cargarMascotas();
-    this.cargarProductos();
+    this.autoDetectarVeterinario();
     this.autoDetectarVeterinario();
 
     // Check for query params from Citas
@@ -91,8 +88,76 @@ export class ConsultasComponent implements OnInit {
       if (citaCodigo) {
         this.vieneDeCita = true;
         this.cargarDatosCita(citaCodigo);
+      } else {
+        this.cargarCitasPendientes();
       }
     });
+  }
+
+  cargarCitasPendientes(): void {
+    this.citaService.listarPendientes().subscribe({
+      next: (citas) => {
+        this.citasPendientesFull = citas.filter((c: any) => c.nombrePaciente);
+        
+        // Extraer los días únicos que tienen citas
+        const diasSet = new Set<string>();
+        this.citasPendientesFull.forEach(c => {
+           const diaStr = this.extraerDia(c.fechaHora);
+           if(diaStr) diasSet.add(diaStr);
+        });
+        
+        this.diasDisponibles = Array.from(diasSet).sort();
+        
+        // Seleccionar por defecto
+        if (this.diasDisponibles.length > 0) {
+           const hoyStr = new Date().toISOString().split('T')[0];
+           if(this.diasDisponibles.includes(hoyStr)) {
+               this.fechaFiltro = hoyStr;
+           } else {
+               this.fechaFiltro = this.diasDisponibles[0];
+           }
+        }
+        
+        this.filtrarCitasPorFecha();
+      },
+      error: () => console.error('No se pudieron cargar citas pendientes')
+    });
+  }
+
+  extraerDia(fechaHora: any): string {
+      if (!fechaHora) return '';
+      if (Array.isArray(fechaHora)) {
+        const y = fechaHora[0];
+        const m = String(fechaHora[1]).padStart(2, '0');
+        const d = String(fechaHora[2]).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      } else {
+        return String(fechaHora).substring(0, 10);
+      }
+  }
+
+  filtrarCitasPorFecha(dia?: string): void {
+    if (dia) this.fechaFiltro = dia;
+    
+    if (!this.fechaFiltro) {
+      this.citasPendientes = this.citasPendientesFull;
+      return;
+    }
+    
+    this.citasPendientes = this.citasPendientesFull.filter((c: any) => {
+      return this.extraerDia(c.fechaHora) === this.fechaFiltro;
+    });
+  }
+
+  onCitaSeleccionada(): void {
+    if (this.consulta.citaCodigo) {
+      this.cargarDatosCita(this.consulta.citaCodigo);
+    }
+  }
+
+  seleccionarCita(codigo: string): void {
+    this.consulta.citaCodigo = codigo;
+    this.onCitaSeleccionada();
   }
 
   autoDetectarVeterinario(): void {
@@ -101,7 +166,6 @@ export class ConsultasComponent implements OnInit {
       this.veterinarioService.obtenerPorEmail(usuario.email).subscribe({
         next: (vet) => {
           this.veterinarioInfo = vet;
-          this.consulta.veterinarioDni = vet.dni;
         },
         error: () => {
           // Si falla, se cargará desde el dropdown
@@ -113,8 +177,6 @@ export class ConsultasComponent implements OnInit {
   cargarDatosCita(codigoCita: string): void {
     this.citaService.obtenerPorCodigo(codigoCita).subscribe({
       next: (cita: any) => {
-        this.consulta.pacienteCodigo = cita.pacienteCodigo;
-        this.consulta.veterinarioDni = cita.veterinarioDni;
         this.consulta.motivo = cita.motivo;
         this.consulta.fecha = new Date().toISOString().split('T')[0];
         this.consulta.citaCodigo = codigoCita;
@@ -143,13 +205,15 @@ export class ConsultasComponent implements OnInit {
           }
         }
 
-        Swal.fire({
-          title: 'Atendiendo Cita',
-          text: `Datos cargados para la cita ${codigoCita}`,
-          icon: 'info',
-          timer: 2000,
-          showConfirmButton: false,
-        });
+        if (this.vieneDeCita) {
+          Swal.fire({
+            title: 'Atendiendo Cita',
+            text: `Datos cargados para la cita ${codigoCita}`,
+            icon: 'info',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        }
       },
       error: () =>
         Swal.fire(
@@ -175,38 +239,9 @@ export class ConsultasComponent implements OnInit {
     });
   }
 
-  cargarProductos(): void {
-    this.productoService.listarTodos().subscribe({
-      next: (data) => (this.productos = data),
-      error: () => console.error('No se pudieron cargar los productos'),
-    });
-  }
 
-  // Cuando el usuario selecciona un paciente del dropdown (modo no-cita)
-  onPacienteSeleccionado(): void {
-    if (this.consulta.pacienteCodigo) {
-      this.mascotaService
-        .buscarPorCodigo(this.consulta.pacienteCodigo)
-        .subscribe({
-          next: (mascota) => (this.mascotaInfo = mascota),
-          error: () => (this.mascotaInfo = null),
-        });
-    } else {
-      this.mascotaInfo = null;
-    }
-  }
 
-  // Cuando el usuario selecciona un veterinario del dropdown
-  onVeterinarioSeleccionado(): void {
-    if (this.consulta.veterinarioDni) {
-      this.veterinarioInfo =
-        this.veterinarios.find(
-          (v) => v.dni === this.consulta.veterinarioDni
-        ) || null;
-    } else {
-      this.veterinarioInfo = null;
-    }
-  }
+
 
   // --- Stepper ---
   irPaso(paso: number): void {
@@ -216,12 +251,8 @@ export class ConsultasComponent implements OnInit {
   }
 
   validarPaso1(): boolean {
-    if (!this.consulta.pacienteCodigo) {
-      Swal.fire('Atención', 'Seleccione un paciente', 'warning');
-      return false;
-    }
-    if (!this.consulta.veterinarioDni) {
-      Swal.fire('Atención', 'Seleccione un veterinario', 'warning');
+    if (!this.consulta.citaCodigo) {
+      Swal.fire('Atención', 'Seleccione una cita previa obligatoriamente', 'warning');
       return false;
     }
     return true;
@@ -243,41 +274,7 @@ export class ConsultasComponent implements OnInit {
     return true;
   }
 
-  // --- Receta ---
-  get productosFiltrados(): ProductoDTO[] {
-    const f = this.filtroProducto.toLowerCase().trim();
-    if (!f) return [];
-    return this.productos.filter(
-      (p) =>
-        p.nombre.toLowerCase().includes(f) ||
-        (p.codigoBarras && p.codigoBarras.toString().includes(f))
-    );
-  }
 
-  agregarAReceta(prod: ProductoDTO): void {
-    const existente = this.recetaItems.find(
-      (r) => r.codigoBarras === prod.codigoBarras
-    );
-    if (existente) {
-      Swal.fire(
-        'Atención',
-        'Este producto ya está en la receta. Puede editar la cantidad.',
-        'info'
-      );
-      return;
-    }
-    this.recetaItems.push({
-      codigoBarras: prod.codigoBarras,
-      nombre: prod.nombre,
-      cantidad: 1,
-      indicaciones: '',
-    });
-    this.filtroProducto = '';
-  }
-
-  quitarDeReceta(index: number): void {
-    this.recetaItems.splice(index, 1);
-  }
 
   // --- Registrar consulta y receta ---
   registrar(): void {
@@ -285,8 +282,8 @@ export class ConsultasComponent implements OnInit {
       next: (consultaCreada: any) => {
         this.codigoConsultaRegistrada = consultaCreada.codigoConsulta || '';
 
-        if (this.recetaItems.length > 0 && this.codigoConsultaRegistrada) {
-          this.asociarProductosSecuencial(0);
+        if ((this.recetaMedica.medicamentos || this.recetaMedica.indicaciones) && this.codigoConsultaRegistrada) {
+          this.guardarReceta(this.codigoConsultaRegistrada);
         } else {
           this.mostrarExito();
         }
@@ -301,30 +298,26 @@ export class ConsultasComponent implements OnInit {
     });
   }
 
-  private asociarProductosSecuencial(index: number): void {
-    if (index >= this.recetaItems.length) {
-      this.mostrarExito();
-      return;
-    }
-
-    const item = this.recetaItems[index];
-    const dto: ConsultaProductoDTO = {
-      codigoConsulta: this.codigoConsultaRegistrada,
-      codigoBarras: item.codigoBarras,
-      cantidad: item.cantidad,
-      indicaciones: item.indicaciones || 'Según indicación médica',
-    };
-
-    this.consultaProductoService.agregarProducto(dto).subscribe({
-      next: () => this.asociarProductosSecuencial(index + 1),
-      error: () => {
-        Swal.fire(
-          'Advertencia',
-          `No se pudo asociar el producto "${item.nombre}". Los demás se registraron correctamente.`,
-          'warning'
-        );
-        this.asociarProductosSecuencial(index + 1);
+  private guardarReceta(codigoConsulta: string): void {
+    // Requires HttpClient which is not injected directly but we can use fetch or inject it.
+    // Wait, let's inject HttpClient. I'll add it to constructor below if needed, but for now I'll use fetch as it's simpler here.
+    const url = `${environment.apiUrl}/recetas/consulta/${codigoConsulta}`;
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.authService.getToken()}`
       },
+      body: JSON.stringify(this.recetaMedica)
+    }).then(res => {
+      if (res.ok) {
+        this.mostrarExito();
+      } else {
+        throw new Error('Error al guardar receta');
+      }
+    }).catch(err => {
+      Swal.fire('Advertencia', 'Consulta registrada pero hubo un error al guardar la receta.', 'warning');
+      this.mostrarExito();
     });
   }
 
@@ -376,14 +369,12 @@ export class ConsultasComponent implements OnInit {
       observaciones: '',
       diagnostico: '',
       tratamiento: '',
-      pacienteCodigo: '',
-      veterinarioDni: '',
+      citaCodigo: '',
     };
     this.mascotaInfo = null;
-    this.recetaItems = [];
+    this.recetaMedica = { medicamentos: '', indicaciones: '' };
     this.pasoActual = 1;
     this.codigoConsultaRegistrada = '';
-    this.filtroProducto = '';
     this.vieneDeCita = false;
 
     // Mantener veterinario auto-detectado

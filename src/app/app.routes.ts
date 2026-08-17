@@ -3,10 +3,13 @@ import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
+  // ══════════════════════════════════════════
+  // AUTH PÚBLICO
+  // ══════════════════════════════════════════
   {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full'
+    path: 'registro',
+    loadComponent: () =>
+      import('./features/auth/registro/registro').then(m => m.RegistroComponent)
   },
   {
     path: 'login',
@@ -18,6 +21,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/registrar-admin/registrar-admin').then(m => m.RegistrarAdminComponent)
   },
+
+  // ══════════════════════════════════════════
+  // PANEL ADMINISTRATIVO (protegido)
+  // ══════════════════════════════════════════
   {
     path: '',
     loadComponent: () =>
@@ -27,8 +34,11 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/dashboard/dashboard').then(m => m.DashboardComponent)
+          import('./features/dashboard/dashboard').then(m => m.DashboardComponent),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
       },
+
       {
         path: 'perfil',
         loadComponent: () =>
@@ -39,12 +49,26 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/citas/citas').then(m => m.CitasComponent),
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'RECEPCIONISTA', 'VETERINARIO'] }
+        data: { roles: ['ADMIN', 'VETERINARIO'] }
       },
       {
         path: 'clientes',
         loadComponent: () =>
           import('./features/clientes/clientes').then(m => m.ClientesComponent),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
+      },
+      {
+        path: 'categorias',
+        loadComponent: () =>
+          import('./features/inventario/categorias/categorias').then(m => m.CategoriasComponent),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'productos',
+        loadComponent: () =>
+          import('./features/inventario/productos/productos').then(m => m.ProductosComponent),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
       },
@@ -77,28 +101,6 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
       },
-      {
-        path: 'productos',
-        loadComponent: () =>
-          import('./features/productos/productos.component').then(m => m.ProductosComponent),
-        canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
-      },
-      {
-        path: 'categorias',
-        loadComponent: () =>
-          import('./features/categorias/categorias').then(m => m.CategoriasComponent),
-        canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
-      },
-
-     {
-            path: 'ventas',
-            loadComponent: () =>
-              import('./features/venta/venta').then(m => m.VentaComponent),
-            canActivate: [RoleGuard],
-            data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
-          },
 
       // ✅ Nuevas rutas agregadas
       {
@@ -106,15 +108,9 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/consulta/consulta').then(m => m.ConsultasComponent),
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'RECEPCIONISTA', 'VETERINARIO'] }
+        data: { roles: ['ADMIN', 'VETERINARIO'] }
       },
-      {
-        path: 'consultas/:id/productos',
-        loadComponent: () =>
-          import('./features/consulta/consulta-medicamento').then(m => m.ConsultaMedicamentoComponent),
-        canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'RECEPCIONISTA', 'VETERINARIO'] }
-      },
+
       {
         path: 'historial-clinico',
         loadComponent: () =>
@@ -122,29 +118,24 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'RECEPCIONISTA', 'VETERINARIO'] }
       },
+
       {
-        path: 'estupefacientes',
+        path: 'configuracion-entorno',
         loadComponent: () =>
-          import('./features/estupefacientes/estupefacientes').then(m => m.EstupefacientesComponent),
+          import('./features/configuracion-entorno/configuracion-entorno').then(m => m.ConfiguracionEntornoComponent),
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'VETERINARIO'] }
+        data: { roles: ['ADMIN'] }
       },
       {
         path: 'no-acceso',
         loadComponent: () =>
           import('./features/auth/no-acceso/no-acceso').then(m => m.NoAccesoComponent)
       },
-      {
-        path: 'reportes',
-        loadComponent: () =>
-          import('./features/reportes/reportes').then(m => m.ReportesComponent),
-        canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
-      },
+
 
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'historial-clinico',
         pathMatch: 'full'
       },
       {
@@ -152,6 +143,15 @@ export const routes: Routes = [
         redirectTo: 'dashboard'
       }
     ]
+  },
+
+  // ══════════════════════════════════════════
+  // RUTA RAÍZ → LOGIN
+  // ══════════════════════════════════════════
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
   },
   {
     path: '**',

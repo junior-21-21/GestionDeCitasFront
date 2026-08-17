@@ -1,76 +1,96 @@
 @use "sass:color";
 
 /* =========================================
-   PREMIUM THEME - VETERINARY CLINIC
+   UI UX PRO MAX THEME - CLAYMORPHISM
+   Veterinary Clinic (100% Unique)
    ========================================= */
 
-// --- VARIABLES ---
-$primary: #3f51b5;         // Indigo profundo
-$primary-light: #7986cb;
-$secondary: #ff4081;       // Pink Accent
-$success: #00c853;         // Green
-$warning: #ffa000;         // Amber
-$danger: #d32f2f;          // Red
-$info: #00b0ff;            // Light Blue
+// --- VARIABLES (Teal + Orange) ---
+$primary: var(--color-primary);
+$primary-light: var(--color-primary-light);
+$secondary: var(--color-accent);
+$accent: var(--color-accent);
+$bg-body: var(--color-bg);
+$text-main: var(--color-text);
+$text-muted: var(--color-text-muted);
+$card-bg: #FFFFFF;
+$border-color: #CCFBF1;
 
-$bg-body: #f5f7fa;         // Gris muy suave (Ghost White)
-$bg-card: #ffffff;
-$text-main: #263238;       // Blue Grey Dark
-$text-muted: #607d8b;
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --color-primary: #0D9488;
+  --color-primary-light: #99F6E4;
+  --color-accent: #EA580C;
+  --color-bg: #F0FDFA;
+  --color-text: #134E4A;
+  --color-text-muted: #115E59;
+}
 
-$shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
-$shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1);
-$radius: 12px;
+// Claymorphism Shadows (The core of the style)
+$shadow-clay: 
+  inset -8px -8px 16px rgba(0, 0, 0, 0.05),
+  inset 8px 8px 16px rgba(255, 255, 255, 0.8),
+  8px 16px 24px rgba(0, 0, 0, 0.08);
+
+$shadow-clay-hover: 
+  inset -4px -4px 8px rgba(0, 0, 0, 0.05),
+  inset 4px 4px 8px rgba(255, 255, 255, 0.9),
+  12px 24px 32px rgba(0, 0, 0, 0.12);
+
+$shadow-clay-active: 
+  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+  inset -4px -4px 8px rgba(255, 255, 255, 0.7),
+  2px 4px 8px rgba(0, 0, 0, 0.05);
+
+$radius-lg: 32px;  // Super soft corners for cards
+$radius-btn: 20px; // Pill/Squircle for buttons
+$transition-spring: 0.35s cubic-bezier(0.23, 1, 0.32, 1);
 
 // --- GLOBAL TEXTURE ---
 body {
   background-color: $bg-body;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  scroll-behavior: smooth;
   color: $text-main;
   overflow-x: hidden;
-}
-
-// Background shape decoration (optional subtle watermark)
-body::before {
-  content: "";
-  position: fixed;
-  top: -10%; right: -10%;
-  width: 50%; height: 50%;
-  background: radial-gradient(circle, rgba($primary, 0.03) 0%, transparent 70%);
-  z-index: -1;
-  border-radius: 50%;
+  line-height: 1.6;
 }
 
 // --- TYPOGRAPHY ---
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  color: color.adjust($primary, $lightness: -10%);
+  font-family: 'Outfit', 'Inter', sans-serif;
+  text-wrap: balance;
+  font-weight: 800;
+  color: $text-main;
   margin-bottom: 1rem;
+  letter-spacing: -0.03em; // Tighter tracking for playful punch
 }
 
-// --- COMPONENT: CARDS ---
+// --- COMPONENT: CARDS (Claymorphism) ---
 .card {
-  background: $bg-card;
-  border: none;
-  border-radius: $radius;
-  box-shadow: $shadow-soft;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: $card-bg;
+  border: 2px solid #FFFFFF; // Thick white border emphasizes 3D
+  border-radius: $radius-lg;
+  box-shadow: $shadow-clay;
+  transition: transform $transition-spring, box-shadow $transition-spring;
   overflow: hidden;
 
-  // Header elegante
   .card-header {
     background: transparent;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    padding: 1.25rem;
-    font-weight: 600;
+    border-bottom: 2px dashed $border-color;
+    padding: 1.5rem;
+    font-weight: 800;
+    font-size: 1.2rem;
     color: $primary;
     display: flex;
     align-items: center;
     justify-content: space-between;
 
     mat-icon {
-      margin-right: 8px;
-      opacity: 0.8;
+      margin-right: 12px;
+      color: $accent;
     }
   }
 
@@ -79,180 +99,219 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-hover;
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: $shadow-clay-hover;
   }
 }
 
-// --- COMPONENT: BUTTONS ---
+// --- COMPONENT: BUTTONS (Haptic Spring) ---
 .btn {
-  border-radius: 8px;
-  font-weight: 500;
-  padding: 0.6rem 1.2rem;
-  transition: all 0.2s ease;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: $radius-btn;
+  font-weight: 800;
+  padding: 0.75rem 1.75rem;
+  transition: all $transition-spring;
+  letter-spacing: 0.02em;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: 2px solid #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 
+  // Squish effect!
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.97) translateY(2px);
+    box-shadow: $shadow-clay-active;
   }
 
-  // Primary Gradient
   &.btn-primary {
-    background: linear-gradient(135deg, $primary 0%, color.adjust($primary, $lightness: -10%) 100%);
-    border: none;
-    color: white;
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    box-shadow: 
+      inset -4px -4px 8px rgba(0,0,0, 0.1),
+      inset 4px 4px 8px rgba(255, 255, 255, 0.3),
+      0 8px 16px color-mix(in srgb, var(--color-primary) 30%, transparent);
 
     &:hover {
-      background: linear-gradient(135deg, color.adjust($primary, $lightness: 5%) 0%, $primary 100%);
-      box-shadow: 0 4px 12px rgba($primary, 0.3);
+      background-color: color-mix(in srgb, var(--color-primary) 85%, white);
+      transform: translateY(-2px);
+      box-shadow: 
+        inset -4px -4px 8px rgba(0,0,0, 0.05),
+        inset 4px 4px 8px rgba(255, 255, 255, 0.4),
+        0 12px 20px color-mix(in srgb, var(--color-primary) 40%, transparent);
     }
   }
 
-  // Success Gradient
-  &.btn-success {
-    background: linear-gradient(135deg, $success 0%, color.adjust($success, $lightness: -10%) 100%);
-    border: none;
-    color: white;
+  &.btn-success { // Map success to Accent in this theme
+    background-color: var(--color-accent);
+    color: #FFFFFF;
+    box-shadow: 
+      inset -4px -4px 8px rgba(0,0,0, 0.1),
+      inset 4px 4px 8px rgba(255, 255, 255, 0.3),
+      0 8px 16px color-mix(in srgb, var(--color-accent) 30%, transparent);
 
     &:hover {
-      background: linear-gradient(135deg, color.adjust($success, $lightness: 5%) 0%, $success 100%);
-      box-shadow: 0 4px 12px rgba($success, 0.3);
-    }
-  }
-
-  // Danger Gradient
-  &.btn-danger {
-    background: linear-gradient(135deg, $danger 0%, color.adjust($danger, $lightness: -10%) 100%);
-    border: none;
-    color: white;
-
-    &:hover {
-      background: linear-gradient(135deg, color.adjust($danger, $lightness: 5%) 0%, $danger 100%);
-      box-shadow: 0 4px 12px rgba($danger, 0.3);
-    }
-  }
-
-  // Outline (Secondary)
-  &.btn-outline-secondary {
-    border: 2px solid #e0e0e0;
-    color: $text-muted;
-    background: transparent;
-    box-shadow: none;
-
-    &:hover {
-      border-color: $text-muted;
-      color: $text-main;
-      background: rgba(0,0,0,0.02);
-    }
-  }
-}
-
-// --- COMPONENT: TABLES ---
-.table-responsive {
-  border-radius: $radius;
-  overflow: hidden;
-  box-shadow: $shadow-soft;
-}
-
-.table {
-  margin-bottom: 0;
-  background-color: white;
-
-  thead {
-    th {
-      background-color: #f8f9fa;
-      color: $text-muted;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      border-bottom: 2px solid #e9ecef;
-      padding: 1rem;
-    }
-  }
-
-  tbody {
-    td {
-      padding: 1rem;
-      border-bottom: 1px solid #f1f1f1;
-      vertical-align: middle;
-      color: $text-main;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover {
-      background-color: #f0f4f8; // Light blue hover
+      transform: translateY(-2px);
     }
   }
 }
 
 // --- FORM INPUTS ---
 .form-control, .form-select {
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  padding: 0.75rem 1rem;
-  background-color: #fafafa;
-  transition: all 0.2s;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  padding: 0.8rem 1.2rem;
+  background-color: #F8FAFC;
+  color: $text-main;
+  font-weight: 600;
+  transition: all $transition-spring;
+  // Inset shadow to look like a pushed-in clay well
+  box-shadow: inset 4px 4px 8px rgba(13, 148, 136, 0.06), inset -4px -4px 8px #FFFFFF;
+
+  &:hover {
+    background-color: #FFFFFF;
+  }
 
   &:focus {
-    background-color: white;
-    border-color: $primary;
-    box-shadow: 0 0 0 4px rgba($primary, 0.1);
+    outline: none;
+    background-color: #FFFFFF;
+    border-color: var(--color-primary-light);
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.03), 0 0 0 4px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
-}
-
-.input-group-text {
-  background-color: #eee;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
 }
 
 // --- ALERTS & BADGES ---
 .alert {
-  border-radius: $radius;
+  border-radius: 20px;
   border: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
-
-  strong { 
-    margin-left: 5px; 
-  }
+  box-shadow: $shadow-clay;
+  background: white;
 }
 
 .badge {
-  padding: 0.5em 0.8em;
-  border-radius: 20px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  padding: 0.5em 1em;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
-// --- UTILITIES ---
-.premium-title {
-  position: relative;
-  display: inline-block;
-  padding-bottom: 10px;
-  margin-bottom: 25px;
-  
-  &::after {
+// ===== MODAL DE SESIÓN EXPIRADA (Petyzoos - Corporativo) =====
+// El sistema aplica estos estilos cuando el backend responde con 401 Unauthorized.
+// La paleta utiliza los colores corporativos: verde (#0D9488) y morado (#7C3AED).
+
+.swal-petyzoos-popup {
+  font-family: 'Inter', sans-serif;
+  border-radius: 28px !important;               // Claymorphism: curvas gruesas
+  padding: 32px !important;
+  max-width: 380px !important;
+  background: #FFFFFF !important;
+
+  // Sombra multicapa de arcilla para que "flote" coherentemente con el panel
+  box-shadow:
+    inset -4px -4px 8px rgba(13, 148, 136, 0.04),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.8),
+    0 20px 40px rgba(13, 148, 136, 0.12),
+    0 4px 16px rgba(124, 58, 237, 0.06) !important;
+
+  border: 2px solid rgba(124, 58, 237, 0.08) !important; // Borde morado muy sutil
+
+  // Línea decorativa de acento en la parte superior (color morado corporativo)
+  &::before {
     content: '';
+    display: block;
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 50px;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
     height: 4px;
-    background: $secondary;
-    border-radius: 2px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    border-radius: 0 0 4px 4px;
   }
 }
 
-.text-gradient {
-  background: linear-gradient(45deg, $primary, $secondary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+// El botón principal del modal reutiliza el estilo "spring" del panel
+.swal-petyzoos-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 12px 28px !important;
+  margin-top: 8px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  color: #FFFFFF !important;
+  border-radius: 14px !important;             // Botón de arcilla redondeado
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  cursor: pointer !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+
+  // Gradiente que combina morado y verde corporativo
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%) !important;
+  box-shadow:
+    inset -2px -2px 4px rgba(0, 0, 0, 0.1),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+    0 8px 20px color-mix(in srgb, var(--color-primary) 30%, transparent) !important;
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow:
+      inset -2px -2px 4px rgba(0, 0, 0, 0.05),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+      0 12px 24px rgba(124, 58, 237, 0.4) !important;
+  }
+
+  // Física de resorte (spring physics) al presionar
+  &:active {
+    transform: scale(0.97) translateY(1px) !important;
+    box-shadow:
+      inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+      0 4px 8px rgba(124, 58, 237, 0.2) !important;
+  }
 }
+
+// --- STAGGER ANIMATION UTILITIES ---
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-item {
+  opacity: 0;
+  animation: fadeSlideUp 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@for $i from 1 through 12 {
+  .stagger-item:nth-child(#{$i}) {
+    animation-delay: #{($i - 1) * 50}ms;
+  }
+}
+
+// --- ACCESSIBILITY: REDUCED MOTION ---
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// --- FOCUS RING ---
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// --- TABULAR FIGURES FOR DATA ---
+.font-data {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+}
+

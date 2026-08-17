@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, OnInit, OnDestroy, HostListener, AfterViewInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -15,10 +15,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 // Servicios
 import { AuthService } from '../services/auth.service';
+import { AnimationService } from '../services/animation.service';
 
 // Utilidades
 import Swal from 'sweetalert2';
 import { SpinnerComponent } from '../shared/components/spinner/spinner.component';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-layout',
@@ -39,7 +41,7 @@ import { SpinnerComponent } from '../shared/components/spinner/spinner.component
     SpinnerComponent
   ]
 })
-export class LayoutComponent implements OnInit, OnDestroy {
+export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
   
   // Referencia al componente visual del Sidebar para poder abrirlo/cerrarlo
   @ViewChild('sidenav') sidenav!: MatSidenav;
@@ -54,10 +56,15 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private anim: AnimationService
   ) {
     this.usuario = this.authService.getUsuario();
-    this.imagenPerfil = this.usuario ? localStorage.getItem('perfil-imagen-' + this.usuario.id) : null;
+    let img = this.usuario ? localStorage.getItem('perfil-imagen-' + this.usuario.id) : null;
+    if (!img && this.usuario && this.usuario.fotoUrl) {
+      img = this.usuario.fotoUrl;
+    }
+    this.imagenPerfil = this.formatImageUrl(img);
 
     // Determinar el label del rol
     if (this.authService.isAdmin()) {
@@ -67,6 +74,18 @@ export class LayoutComponent implements OnInit, OnDestroy {
     } else if (this.authService.isVeterinario()) {
       this.rolLabel = 'Veterinario';
     }
+  }
+
+  formatImageUrl(url: string | null): string | null {
+    if (url && url.startsWith('/api')) {
+      return environment.apiUrl.replace('/api', '') + url;
+    }
+    return url;
+  }
+
+  ngAfterViewInit() {
+    // Animar los items del sidebar en cascada
+    setTimeout(() => this.anim.slideInLeft('.nav-item', 60), 200);
   }
 
   ngOnInit(): void {
@@ -81,14 +100,14 @@ export class LayoutComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Suscripción reactiva a cambios de imagen (reemplaza polling con setInterval)
+    // Suscripcin reactiva a cambios de imagen (reemplaza polling con setInterval)
     this.subscriptions.push(
       this.authService.imagenPerfil$.subscribe(img => {
-        this.imagenPerfil = img;
+        this.imagenPerfil = this.formatImageUrl(img);
       })
     );
 
-    // Suscripción reactiva a cambios del usuario
+  // Suscripción reactiva a cambios del usuario
     this.subscriptions.push(
       this.authService.usuario$.subscribe(user => {
         if (user) {
@@ -96,10 +115,25 @@ export class LayoutComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.checkScreenSize();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth <= 768) {
+        this.isCollapsed = true;
+      }
+    }
   }
 
   // Método para alternar entre expandido y colapsado

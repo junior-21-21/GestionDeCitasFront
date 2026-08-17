@@ -31,34 +31,53 @@
     </div>
 
     <div class="info-grid">
-      <!-- Selección de paciente (si no viene de cita) -->
+      <!-- Alerta: datos forzados desde la cita (Normalización B) -->
+      <div class="alert alert-info d-flex align-items-center mb-3" *ngIf="vieneDeCita">
+        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+        <div>Paciente y veterinario se asignan automáticamente desde la cita seleccionada. No se pueden modificar para mantener la coherencia de datos.</div>
+      </div>
+
+      <!-- Selección de Cita (si no viene de cita) -->
       <div class="select-section" *ngIf="!vieneDeCita">
-        <div class="row g-3 mb-3">
-          <div class="col-md-6">
-            <label class="form-label fw-bold"><i class="bi bi-heart-pulse"></i> Paciente:</label>
-            <select
-              class="form-select"
-              [(ngModel)]="consulta.pacienteCodigo"
-              (ngModelChange)="onPacienteSeleccionado()"
-            >
-              <option value="" disabled>Seleccione una mascota</option>
-              <option *ngFor="let m of mascotas" [value]="m.codigoPaciente">
-                {{ m.nombre }} ({{ m.codigoPaciente }})
-              </option>
-            </select>
+        <div class="paso-header mb-3">
+          <h4 class="text-primary mb-1"><i class="bi bi-calendar-check"></i> Seleccione la Cita a Atender</h4>
+          <p class="small text-muted m-0">Elija al paciente de la lista de citas pendientes para iniciar el diagnóstico.</p>
+        </div>
+        
+        <!-- Chips de Días Disponibles -->
+        <div class="d-flex flex-wrap gap-2 mb-4" *ngIf="diasDisponibles.length > 0">
+          <button 
+            *ngFor="let dia of diasDisponibles"
+            class="btn btn-sm rounded-pill fw-bold px-3 shadow-sm"
+            [ngClass]="fechaFiltro === dia ? 'btn-primary' : 'btn-outline-secondary'"
+            (click)="filtrarCitasPorFecha(dia)"
+          >
+            <i class="bi bi-calendar-day me-1"></i> {{ dia | date:'mediumDate' }}
+          </button>
+        </div>
+
+        <div class="citas-grid mb-4">
+          <div *ngIf="citasPendientes.length === 0" class="alert alert-warning w-100 mb-0">
+            <i class="bi bi-emoji-frown me-2"></i> No hay citas pendientes para atender en este momento.
           </div>
-          <div class="col-md-6" *ngIf="!veterinarioInfo">
-            <label class="form-label fw-bold"><i class="bi bi-person-workspace"></i> Veterinario:</label>
-            <select
-              class="form-select"
-              [(ngModel)]="consulta.veterinarioDni"
-              (ngModelChange)="onVeterinarioSeleccionado()"
-            >
-              <option value="" disabled>Seleccione un veterinario</option>
-              <option *ngFor="let v of veterinarios" [value]="v.dni">
-                {{ v.nombres }}
-              </option>
-            </select>
+          
+          <div 
+            class="cita-card" 
+            *ngFor="let c of citasPendientes" 
+            [class.selected]="consulta.citaCodigo === c.codigoCita"
+            (click)="seleccionarCita(c.codigoCita)"
+          >
+            <div class="cita-card-icon">
+              <i class="bi bi-calendar-event"></i>
+            </div>
+            <div class="cita-card-info">
+              <h5>{{ c.nombrePaciente }}</h5>
+              <span class="text-muted small d-block">Dr/a. {{ c.nombreVeterinario }}</span>
+              <span class="cita-time badge bg-light text-dark mt-1"><i class="bi bi-clock me-1"></i>{{ c.fechaHora | date:'shortTime' }}</span>
+            </div>
+            <div class="cita-card-check">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
           </div>
         </div>
       </div>
@@ -83,7 +102,7 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Edad</span>
-            <span class="detail-value">{{ mascotaInfo.edad ? mascotaInfo.edad + ' años' : 'No registrada' }}</span>
+            <span class="detail-value">{{ mascotaInfo.edadCalculada ? mascotaInfo.edadCalculada + ' años' : 'No registrada' }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Peso</span>
@@ -222,99 +241,27 @@
       <p class="paso-desc">Agregue los medicamentos y productos para la receta. Este paso es opcional.</p>
     </div>
 
-    <!-- Buscar productos -->
-    <div class="receta-busqueda">
-      <label class="form-label fw-bold">Buscar medicamento o servicio:</label>
-      <div class="input-group">
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input
-          type="text"
+    <!-- Nueva Receta Médica (Sin Inventario) -->
+    <div class="row g-3 mt-2">
+      <div class="col-12">
+        <label class="form-label fw-bold text-primary"><i class="bi bi-capsule"></i> Medicamentos a Recetar:</label>
+        <textarea
           class="form-control"
-          [(ngModel)]="filtroProducto"
-          placeholder="Escriba el nombre del producto o código..."
-        />
+          [(ngModel)]="recetaMedica.medicamentos"
+          rows="4"
+          placeholder="Ej: Amoxicilina 500mg, Meloxicam 2mg..."
+        ></textarea>
       </div>
 
-      <!-- Resultados de búsqueda -->
-      <div class="search-results" *ngIf="productosFiltrados.length > 0">
-        <div
-          class="search-item"
-          *ngFor="let prod of productosFiltrados"
-          (click)="agregarAReceta(prod)"
-        >
-          <div class="search-item-info">
-            <strong>{{ prod.nombre }}</strong>
-            <small class="text-muted">{{ prod.codigoBarras }}</small>
-          </div>
-          <div class="search-item-meta">
-            <span class="stock-badge" *ngIf="prod.tipoInventario !== 'SERVICIO'">
-              Stock: {{ prod.stockActual }}
-            </span>
-            <span class="servicio-badge" *ngIf="prod.tipoInventario === 'SERVICIO'">
-              Servicio
-            </span>
-            <button class="btn btn-sm btn-outline-success"><i class="bi bi-plus-lg"></i> Agregar</button>
-          </div>
-        </div>
+      <div class="col-12 mt-3">
+        <label class="form-label fw-bold text-primary"><i class="bi bi-list-check"></i> Indicaciones y Dosis:</label>
+        <textarea
+          class="form-control"
+          [(ngModel)]="recetaMedica.indicaciones"
+          rows="4"
+          placeholder="Ej: Dar 1 pastilla cada 8 horas por 5 días..."
+        ></textarea>
       </div>
-    </div>
-
-    <!-- Receta actual -->
-    <div class="receta-lista mt-4" *ngIf="recetaItems.length > 0">
-      <h5><i class="bi bi-list-check"></i> Productos en la Receta</h5>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle receta-table">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th style="width: 100px;">Cantidad</th>
-              <th>Indicaciones</th>
-              <th style="width: 60px;"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of recetaItems; let i = index">
-              <td>
-                <strong>{{ item.nombre }}</strong>
-                <br>
-                <small class="text-muted">{{ item.codigoBarras }}</small>
-              </td>
-              <td>
-                <input
-                  type="number"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="item.cantidad"
-                  min="1"
-                  [attr.name]="'cant_' + i"
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="item.indicaciones"
-                  placeholder="Ej: 1 cada 8 horas por 5 días"
-                  [attr.name]="'ind_' + i"
-                />
-              </td>
-              <td class="text-center">
-                <button
-                  class="btn btn-sm btn-outline-danger"
-                  (click)="quitarDeReceta(i)"
-                  title="Quitar"
-                >
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="receta-empty" *ngIf="recetaItems.length === 0">
-      <div class="empty-icon"><i class="bi bi-capsule"></i></div>
-      <p>No hay productos en la receta.<br><small>Puede buscar y agregar medicamentos arriba, o registrar sin receta.</small></p>
     </div>
 
     <div class="step-actions">

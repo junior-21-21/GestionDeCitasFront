@@ -1,28 +1,45 @@
 // Variables
-$primary: #0d6efd;
-$success: #198754;
-$bg-light: #f8f9fa;
-$radius: 12px;
+$primary: #0D9488;
+$success: #14B8A6;
+$bg-light: #F0FDFA;
+$radius: 24px;
+$shadow-clay: 
+  inset -8px -8px 16px rgba(13, 148, 136, 0.05),
+  inset 8px 8px 16px rgba(255, 255, 255, 0.8),
+  8px 16px 24px rgba(13, 148, 136, 0.1);
 
 // Animación de entrada suave
-.fade-in { animation: fadeIn 0.5s ease-out; }
-.animate-up { animation: slideUp 0.4s ease-out; }
+.fade-in { animation: fadeIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.animate-up { animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
 // Estilos Generales de Tarjetas
 .card {
   border-radius: $radius;
-  // El overflow hidden asegura que el header tenga las esquinas redondas
+  border: 2px solid #FFFFFF;
+  box-shadow: $shadow-clay;
+  background: #FFFFFF;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+
+  .card-header {
+    background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+    color: white;
+    border-bottom: none;
+    padding: 1.25rem;
+    font-weight: bold;
+  }
 }
 
 // Estilo especial para la alerta de cliente
 .client-alert {
-  background-color: #d1e7dd; // Verde muy suave
-  border: 1px solid #badbcc;
-  border-radius: $radius;
+  background: linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 100%);
+  border: 1px solid #99F6E4;
+  border-radius: 16px;
   padding: 1rem;
+  box-shadow: inset 2px 2px 5px rgba(255,255,255,1), 0 4px 10px rgba(13, 148, 136, 0.05);
   
   .icon-box {
     width: 40px;
@@ -31,40 +48,86 @@ $radius: 12px;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
+    color: #0D9488;
   }
 }
 
 // Inputs del formulario más limpios
 .custom-input {
-  background-color: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
+  background-color: #F8FAFC;
+  border: 2px solid transparent;
+  border-radius: 12px;
   padding: 0.6rem 1rem;
   transition: all 0.2s;
+  box-shadow: inset 4px 4px 8px rgba(13, 148, 136, 0.05), inset -4px -4px 8px #FFFFFF;
 
   &:focus {
-    border-color: $primary;
-    box-shadow: 0 0 0 4px rgba($primary, 0.1);
+    border-color: #99F6E4;
+    background-color: #FFFFFF;
+    outline: none;
+    box-shadow: inset 2px 2px 4px rgba(13, 148, 136, 0.03), 0 0 0 4px rgba(13, 148, 136, 0.15);
   }
 }
 
 // TABLA Y ACCIONES
 .table {
+  border-collapse: separate;
+  border-spacing: 0 8px;
+
   th {
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.5px;
-    color: #6c757d;
+    color: #134E4A;
+    border: none;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 1rem;
+  }
+  
+  td {
+    background: #F8FAFC;
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+
+    &:first-child { border-radius: 16px 0 0 16px; }
+    &:last-child { border-radius: 0 16px 16px 0; }
+  }
+
+  tr {
+    transition: transform 0.2s;
+    &:hover td {
+      background: #F0FDFA;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(13, 148, 136, 0.1);
+    }
   }
   
   // Botones de acción en la tabla
+  .btn-outline-primary {
+    color: #0D9488;
+    border-color: #0D9488;
+    &:hover { background: #0D9488; color: white; }
+  }
+  .btn-outline-danger {
+    color: #EA580C;
+    border-color: #EA580C;
+    &:hover { background: #EA580C; color: white; }
+  }
+
   .btn-outline-primary, .btn-outline-danger {
-    font-weight: 500;
-    border-width: 1px;
-    white-space: nowrap; // Evita que el texto se parta
+    font-weight: 600;
+    border-width: 2px;
+    border-radius: 12px;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     
     &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+    }
+    &:active {
+      transform: scale(0.95);
     }
   }
 }
@@ -79,9 +142,9 @@ $radius: 12px;
     display: block;
     background: white;
     margin-bottom: 1rem;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    border: 2px solid #FFFFFF;
+    border-radius: 20px;
+    box-shadow: $shadow-clay;
     padding: 1rem;
   }
 
@@ -89,45 +152,290 @@ $radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: transparent;
     border: none;
     padding: 0.5rem 0;
-    border-bottom: 1px dashed #f0f0f0;
+    border-bottom: 1px dashed #CCFBF1;
     text-align: right;
 
+    &:first-child { border-radius: 0; }
     &:last-child { 
+      border-radius: 0;
       border-bottom: none; 
       margin-top: 10px;
-      justify-content: center; // Centrar botones en móvil
+      justify-content: center;
       width: 100%;
-      display: block; // Importante para que el div interno ocupe el ancho
+      display: block;
     }
 
-    // Usamos el atributo data-label del HTML para poner el título
     &:before {
       content: attr(data-label);
       font-weight: bold;
-      color: #888;
+      color: #0D9488;
       font-size: 0.85rem;
       text-transform: uppercase;
       margin-right: 10px;
     }
     
-    // El td de acciones no necesita label "before" visible
     &:last-child:before {
         display: none;
     }
   }
   
-  // En móvil, hacemos que los botones ocupen el ancho completo para ser fáciles de tocar
   .action-buttons {
     width: 100%;
     display: flex !important;
     gap: 10px;
     
     button {
-      flex: 1; // 50% de ancho cada uno
+      flex: 1;
       justify-content: center;
       padding: 0.5rem;
     }
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODAL CREDENCIAL PREMIUM
+// ═══════════════════════════════════════════════════════════════════════════
+.modal-cred-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1060;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-cred-card {
+  background: #fff;
+  border-radius: 20px;
+  width: min(540px, 100%);
+  display: flex; 
+  flex-direction: column;
+  overflow: hidden;
+  margin: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  animation: slideUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-cred-header {
+  background: linear-gradient(135deg, #0d6e5c, #20c997);
+  color: white;
+  padding: 1rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-cred-body {
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// ── Preview tarjeta estilo DNI ───────────────────────────────────────────────
+.cred-preview-card {
+  background: linear-gradient(120deg, #0d6e5c 0%, #20c997 70%, #5ce6b5 100%);
+  border-radius: 14px;
+  padding: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  grid-template-rows: 1fr auto;
+  min-height: 130px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(13, 110, 92, 0.3);
+
+  // Patrón de onda decorativo
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 120px;
+    background: radial-gradient(ellipse at 120% 50%, rgba(255,255,255,0.12) 40%, transparent 70%);
+    pointer-events: none;
+  }
+}
+
+.cred-photo-area {
+  grid-row: 1;
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0 12px 12px;
+
+  img {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #d4af37;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+  }
+
+  .cred-photo-placeholder {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 3px solid #d4af37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: rgba(255,255,255,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 68px;
+    text-align: center;
+  }
+}
+
+.cred-info-area {
+  grid-row: 1;
+  grid-column: 2;
+  padding: 10px 12px 6px 8px;
+  color: white;
+}
+
+.cred-clinic-name {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+}
+
+.cred-clinic-sub {
+  font-size: 0.52rem;
+  opacity: 0.75;
+  margin-bottom: 4px;
+}
+
+.cred-divider {
+  height: 1.5px;
+  background: #d4af37;
+  margin: 4px 0;
+  width: 70%;
+}
+
+.cred-badge {
+  font-size: 0.52rem;
+  font-weight: 700;
+  color: rgba(212, 255, 230, 0.9);
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.cred-codigo {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #d4af37;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.cred-row {
+  display: flex;
+  gap: 6px;
+  font-size: 0.54rem;
+  line-height: 1.7;
+  color: white;
+}
+
+.cred-lbl {
+  color: rgba(180, 240, 210, 0.9);
+  font-weight: 700;
+  min-width: 42px;
+}
+
+.cred-footer-strip {
+  grid-column: 1 / -1;
+  background: white;
+  padding: 6px 14px;
+  font-size: 0.54rem;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cred-footer-lbl {
+  font-weight: 700;
+  color: #0d6e5c;
+}
+
+.cred-mrz {
+  font-family: 'Courier New', monospace;
+  font-size: 0.44rem;
+  color: #aaa;
+  letter-spacing: 0.05em;
+}
+
+// ── Upload area ──────────────────────────────────────────────────────────────
+.cred-upload-area {
+  text-align: center;
+}
+
+.cred-upload-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  background: #f0fdfa;
+  border: 2px dashed #20c997;
+  border-radius: 10px;
+  color: #0d9488;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  width: 100%;
+  justify-content: center;
+
+  &:hover {
+    background: #ccfbf1;
+    border-color: #0d9488;
+  }
+}
+
+// ── Footer del modal ─────────────────────────────────────────────────────────
+.modal-cred-footer {
+  padding: 0.9rem 1.4rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.btn-cred-generate {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.6rem;
+  background: linear-gradient(135deg, #0d6e5c, #20c997);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 4px 14px rgba(13, 110, 92, 0.35);
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}

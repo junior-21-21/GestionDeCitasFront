@@ -55,4 +55,37 @@ export class ReporteService {
   getEspeciesMasAtendidas(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/especies-mas-atendidas`);
   }
+
+  getDashboardSummary(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/dashboard-summary`);
+  }
+
+  getTotalClientes(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/total-clientes`);
+  }
+
+  getTotalMascotas(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/total-mascotas`);
+  }
+
+  getMascotasPorEspecie(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/mascotas-por-especie`);
+  }
+
+  getTotalCompras(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/total-compras`);
+  }
+
+  getComprasPorFecha(inicio: string, fin: string): Observable<any[]> {
+    let params = new HttpParams().set('inicio', inicio).set('fin', fin);
+    return this.http.get<any[]>(`${this.apiUrl}/compras-por-fecha`, { params });
+  }
+
+  getCitasHoy(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/citas-hoy`);
+  }
+
+  getVentasVsCompras(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/ventas-vs-compras`);
+  }
 }

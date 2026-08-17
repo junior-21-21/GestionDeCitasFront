@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../services/auth.service';
 import Swal from 'sweetalert2';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-perfil',
@@ -21,6 +22,7 @@ import Swal from 'sweetalert2';
 export class PerfilComponent implements OnInit {
   usuario: any;
   nombres: string = '';
+  apellidos: string = '';
   email: string = '';
   rolLabel: string = '';
   inicialNombre: string = 'U';
@@ -42,6 +44,7 @@ export class PerfilComponent implements OnInit {
     this.usuario = this.authService.getUsuario();
     if (this.usuario) {
       this.nombres = this.usuario.nombres || '';
+      this.apellidos = this.usuario.apellidos || '';
       this.email = this.usuario.email || '';
       this.inicialNombre = this.nombres.charAt(0).toUpperCase();
 
@@ -52,18 +55,21 @@ export class PerfilComponent implements OnInit {
       } else if (this.authService.isVeterinario()) {
         this.rolLabel = 'Veterinario';
       }
+
+      // Obtener la imagen
+      const cachedImage = localStorage.getItem('perfil-imagen-' + this.usuario.id);
+      if (cachedImage) {
+        this.imagenPerfil = this.formatImageUrl(cachedImage);
+      } else if (this.usuario.fotoUrl) {
+        this.imagenPerfil = this.formatImageUrl(this.usuario.fotoUrl);
+      }
     }
 
-    // Cargar imagen - primero localStorage (rapido), luego backend (persistente)
-    const imgLocal = localStorage.getItem('perfil-imagen-' + this.usuario.id);
-    if (imgLocal) {
-      this.imagenPerfil = imgLocal;
-    }
     // Sincronizar con backend
     this.authService.obtenerImagen(this.usuario.id).subscribe({
       next: (res: any) => {
         if (res?.imagen) {
-          this.imagenPerfil = res.imagen;
+          this.imagenPerfil = this.formatImageUrl(res.imagen);
           localStorage.setItem('perfil-imagen-' + this.usuario.id, res.imagen);
         }
       }
@@ -80,35 +86,30 @@ export class PerfilComponent implements OnInit {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagenPerfil = reader.result as string;
-        // Guardar en localStorage (cache rapida)
-        localStorage.setItem('perfil-imagen-' + this.usuario.id, this.imagenPerfil);
-
-        // Guardar en backend (persistencia para produccion)
-        this.authService.actualizarImagen(this.usuario.id, this.imagenPerfil).subscribe({
-          next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Foto actualizada',
-              timer: 1500,
-              showConfirmButton: false
-            });
-          },
-          error: () => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Foto actualizada localmente',
-              text: 'Se guardara en el servidor cuando se reinicie',
-              timer: 2000,
-              showConfirmButton: false
-            });
-          }
-        });
-      };
-      reader.readAsDataURL(file);
+      // Subir al backend
+      this.authService.actualizarImagen(this.usuario.id, file).subscribe({
+        next: (res) => {
+          this.imagenPerfil = this.formatImageUrl(res.url);
+          Swal.fire({
+            icon: 'success',
+            title: 'Foto actualizada',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        },
+        error: (err) => {
+          console.error(err);
+          Swal.fire('Error', 'No se pudo subir la foto', 'error');
+        }
+      });
     }
+  }
+
+  formatImageUrl(url: string): string {
+    if (url && url.startsWith('/api')) {
+      return environment.apiUrl.replace('/api', '') + url;
+    }
+    return url;
   }
 
   guardarDatos(): void {
@@ -119,6 +120,7 @@ export class PerfilComponent implements OnInit {
 
     const dto = {
       nombres: this.nombres,
+      apellidos: this.apellidos,
       email: this.email,
       password: ''
     };
@@ -128,6 +130,7 @@ export class PerfilComponent implements OnInit {
         const stored = this.authService.getUsuario();
         if (stored) {
           stored.nombres = this.nombres;
+          stored.apellidos = this.apellidos;
           localStorage.setItem('auth-user', JSON.stringify(stored));
           this.usuario = stored;
           this.inicialNombre = this.nombres.charAt(0).toUpperCase();

@@ -68,23 +68,64 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-6">
-                  <div class="form-group">
-                    <label>Teléfono</label>
-                    <div class="input-group-vet">
-                      <span class="icon"><i class="bi bi-phone"></i></span>
-                      <input type="text" [(ngModel)]="nuevoCliente.telefono" name="telefono" placeholder="999..." />
-                    </div>
-                  </div>
+              <div class="mb-3">
+                <label>Teléfonos</label>
+                <div *ngFor="let tel of nuevoCliente.telefonos; let i = index" class="input-group-vet mb-2 d-flex">
+                  <span class="icon"><i class="bi bi-phone"></i></span>
+                  <input type="text" [(ngModel)]="tel.numero" name="telNumero_{{i}}" placeholder="999..." class="flex-grow-1 border-end-0" required />
+                  <select [(ngModel)]="tel.tipo" name="telTipo_{{i}}" class="form-select border-start-0" style="max-width: 120px;">
+                    <option value="CELULAR">Celular</option>
+                    <option value="CASA">Casa</option>
+                    <option value="TRABAJO">Trabajo</option>
+                  </select>
+                  <button type="button" class="btn btn-danger" (click)="eliminarTelefono(i)"><i class="bi bi-trash"></i></button>
                 </div>
+                <button type="button" class="btn btn-sm btn-outline-primary mt-1" (click)="agregarTelefono()">+ Agregar Teléfono</button>
+              </div>
               </div>
 
-              <!-- Dirección -->
-              <div class="form-group mb-4">
+              <div class="form-group mb-3">
                 <label>Dirección</label>
-                <div class="input-group-vet">
-                  <span class="icon"><i class="bi bi-geo-alt-fill"></i></span>
-                  <input type="text" [(ngModel)]="nuevoCliente.direccion" name="direccion" placeholder="Av. Principal 123" />
+                <div class="row g-2">
+                  <div class="col-8">
+                    <input type="text" class="form-control" [(ngModel)]="nuevoCliente.calle" name="calle" placeholder="Calle/Av." />
+                  </div>
+                  <div class="col-4">
+                    <input type="text" class="form-control" [(ngModel)]="nuevoCliente.numero" name="numero" placeholder="N°/Mz" />
+                  </div>
+
+                  <!-- Provincia → select fijo con todas las provincias de Ayacucho -->
+                  <div class="col-6">
+                    <div class="select-vet-wrapper">
+                      <i class="bi bi-map select-icon"></i>
+                      <select
+                        class="form-select select-vet"
+                        [(ngModel)]="nuevoCliente.provincia"
+                        name="provincia"
+                        (ngModelChange)="onProvinciaChange()">
+                        <option value="" disabled selected>Provincia</option>
+                        <option *ngFor="let prov of provincias" [value]="prov">{{ prov }}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Distrito → se habilita y filtra según la provincia elegida -->
+                  <div class="col-6">
+                    <div class="select-vet-wrapper" [class.disabled-wrapper]="!nuevoCliente.provincia">
+                      <i class="bi bi-geo-alt select-icon"></i>
+                      <select
+                        class="form-select select-vet"
+                        [(ngModel)]="nuevoCliente.distrito"
+                        name="distrito"
+                        [disabled]="!nuevoCliente.provincia">
+                        <option value="" disabled selected>
+                          {{ nuevoCliente.provincia ? 'Distrito' : '— Elige provincia —' }}
+                        </option>
+                        <option *ngFor="let dist of distritosFiltrados" [value]="dist">{{ dist }}</option>
+                      </select>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
@@ -147,17 +188,19 @@
                   <!-- Cliente Info -->
                   <td class="ps-4">
                     <div class="client-name">{{ cliente.nombres }} {{ cliente.apellidos }}</div>
-                    <div class="client-address" *ngIf="cliente.direccion">
-                      <i class="bi bi-geo-alt me-1"></i>{{ cliente.direccion }}
+                    <div class="client-address" *ngIf="cliente.calle || cliente.distrito">
+                      <i class="bi bi-geo-alt me-1"></i>{{ cliente.calle }} {{ cliente.numero ? cliente.numero + ',' : '' }} {{ cliente.distrito }}
                     </div>
                   </td>
                   
                   <!-- Teléfono -->
                   <td>
-                    <div class="phone-badge" *ngIf="cliente.telefono">
-                      <i class="bi bi-whatsapp"></i> {{ cliente.telefono }}
+                    <div *ngIf="cliente.telefonos && cliente.telefonos.length > 0">
+                      <div class="phone-badge mb-1" *ngFor="let t of cliente.telefonos">
+                        <i class="bi bi-whatsapp"></i> {{ t.numero }} <small class="text-white-50">({{t.tipo}})</small>
+                      </div>
                     </div>
-                    <span class="text-muted small fst-italic" *ngIf="!cliente.telefono">--</span>
+                    <span class="text-muted small fst-italic" *ngIf="!cliente.telefonos || cliente.telefonos.length === 0">--</span>
                   </td>
 
                   <!-- DNI -->

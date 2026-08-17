@@ -315,3 +315,54 @@ $text-muted: #6c757d;
     from { opacity: 0; transform: translateX(100%); }
     to { opacity: 1; transform: translateX(0); }
 }
+
+// ── Select encadenado Provincia / Distrito ───────────────────────────────────
+.select-vet-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .select-icon {
+    position: absolute;
+    left: 0.65rem;
+    color: $vet-primary;
+    font-size: 0.95rem;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .select-vet {
+    padding-left: 2.1rem;   // espacio para el icono
+    background-color: $bg-input;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: $text-dark;
+    height: 38px;
+    width: 100%;
+    appearance: auto;       // muestra la flecha nativa del SO
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+
+    &:focus {
+      border-color: $vet-primary;
+      box-shadow: 0 0 0 3px rgba($vet-primary, 0.18);
+      outline: none;
+    }
+
+    option:disabled {
+      color: $text-muted;
+    }
+  }
+
+  // Estado: no se ha elegido provincia aún
+  &.disabled-wrapper {
+    opacity: 0.55;
+    cursor: not-allowed;
+
+    .select-vet {
+      cursor: not-allowed;
+      background-color: color.adjust($bg-input, $lightness: -3%);
+    }
+  }
+}

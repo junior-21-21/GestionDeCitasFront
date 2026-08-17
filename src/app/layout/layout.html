@@ -10,14 +10,7 @@
   <span class="logo-section">
     <img src="logo_petyzoos.png" alt="PetyZoos" class="logo-img">
     <span class="brand-name">
-        <span class="c-p">P</span>
-        <span class="c-e">e</span>
-        <span class="c-t">t</span>
-        <span class="c-y">y</span>
-        <span class="c-z">z</span>
-        <span class="c-o1">o</span>
-        <span class="c-o2">o</span>
-        <span class="c-s">s</span>
+        PetyZoos
     </span>
   </span>
   
@@ -90,21 +83,21 @@
 
         <span class="nav-section-label" *ngIf="!isCollapsed">MENU</span>
 
-        <a routerLink="/dashboard" routerLinkActive="active" 
+        <a *ngIf="esAdmin()" routerLink="/dashboard" routerLinkActive="active" 
            [matTooltip]="isCollapsed ? 'Dashboard' : ''" matTooltipPosition="right"
            class="nav-item">
           <mat-icon>dashboard</mat-icon>
           <span *ngIf="!isCollapsed">Dashboard</span>
         </a>
 
-        <a routerLink="/citas" routerLinkActive="active" 
+        <a *ngIf="esAdmin() || esVeterinario()" routerLink="/citas" routerLinkActive="active" 
            [matTooltip]="isCollapsed ? 'Citas' : ''" matTooltipPosition="right"
            class="nav-item">
           <mat-icon>calendar_today</mat-icon>
           <span *ngIf="!isCollapsed">Citas</span>
         </a>
 
-        <a routerLink="/consultas" routerLinkActive="active" 
+        <a *ngIf="esAdmin() || esVeterinario()" routerLink="/consultas" routerLinkActive="active" 
            [matTooltip]="isCollapsed ? 'Diagnósticos' : ''" matTooltipPosition="right"
            class="nav-item">
           <mat-icon>medical_services</mat-icon>
@@ -118,58 +111,50 @@
           <span *ngIf="!isCollapsed">Historial Clínico</span>
         </a>
 
-        <a routerLink="/estupefacientes" routerLinkActive="active" 
-           [matTooltip]="isCollapsed ? 'Estupefacientes' : ''" matTooltipPosition="right"
-           class="nav-item">
-          <mat-icon>menu_book</mat-icon>
-          <span *ngIf="!isCollapsed">Estupefacientes</span>
-        </a>
-
-        <a *ngIf="!esVeterinario()" routerLink="/clientes" routerLinkActive="active" 
+        <a *ngIf="esAdmin() || esRecepcionista()" routerLink="/clientes" routerLinkActive="active" 
            [matTooltip]="isCollapsed ? 'Clientes' : ''" matTooltipPosition="right"
            class="nav-item">
           <mat-icon>person</mat-icon>
           <span *ngIf="!isCollapsed">Clientes</span>
         </a>
 
-        <a *ngIf="!esVeterinario()" routerLink="/mascotas" routerLinkActive="active" 
+        <a *ngIf="esAdmin() || esRecepcionista()" routerLink="/mascotas" routerLinkActive="active" 
            [matTooltip]="isCollapsed ? 'Pacientes' : ''" matTooltipPosition="right"
            class="nav-item">
           <mat-icon>pets</mat-icon>
           <span *ngIf="!isCollapsed">Pacientes</span>
         </a>
 
-        <a *ngIf="!esVeterinario()" routerLink="/ventas" routerLinkActive="active" 
-           [matTooltip]="isCollapsed ? 'Ventas' : ''" matTooltipPosition="right"
-           class="nav-item">
-          <mat-icon>point_of_sale</mat-icon>
-          <span *ngIf="!isCollapsed">Ventas</span>
-        </a>
+        <!-- INVENTARIO -->
+        <ng-container *ngIf="esAdmin() || esRecepcionista()">
+          <div class="sidebar-divider"></div>
+          <span class="nav-section-label" *ngIf="!isCollapsed">INVENTARIO</span>
 
-        <!-- Seccion Admin -->
+          <a routerLink="/productos" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Productos e Insumos' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>inventory_2</mat-icon>
+            <span *ngIf="!isCollapsed">Productos e Insumos</span>
+          </a>
+
+          <a *ngIf="esAdmin()" routerLink="/categorias" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Categorías' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>label</mat-icon>
+            <span *ngIf="!isCollapsed">Categorías</span>
+          </a>
+        </ng-container>
+
+        <!-- Sección Admin -->
         <ng-container *ngIf="esAdmin()">
           <div class="sidebar-divider"></div>
-          <span class="nav-section-label" *ngIf="!isCollapsed">ADMIN</span>
+          <span class="nav-section-label" *ngIf="!isCollapsed">ADMINISTRACIÓN</span>
 
           <a routerLink="/especialidades" routerLinkActive="active" 
              [matTooltip]="isCollapsed ? 'Especialidades' : ''" matTooltipPosition="right"
              class="nav-item">
             <mat-icon>verified</mat-icon>
             <span *ngIf="!isCollapsed">Especialidades</span>
-          </a>
-
-          <a routerLink="/productos" routerLinkActive="active" 
-             [matTooltip]="isCollapsed ? 'Inventario' : ''" matTooltipPosition="right"
-             class="nav-item">
-            <mat-icon>inventory</mat-icon>
-            <span *ngIf="!isCollapsed">Inventario</span>
-          </a>
-
-          <a routerLink="/categorias" routerLinkActive="active" 
-             [matTooltip]="isCollapsed ? 'Categorías' : ''" matTooltipPosition="right"
-             class="nav-item">
-            <mat-icon>category</mat-icon>
-            <span *ngIf="!isCollapsed">Categorías</span>
           </a>
 
           <a routerLink="/veterinarios" routerLinkActive="active" 
@@ -186,13 +171,15 @@
             <span *ngIf="!isCollapsed">Usuarios</span>
           </a>
 
-          <a routerLink="/reportes" routerLinkActive="active" 
-             [matTooltip]="isCollapsed ? 'Reportes' : ''" matTooltipPosition="right"
+          <a routerLink="/configuracion-entorno" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Configuración Tema' : ''" matTooltipPosition="right"
              class="nav-item">
-            <mat-icon>analytics</mat-icon>
-            <span *ngIf="!isCollapsed">Reportes</span>
+            <mat-icon>palette</mat-icon>
+            <span *ngIf="!isCollapsed">Configuración Tema</span>
           </a>
         </ng-container>
+
+
 
       </nav>
 

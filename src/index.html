@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="PetyZoos — Sistema de gestión para clínica veterinaria. Control de pacientes, inventario, citas, ventas y más.">
-  <meta name="theme-color" content="#1e1b4b">
+  <meta name="theme-color" content="#F0FDFA">
 
   <!-- Open Graph -->
   <meta property="og:title" content="PetyZoos — Clínica Veterinaria">
@@ -19,33 +19,26 @@
   <link rel="icon" type="image/png" href="favicon.png">
 
   <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <style>
+    html {
+      scroll-behavior: smooth;
+    }
     body {
       margin: 0;
-      font-family: 'Roboto', sans-serif;
-      min-height: 100vh;
-
-      background: linear-gradient(to bottom right, #d0f0fd, #e6faff); /* Degradado celeste pastel */
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-
-    /* Fondo con textura sutil encima */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("https://www.transparenttextures.com/patterns/white-wall-3.png"); /* textura sutil */
-      opacity: 0.15;
-      z-index: -1;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100dvh;
+      background-color: #F0FDFA; /* Teal 50 (Claymorphism) */
+      color: #134E4A; /* Teal 900 */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
   </style>
 </head>
@@ -53,7 +46,7 @@
 <body class="mat-typography">
 <app-root></app-root>
 <noscript>
-  <div style="text-align:center;padding:2rem;font-family:Roboto,sans-serif;">
+  <div style="text-align:center;padding:2rem;font-family:'Inter',sans-serif;">
     <h2>🐾 PetyZoos requiere JavaScript</h2>
     <p>Por favor, habilita JavaScript en tu navegador para usar esta aplicación.</p>
   </div>

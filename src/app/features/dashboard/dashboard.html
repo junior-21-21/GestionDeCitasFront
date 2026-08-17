@@ -1,30 +1,98 @@
-<div class="home-container" [ngClass]="rolClass">
-
-  <!-- Columna izquierda: Texto -->
-  <div class="home-left">
-    <div class="welcome-badge">
-      <span>{{ rolBadge }}</span>
+<div class="dashboard-wrapper">
+  <div class="welcome-banner">
+    <div class="welcome-content">
+      <div class="role-badge">{{ rolLabel }}</div>
+      
+      <h1>Bienvenido(a) a <br><span class="brand-text">Petyzoos</span></h1>
+      
+      <p class="greeting">
+        Buenos días, <strong>{{ usuario?.nombres || 'Admin Sistema' }}</strong>
+      </p>
+      
+      <p class="description">
+        Tienes control total del sistema. Gestiona citas, historiales médicos y todas las operaciones de la Clínica Veterinaria Petyzoos.
+      </p>
+      
+      <p class="quote">"No solo son mascotas, son familia"</p>
+      
+      <p class="date">{{ fechaActual | date:'EEEE, d \'de\' MMMM \'de\' yyyy':'':'es' }}</p>
     </div>
-
-    <h1 class="home-title">
-      Bienvenido(a) a<br>
-      <span class="highlight">Petyzoos</span>
-    </h1>
-
-    <p class="home-greeting">
-      {{ saludo }}, <strong>{{ nombreUsuario }}</strong>
-    </p>
-
-    <p class="home-description">{{ mensajeRol }}</p>
-
-    <p class="home-slogan">"No solo son mascotas, son familia"</p>
-
-    <div class="home-date">{{ fechaActual }}</div>
+    
+    <div class="welcome-illustration">
+      <img src="vet_welcome.png" alt="Veterinaria Petyzoos" />
+    </div>
   </div>
-
-  <!-- Columna derecha: Ilustracion -->
-  <div class="home-right">
-    <img src="vet_welcome.png" alt="Bienvenida Clinica Veterinaria" class="home-illustration">
+  
+  <!-- Stats Section -->
+  <div class="stats-section">
+    <div class="stats-header">
+      <h2>Estadísticas Generales</h2>
+      <div class="period-selector">
+        <button [class.active]="periodoSeleccionado === 'hoy'" (click)="cambiarPeriodo('hoy')">Hoy</button>
+        <button [class.active]="periodoSeleccionado === 'semana'" (click)="cambiarPeriodo('semana')">Esta Semana</button>
+        <button [class.active]="periodoSeleccionado === 'mes'" (click)="cambiarPeriodo('mes')">Este Mes</button>
+        <button [class.active]="periodoSeleccionado === 'total'" (click)="cambiarPeriodo('total')">Total</button>
+      </div>
+    </div>
+    
+    <div class="stats-grid" *ngIf="!loadingStats && stats">
+      
+      <!-- Citas Card -->
+      <div class="stat-card citas">
+        <div class="stat-icon">
+          <i class="bi bi-calendar-check"></i>
+        </div>
+        <div class="stat-details">
+          <h3 #statNumber [attr.data-value]="stats.citas">{{ stats.citas }}</h3>
+          <p>Citas Programadas</p>
+        </div>
+      </div>
+      
+      <!-- Consultas Card -->
+      <div class="stat-card consultas">
+        <div class="stat-icon">
+          <i class="bi bi-heart-pulse"></i>
+        </div>
+        <div class="stat-details">
+          <h3 #statNumber [attr.data-value]="stats.consultas">{{ stats.consultas }}</h3>
+          <p>Pacientes Atendidos</p>
+        </div>
+      </div>
+      
+      <!-- Pacientes Card -->
+      <div class="stat-card pacientes">
+        <div class="stat-icon">
+          <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-details">
+          <h3 #statNumber [attr.data-value]="stats.pacientes">{{ stats.pacientes }}</h3>
+          <p>Total de Pacientes</p>
+        </div>
+      </div>
+      
+      <!-- Especies Card -->
+      <div class="stat-card especies">
+        <div class="stat-icon">
+          <i class="bi bi-pie-chart"></i>
+        </div>
+        <div class="stat-details">
+          <h3>Top Especies</h3>
+          <p class="species-list" *ngIf="getTopEspeciesKeys().length > 0">
+            <span class="species-item" *ngFor="let key of getTopEspeciesKeys()">
+              {{ key }}: <strong>{{ stats.topEspecies[key] }}</strong>
+            </span>
+          </p>
+          <p *ngIf="getTopEspeciesKeys().length === 0">Sin datos</p>
+        </div>
+      </div>
+      
+    </div>
+    
+    <div class="stats-loading" *ngIf="loadingStats">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p>Cargando estadísticas...</p>
+    </div>
   </div>
-
 </div>

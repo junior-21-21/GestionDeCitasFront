@@ -10,6 +10,7 @@ export interface Paciente {
   fechaNacimiento?: string;
   edadCalculada?: number;
   peso?: number;
+  genero?: string;
   clienteDni?: string;
 }
 
@@ -19,6 +20,7 @@ export interface PacienteDTO {
   razaId: number;
   fechaNacimiento: string;
   peso?: number;
+  genero?: string;
   clienteDni: string;
   fotoUrl?: string;
 }
@@ -34,6 +36,7 @@ export interface PacienteResponseDTO {
   fechaNacimiento?: string;
   edadCalculada?: number;
   peso?: number;
+  genero?: string;
   clienteDni: string;
   clienteNombreCompleto?: string;
   fotoUrl?: string;

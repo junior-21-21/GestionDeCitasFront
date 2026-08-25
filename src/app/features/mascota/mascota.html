@@ -56,39 +56,63 @@
       </div>
 
       <!-- Formulario (Solo visible si hay cliente) -->
-      <form *ngIf="clienteEncontrado" (ngSubmit)="editando ? actualizar() : registrar()" class="animate-up">
+      <form *ngIf="clienteEncontrado" (ngSubmit)="editando ? actualizar() : registrar()" class="animate-up" #mascotaForm="ngForm">
         <h5 class="text-secondary mb-3 border-bottom pb-2">Datos de la Mascota</h5>
         
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label text-muted small">Nombre</label>
-            <input type="text" class="form-control custom-input" [(ngModel)]="mascota.nombre" name="nombre" required placeholder="Ej. Firulais"/>
+            <label class="form-label text-muted small">Nombre <span class="text-danger">*</span></label>
+            <input type="text" class="form-control custom-input" [(ngModel)]="mascota.nombre" name="nombre" required #nombre="ngModel" [ngClass]="{'is-invalid': nombre.invalid && (nombre.dirty || nombre.touched)}" placeholder="Ej. Firulais"/>
+            <div *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)" class="invalid-feedback">
+              El nombre es obligatorio.
+            </div>
           </div>
 
           <div class="col-md-6">
             <label class="form-label text-muted small">Especie <span class="text-danger">*</span></label>
-            <select class="form-select custom-input" [(ngModel)]="especieSeleccionada" name="especie" (ngModelChange)="onEspecieChange($event)" required>
+            <select class="form-select custom-input" [(ngModel)]="especieSeleccionada" name="especie" (ngModelChange)="onEspecieChange($event)" required #especie="ngModel" [ngClass]="{'is-invalid': especie.invalid && (especie.dirty || especie.touched)}">
               <option [ngValue]="null" disabled>Seleccione una especie</option>
               <option *ngFor="let esp of especies" [ngValue]="esp.id">{{ esp.nombre }}</option>
             </select>
+            <div *ngIf="especie.invalid && (especie.dirty || especie.touched)" class="invalid-feedback">
+              La especie es obligatoria.
+            </div>
           </div>
 
           <div class="col-md-4">
             <label class="form-label text-muted small">Raza <span class="text-danger">*</span></label>
-            <select class="form-select custom-input" [(ngModel)]="mascota.razaId" name="raza" required [disabled]="!especieSeleccionada">
+            <select class="form-select custom-input" [(ngModel)]="mascota.razaId" name="raza" required [disabled]="!especieSeleccionada" #raza="ngModel" [ngClass]="{'is-invalid': raza.invalid && (raza.dirty || raza.touched) && raza.value === 0}">
               <option [ngValue]="0" disabled>{{ especieSeleccionada ? 'Seleccione una raza' : 'Primero seleccione especie' }}</option>
               <option *ngFor="let r of razasFiltradas" [ngValue]="r.id">{{ r.nombre }}</option>
             </select>
+            <div *ngIf="raza.invalid && (raza.dirty || raza.touched)" class="invalid-feedback">
+              La raza es obligatoria.
+            </div>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-3">
             <label class="form-label text-muted small">Fecha de Nacimiento</label>
-            <input type="date" class="form-control custom-input" [(ngModel)]="mascota.fechaNacimiento" name="fechaNacimiento" />
+            <input type="date" class="form-control custom-input" [(ngModel)]="mascota.fechaNacimiento" name="fechaNacimiento" [max]="fechaActual" #fechaNacimiento="ngModel" [ngClass]="{'is-invalid': fechaNacimiento.invalid && (fechaNacimiento.dirty || fechaNacimiento.touched)}" />
+            <div *ngIf="fechaNacimiento.invalid && (fechaNacimiento.dirty || fechaNacimiento.touched)" class="invalid-feedback">
+              La fecha no puede ser futura.
+            </div>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-3">
             <label class="form-label text-muted small">Peso (kg) (Opcional)</label>
-            <input type="number" step="0.1" class="form-control custom-input" [(ngModel)]="mascota.peso" name="peso" placeholder="Ej. 12.5"/>
+            <input type="number" step="0.1" min="0.1" class="form-control custom-input" [(ngModel)]="mascota.peso" name="peso" placeholder="Ej. 12.5" #peso="ngModel" [ngClass]="{'is-invalid': peso.invalid && (peso.dirty || peso.touched)}" />
+            <div *ngIf="peso.invalid && (peso.dirty || peso.touched)" class="invalid-feedback">
+              El peso debe ser mayor a 0.
+            </div>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label text-muted small">Género</label>
+            <select class="form-select custom-input" [(ngModel)]="mascota.genero" name="genero">
+              <option value="" disabled selected>Seleccione</option>
+              <option value="Macho">Macho</option>
+              <option value="Hembra">Hembra</option>
+            </select>
           </div>
         </div>
 
@@ -98,11 +122,11 @@
             Cancelar
           </button>
           
-          <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm" *ngIf="editando === null">
+          <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm" *ngIf="editando === null" [disabled]="mascotaForm.invalid || mascota.razaId === 0">
             Registrar Mascota
           </button>
           
-          <button type="submit" class="btn btn-warning btn-lg px-4 text-white shadow-sm" *ngIf="editando !== null">
+          <button type="submit" class="btn btn-warning btn-lg px-4 text-white shadow-sm" *ngIf="editando !== null" [disabled]="mascotaForm.invalid || mascota.razaId === 0">
             Actualizar Mascota
           </button>
         </div>
@@ -160,6 +184,7 @@
               <th class="border-0">Raza</th>
               <th class="border-0">Edad</th>
               <th class="border-0">Peso</th>
+              <th class="border-0">Género</th>
               <th class="text-end pe-4 border-0" style="min-width: 200px;">Acciones</th>
             </tr>
           </thead>
@@ -170,6 +195,12 @@
               <td data-label="Raza">{{ m.raza || '-' }}</td>
               <td data-label="Edad">{{ m.edadCalculada ?? '-' }} años</td>
               <td data-label="Peso">{{ m.peso ? m.peso + ' kg' : '-' }}</td>
+              <td data-label="Género">
+                <span class="badge" 
+                      [ngClass]="m.genero === 'Hembra' ? 'bg-pink text-white' : (m.genero === 'Macho' ? 'bg-primary text-white' : 'bg-secondary')">
+                  {{ m.genero || '-' }}
+                </span>
+              </td>
               
               <!-- ACCIONES MEJORADAS -->
               <td class="text-end pe-4">

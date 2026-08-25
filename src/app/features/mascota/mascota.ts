@@ -31,6 +31,7 @@ export class MascotaComponent implements OnInit {
     razaId: 0,
     fechaNacimiento: '',
     peso: undefined,
+    genero: '',
     clienteDni: ''
   };
 
@@ -65,6 +66,9 @@ export class MascotaComponent implements OnInit {
   fotoCredencialDataUrl: string | null = null;
   fotoCredencialNombre: string = '';
   // ─────────────────────────────────────────────────────────────────────────
+
+  // Fecha actual para restringir el calendario
+  fechaActual: string = new Date().toISOString().split('T')[0];
 
   constructor(
     private mascotaService: MascotaService,
@@ -417,6 +421,7 @@ export class MascotaComponent implements OnInit {
       razaId: this.mascota.razaId,
       fechaNacimiento: this.mascota.fechaNacimiento,
       peso: this.mascota.peso,
+      genero: this.mascota.genero,
       clienteDni: this.mascota.clienteDni
     };
 
@@ -472,6 +477,7 @@ export class MascotaComponent implements OnInit {
           razaId: m.razaId || 0,
           fechaNacimiento: m.fechaNacimiento || '',
           peso: m.peso,
+          genero: m.genero || '',
           clienteDni: m.clienteDni
         };
         
@@ -500,6 +506,7 @@ export class MascotaComponent implements OnInit {
       razaId: 0,
       fechaNacimiento: '',
       peso: undefined,
+      genero: '',
       clienteDni: ''
     };
     this.dniCliente = '';

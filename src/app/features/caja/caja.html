@@ -19,6 +19,11 @@
             <i class="bi bi-cart-plus"></i> Nueva Venta Rápida (Mostrador)
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="modoActivo === 'historial'" (click)="setModo('historial')" style="cursor: pointer;">
+            <i class="bi bi-clock-history"></i> Historial de Ventas
+          </a>
+        </li>
       </ul>
     </div>
   </div>
@@ -154,6 +159,57 @@
             <span *ngIf="!procesandoVenta"><i class="bi bi-check2-circle"></i> Confirmar Venta</span>
             <span *ngIf="procesandoVenta"><i class="spinner-border spinner-border-sm"></i> Procesando...</span>
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Historial de Ventas -->
+  <div *ngIf="modoActivo === 'historial'">
+    <div *ngIf="cargandoHistorial" class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+    
+    <div *ngIf="!cargandoHistorial && historialVentas.length === 0" class="alert alert-info text-center shadow-sm">
+      <i class="bi bi-info-circle fs-4 d-block mb-2"></i>
+      No hay ventas registradas aún.
+    </div>
+
+    <div class="card shadow-sm border-0" *ngIf="!cargandoHistorial && historialVentas.length > 0">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Nro Venta</th>
+                <th>Fecha y Hora</th>
+                <th>Cliente</th>
+                <th>Productos Vendidos</th>
+                <th>Total</th>
+                <th class="text-center pe-4">Boleta (PDF)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let v of historialVentas">
+                <td class="ps-4 fw-bold text-secondary">#{{ v.id | number:'3.0-0' }}</td>
+                <td>{{ v.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ v.clienteNombre || 'Cliente General' }}</td>
+                <td>
+                  <span class="badge bg-secondary me-1" *ngFor="let det of v.detalles">
+                    {{det.cantidad}}x {{det.producto?.nombre || 'Prod'}}
+                  </span>
+                </td>
+                <td class="fw-bold text-success">S/. {{ v.total | number:'1.2-2' }}</td>
+                <td class="text-center pe-4">
+                  <button class="btn btn-sm btn-outline-danger" (click)="verBoletaPDF(v.id!)">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

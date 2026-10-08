@@ -21,7 +21,7 @@ export class CajaComponent implements OnInit {
   cargando = false;
 
   // --- VENTA DIRECTA (POS) ---
-  modoActivo: 'cobros' | 'venta' = 'cobros';
+  modoActivo: 'cobros' | 'venta' | 'historial' = 'cobros';
   
   // Productos disponibles
   productosTodos: ProductoDTO[] = [];
@@ -34,6 +34,10 @@ export class CajaComponent implements OnInit {
   ventaNueva: Venta = { detalles: [] };
   procesandoVenta = false;
 
+  // --- HISTORIAL DE VENTAS ---
+  historialVentas: Venta[] = [];
+  cargandoHistorial = false;
+
   constructor(
     private cobroService: CobroConsultaService,
     private ventaService: VentaService,
@@ -45,10 +49,13 @@ export class CajaComponent implements OnInit {
     this.cargarProductos();
   }
 
-  setModo(modo: 'cobros' | 'venta') {
+  setModo(modo: 'cobros' | 'venta' | 'historial') {
     this.modoActivo = modo;
     if (modo === 'venta' && this.productosTodos.length === 0) {
       this.cargarProductos();
+    }
+    if (modo === 'historial') {
+      this.cargarHistorial();
     }
   }
 
@@ -224,5 +231,27 @@ export class CajaComponent implements OnInit {
         });
       }
     });
+  }
+
+  // --- MÉTODOS HISTORIAL DE VENTAS ---
+  cargarHistorial(): void {
+    this.cargandoHistorial = true;
+    this.ventaService.listarVentas().subscribe({
+      next: (data) => {
+        // Ordenar de más reciente a más antigua
+        this.historialVentas = data.sort((a, b) => new Date(b.fecha!).getTime() - new Date(a.fecha!).getTime());
+        this.cargandoHistorial = false;
+      },
+      error: (err) => {
+        console.error('Error cargando historial de ventas', err);
+        this.cargandoHistorial = false;
+        Swal.fire('Error', 'No se pudo cargar el historial de ventas.', 'error');
+      }
+    });
+  }
+
+  verBoletaPDF(id: number): void {
+    const url = `http://localhost:8080/api/ventas/${id}/comprobante/pdf`;
+    window.open(url, '_blank');
   }
 }

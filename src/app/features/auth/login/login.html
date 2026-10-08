@@ -1,52 +1,77 @@
-<div class="vet-login-container">
-  <div class="login-card">
-    
-    <div class="header-text">
-      <div class="vet-avatar-circle">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #20c997;">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-        </svg>
+<div class="vet-login-container row g-0">
+  
+  <!-- Left Side: Image -->
+  <div class="col-lg-7 d-none d-lg-block login-image-side">
+    <div class="image-overlay">
+      <div class="overlay-text">
+        <h1 class="display-4 fw-black text-white drop-shadow-text">BIENVENIDO DE VUELTA</h1>
+        <p class="lead text-white drop-shadow-text">El mejor cuidado para los mejores amigos.</p>
       </div>
-      <h2>Veterinaria Petyzoos</h2>
-      <p>Panel de Administración</p>
     </div>
-
-    <form (ngSubmit)="login()">
-      
-      <div class="input-group">
-        <label>Correo Electrónico</label>
-        <input 
-          [(ngModel)]="dto.email" 
-          name="email" 
-          type="email"
-          class="vet-input" 
-          placeholder="admin@petyzoos.com"
-          required 
-        />
-      </div>
-
-      <div class="input-group">
-        <label>Contraseña</label>
-        <input 
-          [(ngModel)]="dto.password" 
-          name="password" 
-          type="password" 
-          class="vet-input" 
-          placeholder="••••••••"
-          required 
-        />
-      </div>
-
-      <button class="btn-vet" type="submit">
-        Ingresar al sistema
-      </button>
-
-    </form>
-
-    <div class="footer-text">
-      <p>¿Problemas para acceder?</p>
-      <small>Contactar al administrador</small>
-    </div>
-
   </div>
+
+  <!-- Right Side: Form -->
+  <div class="col-lg-5 d-flex align-items-center justify-content-center login-form-side">
+    <div class="login-card shadow-clay">
+      
+      <div class="header-text text-center mb-4">
+        <div class="mx-auto mb-3">
+          <img src="logo_sysvet.png" alt="Sistema Veterinario SYSVET" style="height: 110px; max-width: 100%; object-fit: contain;">
+        </div>
+        <p class="text-muted fw-semibold">Panel de Administración</p>
+      </div>
+
+      <form (ngSubmit)="login()">
+        
+        <div class="mb-3">
+          <label class="form-label text-primary fw-semibold small">Correo Electrónico</label>
+          <input 
+            [(ngModel)]="dto.email" 
+            name="email" 
+            type="email"
+            class="form-control form-control-lg bg-light" 
+            placeholder="ejemplo@correo.com"
+            required 
+          />
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-primary fw-semibold small">Contraseña</label>
+          <div class="input-group-password">
+            <input 
+              [(ngModel)]="dto.password" 
+              name="password" 
+              [type]="showPassword ? 'text' : 'password'" 
+              class="form-control form-control-lg bg-light" 
+              placeholder="Escribe tu contraseña"
+              required 
+            />
+            <button type="button" class="btn btn-icon password-toggle" (click)="togglePasswordVisibility()" tabindex="-1">
+              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-accent btn-lg w-100 fw-bold rounded-pill text-white shadow-clay-hover d-flex justify-content-center align-items-center" type="submit" [disabled]="isLoading">
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <span *ngIf="!isLoading">Ingresar al sistema</span>
+          <span *ngIf="isLoading">Ingresando...</span>
+        </button>
+
+      </form>
+
+      <div class="footer-text text-center mt-4">
+        <p class="text-muted small mb-1">¿Problemas para acceder?</p>
+        <a href="#" class="text-accent fw-bold small text-decoration-none">Contactar al administrador</a>
+      </div>
+
+      <div class="text-center mt-4">
+         <a routerLink="/" class="text-primary text-decoration-none small fw-semibold">
+           <i class="bi bi-arrow-left"></i> Volver a la página principal
+         </a>
+      </div>
+
+    </div>
+  </div>
+
 </div>

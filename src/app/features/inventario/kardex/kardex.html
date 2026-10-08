@@ -1,0 +1,63 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0 text-primary">Kardex (Historial de Movimientos)</h2>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Seleccione un Producto</label>
+          <select class="form-select form-select-lg" [(ngModel)]="productoSeleccionadoId" (change)="onProductoChange()">
+            <option [value]="null">Seleccione...</option>
+            <option *ngFor="let p of productos" [value]="p.id">{{ p.codigo }} - {{ p.nombre }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm" *ngIf="productoSeleccionadoId">
+    <div class="card-body p-0">
+      <div *ngIf="cargando" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Cargando historial...</p>
+      </div>
+
+      <table class="table table-hover align-middle mb-0" *ngIf="!cargando">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Fecha y Hora</th>
+            <th>Operación</th>
+            <th>Detalle</th>
+            <th class="text-center">Cantidad</th>
+            <th class="text-center">Saldo Resultante</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of historialKardex">
+            <td class="ps-4">{{ h.fechaHora | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td>
+              <span [class]="getClaseOperacion(h.tipoOperacion)">
+                {{ h.tipoOperacion }}
+              </span>
+            </td>
+            <td class="text-muted">{{ h.detalle }}</td>
+            <td class="text-center fw-bold" 
+                [ngClass]="{'text-success': h.tipoOperacion === 'INGRESO', 'text-danger': h.tipoOperacion !== 'INGRESO'}">
+              <span *ngIf="h.tipoOperacion === 'INGRESO'">+</span>
+              <span *ngIf="h.tipoOperacion !== 'INGRESO'">-</span>
+              {{ h.cantidad }}
+            </td>
+            <td class="text-center fw-bold text-primary">{{ h.saldoResultante }}</td>
+          </tr>
+          <tr *ngIf="historialKardex.length === 0">
+            <td colspan="5" class="text-center text-muted py-5">
+              No hay movimientos registrados para este producto.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -284,14 +284,21 @@ export class ClientesComponent implements OnInit {
 
   // Helpers para mensajes visuales
   mostrarExito(msg: string) {
-    this.mensajeExito = msg;
-    this.mensajeError = '';
-    setTimeout(() => this.mensajeExito = '', 4000);
+    Swal.fire({
+      title: '¡Éxito!',
+      text: msg,
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false
+    });
   }
 
   mostrarError(msg: string) {
-    this.mensajeError = msg;
-    this.mensajeExito = '';
-    setTimeout(() => this.mensajeError = '', 4000);
+    Swal.fire({
+      title: 'Error',
+      text: msg,
+      icon: 'error',
+      confirmButtonColor: '#20c997'
+    });
   }
 }

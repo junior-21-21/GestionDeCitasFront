@@ -1,0 +1,347 @@
+<!-- Header -->
+<nav class="navbar navbar-expand-lg sticky-top py-3 landing-nav">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="logo_sysvet.png" alt="SYSVET" style="height: 60px;">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link fw-semibold" href="#inicio">INICIO</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="#nosotros">NOSOTROS</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="#servicios">SERVICIOS</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold text-accent" href="#historial">HISTORIAL</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="#contacto">CONTACTO</a></li>
+      </ul>
+      <div class="d-flex gap-3 align-items-center">
+        <a routerLink="/login" class="text-muted text-decoration-none opacity-50 hover-opacity-100" title="Acceso Personal">
+          <i class="bi bi-lock-fill fs-5"></i>
+        </a>
+        <a href="#contacto" class="btn btn-accent text-white text-decoration-none">Solicitar Cita</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<header id="inicio" class="hero-section position-relative d-flex align-items-center stagger-item">
+  <div class="hero-bg" style="background-image: url('landing/hero_vet_bg_1788826639954.jpg');"></div>
+  <div class="hero-overlay"></div>
+  <div class="container position-relative z-index-1">
+    <div class="row">
+      <div class="col-lg-6 offset-lg-6 text-end text-white hero-content">
+        <h1 class="display-3 fw-black text-accent text-uppercase mb-2 drop-shadow-text">CUIDADO</h1>
+        <h2 class="display-2 fw-black text-white text-uppercase mb-4 drop-shadow-text">VETERINARIO</h2>
+        <p class="lead fw-semibold mb-4 drop-shadow-text">SALUD, AMOR Y PROTECCIÓN PARA TUS MASCOTAS</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Sobre Nosotros -->
+<section id="nosotros" class="py-5 bg-body scroll-animate">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-lg-5 mb-5 mb-lg-0 position-relative">
+        <img src="landing/about_us_vet_1788827143514.jpg" alt="Veterinaria con gatito" class="img-fluid rounded-4 shadow-clay about-img float-animation">
+      </div>
+      <div class="col-lg-6 offset-lg-1">
+        <h2 class="fw-black text-accent mb-1 text-uppercase">SOBRE <span class="text-primary">NOSOTROS</span></h2>
+        <h5 class="text-primary fw-bold mb-4">ESPECIALISTAS EN CUIDADO ANIMAL</h5>
+        <p class="mb-4">
+          Nuestra clínica veterinaria cuenta con un equipo de profesionales apasionados por el bienestar animal. 
+          Ofrecemos atención integral, diagnósticos precisos y tratamientos efectivos para asegurar que tu compañero 
+          de vida disfrute de una vida larga y saludable.
+        </p>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-3 d-flex align-items-start">
+            <i class="bi bi-check-circle-fill text-accent fs-5 me-3"></i>
+            <span><strong>Atención Profesional:</strong> Médicos veterinarios altamente capacitados y con vasta experiencia.</span>
+          </li>
+          <li class="mb-3 d-flex align-items-start">
+            <i class="bi bi-check-circle-fill text-accent fs-5 me-3"></i>
+            <span><strong>Trato Amable:</strong> Entendemos que tu mascota es parte de tu familia y la tratamos con el mismo amor.</span>
+          </li>
+          <li class="d-flex align-items-start">
+            <i class="bi bi-check-circle-fill text-accent fs-5 me-3"></i>
+            <span><strong>Instalaciones Modernas:</strong> Equipamiento de última generación para diagnósticos rápidos y precisos.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Servicios -->
+<section id="servicios" class="py-5 bg-primary-dark scroll-animate">
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <h2 class="fw-black text-white text-uppercase"><span class="text-accent">NUESTROS</span> SERVICIOS</h2>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        <div class="service-card card h-100 border-0 overflow-hidden shadow-clay">
+          <img src="landing/service_vet_1_1788827252629.jpg" class="card-img-top" alt="Consulta General">
+          <div class="card-body bg-primary-dark text-white p-4">
+            <h5 class="card-title fw-bold">CONSULTA GENERAL</h5>
+            <p class="card-text small">Revisión completa de salud, diagnósticos oportunos y tratamientos preventivos para perros y gatos.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="service-card card h-100 border-0 overflow-hidden shadow-clay">
+          <img src="landing/service_vet_2_1788827576850.jpg" class="card-img-top" alt="Peluquería">
+          <div class="card-body bg-teal text-white p-4">
+            <h5 class="card-title fw-bold">PELUQUERÍA Y BAÑO</h5>
+            <p class="card-text small">Servicio completo de estética canina y felina. Cortes, baños terapéuticos y limpieza de oídos y uñas.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="service-card card h-100 border-0 overflow-hidden shadow-clay">
+          <div class="service-placeholder d-flex align-items-center justify-content-center bg-light">
+             <i class="bi bi-heart-pulse text-accent" style="font-size: 5rem;"></i>
+          </div>
+          <div class="card-body bg-accent text-white p-4">
+            <h5 class="card-title fw-bold">CIRUGÍA Y URGENCIAS</h5>
+            <p class="card-text small">Quirófano equipado y personal preparado para atender cirugías de rutina y emergencias médicas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Historial Médico -->
+<section id="historial" class="py-5 bg-light scroll-animate">
+  <div class="container py-5 text-center">
+    <h2 class="fw-black text-primary text-uppercase mb-3">HISTORIAL <span class="text-accent">CLÍNICO</span></h2>
+    <p class="mb-5 text-secondary">Ingresa el código único de tu mascota para descargar su historial clínico completo en PDF.</p>
+    
+    <div class="card border-0 shadow-clay mx-auto" style="max-width: 600px; border-radius: 1rem;">
+      <div class="card-body p-4 p-md-5">
+        <form (ngSubmit)="buscarHistorial()" #historialForm="ngForm">
+          <div class="input-group input-group-lg mb-3">
+            <span class="input-group-text bg-white border-end-0 text-primary">
+              <i class="bi bi-upc-scan"></i>
+            </span>
+            <input type="text" class="form-control border-start-0" placeholder="Ej: PCP000001" 
+                   [(ngModel)]="codigoBusqueda" name="codigoBusqueda" required
+                   [disabled]="cargando">
+            <button class="btn btn-primary px-4 fw-bold" type="submit" [disabled]="cargando || !codigoBusqueda">
+              <span *ngIf="!cargando"><i class="bi bi-search me-2"></i> Buscar</span>
+              <span *ngIf="cargando"><span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Buscando...</span>
+            </button>
+          </div>
+        </form>
+        
+        <div *ngIf="mascotaEncontrada" class="mt-4 text-start">
+          <div class="alert alert-success d-flex align-items-center rounded-3 mb-4">
+            <div class="me-3 fs-1 text-success"><i class="bi bi-check-circle-fill"></i></div>
+            <div>
+              <h5 class="fw-bold mb-1">¡Mascota encontrada!</h5>
+              <p class="mb-0 small">Hemos localizado el historial clínico de <strong class="text-uppercase">{{pacienteInfo?.nombre}}</strong>.</p>
+            </div>
+          </div>
+
+          <!-- Previsualización del Historial -->
+          <div class="card shadow-sm border-0 mb-4" *ngIf="historialConsultas.length > 0">
+            <div class="card-header bg-primary text-white py-3 fw-bold d-flex justify-content-between align-items-center">
+              <div><i class="bi bi-clock-history me-2"></i> Previsualización del Historial Clínico</div>
+              <span class="badge bg-light text-primary rounded-pill">{{historialConsultas.length}} atenciones</span>
+            </div>
+            <div class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+              <div class="list-group-item p-3 border-bottom" *ngFor="let c of historialConsultas">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                  <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-calendar-event me-1"></i> {{c.fecha}}</h6>
+                  <span class="badge bg-light text-dark border"><i class="bi bi-person-fill"></i> Dr. {{c.nombreVeterinario}}</span>
+                </div>
+                
+                <div class="row g-2 small">
+                  <div class="col-12">
+                    <strong>Motivo:</strong> {{c.motivo}}
+                  </div>
+                  <div class="col-md-6" *ngIf="c.peso">
+                    <strong>Peso:</strong> {{c.peso}} kg
+                  </div>
+                  <div class="col-12 text-muted">
+                    <strong>Diagnóstico:</strong> {{c.diagnostico || 'No registrado'}}
+                  </div>
+                  <div class="col-12 text-muted" *ngIf="c.tratamiento">
+                    <strong>Tratamiento:</strong> {{c.tratamiento}}
+                  </div>
+                  <div class="col-12 text-muted" *ngIf="c.observaciones">
+                    <strong>Observaciones:</strong> {{c.observaciones}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card shadow-sm border-0 mb-4" *ngIf="historialConsultas.length === 0">
+            <div class="card-body text-center text-muted py-5">
+              <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+              <p class="mb-0">Aún no hay atenciones registradas para esta mascota.</p>
+            </div>
+          </div>
+
+          <button class="btn btn-success fw-bold d-flex align-items-center w-100 justify-content-center py-3 rounded-pill shadow-clay-hover" (click)="descargarHistorialPdf()">
+            <i class="bi bi-file-earmark-pdf-fill fs-5 me-2"></i> Descargar Historial Completo en PDF
+          </button>
+        </div>
+        
+        <div *ngIf="error" class="alert alert-danger mt-4 mb-0 text-start d-flex align-items-center rounded-3">
+          <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+          <div>{{ error }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Por qué elegirnos -->
+<section class="py-5 bg-body scroll-animate">
+  <div class="container py-5 text-center">
+    <h2 class="fw-black text-primary text-uppercase mb-5">¿POR QUÉ <span class="text-accent">ELEGIRNOS?</span></h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-box p-4 bg-primary-dark text-white rounded-4 shadow-clay h-100">
+          <i class="bi bi-rocket-takeoff-fill fs-1 text-accent mb-3 d-block"></i>
+          <h5 class="fw-bold">ATENCIÓN RÁPIDA</h5>
+          <p class="small mb-0">Disponibilidad para citas prontas y atención de emergencias prioritaria.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-box p-4 bg-accent text-white rounded-4 shadow-clay h-100">
+          <i class="bi bi-shield-check fs-1 text-white mb-3 d-block"></i>
+          <h5 class="fw-bold">SEGURIDAD MÉDICA</h5>
+          <p class="small mb-0">Protocolos estrictos de higiene y seguridad para cuidar el bienestar de tu mascota.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-box p-4 bg-yellow text-white rounded-4 shadow-clay h-100">
+          <i class="bi bi-people-fill fs-1 text-primary-dark mb-3 d-block"></i>
+          <h5 class="fw-bold">EXPERTOS EN CAMPO</h5>
+          <p class="small mb-0">Nuestro equipo se capacita continuamente en las mejores prácticas veterinarias.</p>
+        </div>
+      </div>
+      <div class="col-md-4 offset-md-2">
+        <div class="feature-box p-4 bg-accent text-white rounded-4 shadow-clay h-100">
+          <i class="bi bi-clock-history fs-1 text-white mb-3 d-block"></i>
+          <h5 class="fw-bold">ATENCIÓN PERSONALIZADA</h5>
+          <p class="small mb-0">Cada mascota es única. Adaptamos nuestros tratamientos a sus necesidades específicas.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-box p-4 bg-teal text-white rounded-4 shadow-clay h-100">
+          <i class="bi bi-cash-coin fs-1 text-accent mb-3 d-block"></i>
+          <h5 class="fw-bold">PRECIOS COMPETITIVOS</h5>
+          <p class="small mb-0">Servicios de calidad superior con precios accesibles y transparentes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contacto -->
+<section id="contacto" class="py-5 bg-primary-dark scroll-animate">
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <h2 class="fw-black text-white text-uppercase">HABLEMOS DE <span class="text-accent">TU MASCOTA</span></h2>
+      <p class="text-white-50">Completa el formulario y nos pondremos en contacto contigo lo antes posible.</p>
+    </div>
+    
+    <div class="card bg-white border-0 shadow-clay mx-auto overflow-hidden" style="max-width: 900px; border-radius: 20px;">
+      <div class="row g-0">
+        <div class="col-md-5 bg-light p-4 d-flex flex-column justify-content-center align-items-center text-center position-relative">
+          <div class="position-absolute w-100 h-100" style="background-image: url('landing/hero_vet_bg_1788826639954.jpg'); background-size: cover; background-position: center; opacity: 0.2;"></div>
+          <div class="position-relative z-index-1">
+            <h4 class="fw-bold text-primary mb-4">¿Prefieres escribirnos directo?</h4>
+            <a href="https://wa.me/123456789" class="btn bg-yellow btn-lg text-primary-dark fw-bold mb-4 w-100 shadow-clay-hover rounded-pill">
+              <i class="bi bi-whatsapp me-2"></i> Mensaje por WhatsApp
+            </a>
+            <ul class="list-unstyled text-start fw-semibold text-primary">
+              <li class="mb-2"><i class="bi bi-check text-accent fs-5"></i> Atención personalizada</li>
+              <li><i class="bi bi-check text-accent fs-5"></i> Asesoramiento previo</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-7 p-4 p-lg-5">
+          <form>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <input type="text" class="form-control bg-light" placeholder="Nombre">
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control bg-light" placeholder="Teléfono">
+              </div>
+              <div class="col-12">
+                <input type="email" class="form-control bg-light" placeholder="Correo">
+              </div>
+              <div class="col-12">
+                <textarea class="form-control bg-light" rows="4" placeholder="¿Cómo podemos ayudarte?"></textarea>
+              </div>
+              <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-accent w-100 text-white fw-bold rounded-pill shadow-clay-hover py-3">
+                  ENVIAR MENSAJE
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-white py-5 mt-auto">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <a class="d-flex align-items-center" href="#">
+          <img src="logo_sysvet.png" alt="SYSVET" style="height: 60px;">
+        </a>
+        <p class="small text-muted mb-0">
+          Especialistas en la salud y cuidado de tus mascotas. Atención integral y con el mayor cariño.
+        </p>
+      </div>
+      <div class="col-lg-3 offset-lg-1">
+        <h6 class="fw-bold text-primary text-uppercase mb-3">MAPA DEL SITIO</h6>
+        <ul class="list-unstyled small mb-0 footer-links">
+          <li class="mb-2"><a href="#inicio" class="text-decoration-none text-muted">Inicio</a></li>
+          <li class="mb-2"><a href="#nosotros" class="text-decoration-none text-muted">Nosotros</a></li>
+          <li class="mb-2"><a href="#servicios" class="text-decoration-none text-muted">Servicios</a></li>
+          <li><a href="#contacto" class="text-decoration-none text-muted">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2">
+        <h6 class="fw-bold text-primary text-uppercase mb-3">CONTÁCTANOS</h6>
+        <ul class="list-unstyled small mb-0 text-muted">
+          <li class="mb-2"><i class="bi bi-envelope-fill text-accent me-2"></i> contacto@petyzoos.com</li>
+          <li class="mb-2"><i class="bi bi-telephone-fill text-accent me-2"></i> +51 987 654 321</li>
+          <li><i class="bi bi-geo-alt-fill text-accent me-2"></i> Av. Veterinaria 123, Ciudad</li>
+        </ul>
+      </div>
+      <div class="col-lg-2">
+        <h6 class="fw-bold text-primary text-uppercase mb-3">SÍGUENOS</h6>
+        <div class="d-flex gap-3">
+          <a href="#" class="text-primary fs-5"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="text-primary fs-5"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="text-primary fs-5"><i class="bi bi-tiktok"></i></a>
+        </div>
+      </div>
+    </div>
+    <hr class="my-4 text-muted">
+    <div class="text-center small text-muted">
+      &copy; 2026 PetyZoos Vet. Todos los derechos reservados.
+    </div>
+  </div>
+</footer>
+
+<!-- Floating WhatsApp Button -->
+<a href="https://wa.me/123456789" class="whatsapp-float shadow-clay-hover" target="_blank" title="Escríbenos por WhatsApp">
+  <i class="bi bi-whatsapp"></i>
+</a>

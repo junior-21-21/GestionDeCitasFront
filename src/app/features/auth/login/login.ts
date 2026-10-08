@@ -1,7 +1,7 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AnimationService } from '../../../services/animation.service';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,13 +23,20 @@ import Swal from 'sweetalert2';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule
+    MatCardModule,
+    RouterModule
   ],
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
 export class LoginComponent implements AfterViewInit {
   dto: LoginDTO = { email: '', password: '' };
+  showPassword = false;
+  isLoading = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   constructor(
     private authService: AuthService,
@@ -52,8 +59,11 @@ export class LoginComponent implements AfterViewInit {
       return;
     }
 
+    this.isLoading = true;
+
     this.authService.login(this.dto).subscribe({
       next: () => {
+        this.isLoading = false;
         Swal.fire({
           icon: 'success',
           title: 'Bienvenido',
@@ -72,6 +82,7 @@ export class LoginComponent implements AfterViewInit {
         }
       },
       error: (err) => {
+        this.isLoading = false;
         // Shake al formulario en cualquier error
         this.anim.shake('form, mat-card');
         const body = err.error;

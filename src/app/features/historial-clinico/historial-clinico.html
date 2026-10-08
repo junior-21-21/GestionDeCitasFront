@@ -87,9 +87,14 @@
         <span *ngIf="buscado && !nombrePaciente"><i class="bi bi-heart-pulse"></i> Resultados</span>
         <span *ngIf="!buscado"><i class="bi bi-calendar-check"></i> Atenciones del Día de Hoy</span>
       </h4>
-      <span class="badge bg-info fs-6" *ngIf="consultas.length > 0">
-        {{ consultas.length }} consulta{{ consultas.length > 1 ? 's' : '' }}
-      </span>
+      <div class="d-flex gap-2 align-items-center">
+        <span class="badge bg-info fs-6" *ngIf="consultas.length > 0">
+          {{ consultas.length }} consulta{{ consultas.length > 1 ? 's' : '' }}
+        </span>
+        <button class="btn btn-success btn-sm fw-bold" *ngIf="buscado && consultas.length > 0" (click)="descargarHistorialPdf()">
+          <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+        </button>
+      </div>
     </div>
 
     <div *ngIf="consultas.length > 0; else sinResultados" class="table-responsive">

@@ -46,4 +46,10 @@ export class ConsultaService {
       responseType: 'blob'
     });
   }
+
+  descargarHistorialPdf(codigoPaciente: string): Observable<Blob> {
+    return this.http.get(`${this.url}/historial/public/paciente/${codigoPaciente}/pdf`, {
+      responseType: 'blob'
+    });
+  }
 }

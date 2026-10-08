@@ -312,29 +312,83 @@
       <!-- Body -->
       <div class="modal-cred-body">
 
-        <!-- Preview tarjeta -->
-        <div class="cred-preview-card" id="credencial-preview">
-          <div class="cred-photo-area">
-            <img *ngIf="fotoCredencialDataUrl" [src]="fotoCredencialDataUrl" alt="Foto mascota" />
-            <i *ngIf="!fotoCredencialDataUrl" class="bi bi-camera-fill cred-photo-placeholder"></i>
-          </div>
-          <div class="cred-info-area">
-            <div class="cred-clinic-name">CLÍNICA VETERINARIA PETYZOOS</div>
-            <div class="cred-clinic-sub">Av. Ramón Castilla N.° 898, Huamanga</div>
-            <div class="cred-divider"></div>
-            <div class="cred-badge">CREDENCIAL DE MASCOTA</div>
-            <div class="cred-codigo">{{ mascotaCredencial?.codigoPaciente }}</div>
-            <div class="cred-row"><span class="cred-lbl">Nombre</span><span>{{ mascotaCredencial?.nombre }}</span></div>
-            <div class="cred-row"><span class="cred-lbl">Especie</span><span>{{ mascotaCredencial?.especie || '-' }}</span></div>
-            <div class="cred-row"><span class="cred-lbl">Raza</span><span>{{ mascotaCredencial?.raza || '-' }}</span></div>
-          </div>
-          <!-- Franja inferior -->
-          <div class="cred-footer-strip">
-            <div>
-              <span class="cred-footer-lbl">PROPIETARIO: </span>
-              {{ mascotaCredencial?.clienteNombreCompleto || '-' }}
+        <!-- Preview tarjeta estilo DNI Premium (PEID) -->
+        <div class="cred-preview-card peid-style" id="credencial-preview">
+          <!-- Logo & Header -->
+          <div class="peid-header">
+            <div class="peid-logo">
+               <img src="logo_sysvet.png" alt="SYSVET Logo" style="height: 35px; width: auto; object-fit: contain;">
             </div>
-            <div class="cred-mrz">{{ mascotaCredencial?.codigoPaciente }}&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+            <div class="peid-title">República del Perú</div>
+            <div class="peid-numero">{{ mascotaCredencial?.codigoPaciente }} - 1</div>
+          </div>
+
+          <!-- Body -->
+          <div class="peid-body">
+            <!-- Left: Number + Photo -->
+            <div class="peid-left">
+              <div class="peid-vert-num">{{ mascotaCredencial?.codigoPaciente }}</div>
+              <div class="peid-photo">
+                <img *ngIf="fotoCredencialDataUrl" [src]="fotoCredencialDataUrl" alt="Foto mascota" />
+                <i *ngIf="!fotoCredencialDataUrl" class="bi bi-camera-fill"></i>
+              </div>
+            </div>
+            
+            <!-- Middle: Data pills con labels flotantes -->
+            <div class="peid-center">
+              <div class="peid-pill">
+                <div class="lbl">Nombre</div>
+                {{ mascotaCredencial?.nombre || '-' }}
+              </div>
+              <div class="peid-pill">
+                <div class="lbl">Especie / Raza</div>
+                {{ mascotaCredencial?.especie || '-' }} - {{ mascotaCredencial?.raza || '-' }}
+              </div>
+              <div class="peid-pill-row">
+                <div class="peid-pill" style="flex: 1;">
+                  <div class="lbl">Sexo</div>
+                  {{ mascotaCredencial?.genero || '-' }}
+                </div>
+                <div class="peid-pill" style="flex: 1;">
+                  <div class="lbl">Peso</div>
+                  {{ mascotaCredencial?.peso ? mascotaCredencial?.peso + ' kg' : '-' }}
+                </div>
+                <div class="peid-pill" style="flex: 1;">
+                  <div class="lbl">F. Nac.</div>
+                  {{ mascotaCredencial?.fechaNacimiento ? (mascotaCredencial?.fechaNacimiento | date:'dd/MM/yyyy') : '-' }}
+                </div>
+              </div>
+              <div class="peid-pill">
+                <div class="lbl">Propietario</div>
+                {{ mascotaCredencial?.clienteNombreCompleto || '-' }}
+              </div>
+            </div>
+
+            <!-- Right: Dates -->
+            <div class="peid-right">
+              <div class="peid-date-box">
+                <div>Inscripción</div>
+                <strong>01-01-2024</strong>
+              </div>
+              <div class="peid-date-box">
+                <div>Emisión</div>
+                <strong>{{ fechaActual | date:'dd-MM-yyyy' }}</strong>
+              </div>
+              <div class="peid-date-box">
+                <div>Caducidad</div>
+                <strong>31-12-2034</strong>
+              </div>
+              <div class="peid-thumb">
+                <img *ngIf="fotoCredencialDataUrl" [src]="fotoCredencialDataUrl" alt="Thumb" />
+                <i *ngIf="!fotoCredencialDataUrl" class="bi bi-paw-fill"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer MRZ -->
+          <div class="peid-footer" style="font-family: 'Courier New', Courier, monospace; letter-spacing: 2px; font-size: 0.95rem; line-height: 1.2;">
+            {{ mrzLinea1 }}<br>
+            {{ mrzLinea2 }}
           </div>
         </div>
 

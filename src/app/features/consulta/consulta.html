@@ -1,275 +1,406 @@
-<div class="diagnostico-container">
-  <!-- Header con Stepper -->
-  <div class="stepper-header">
-    <div class="stepper-title">
-      <h2><i class="bi bi-heart-pulse"></i> Diagnosticar Mascota</h2>
-      <span class="cita-badge" *ngIf="vieneDeCita">Desde Cita {{ consulta.citaCodigo }}</span>
+<div class="consulta-container animate__animated animate__fadeIn">
+  
+  <div class="stepper-header mb-4">
+    <div class="stepper-title text-center text-white p-3 rounded-top bg-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <h2 class="m-0"><i class="bi bi-heart-pulse"></i> Atención Veterinaria (Método SOAP)</h2>
+      <span class="badge bg-light text-primary mt-2" *ngIf="vieneDeCita">Desde Cita {{consulta.citaCodigo}}</span>
     </div>
-    <div class="stepper">
-      <div class="step" [class.active]="pasoActual >= 1" [class.completed]="pasoActual > 1" (click)="irPaso(1)">
-        <div class="step-number">1</div>
-        <span class="step-label">Paciente</span>
+    
+    <div class="stepper-progress bg-white p-3 rounded-bottom shadow-sm d-flex justify-content-between align-items-center">
+      <div class="step" [class.active]="pasoActual === 1" [class.completed]="pasoActual > 1">
+        <div class="step-icon">1</div>
+        <div class="step-label">Triage</div>
       </div>
-      <div class="step-line" [class.active]="pasoActual > 1"></div>
-      <div class="step" [class.active]="pasoActual >= 2" [class.completed]="pasoActual > 2" (click)="irPaso(2)">
-        <div class="step-number">2</div>
-        <span class="step-label">Diagnóstico</span>
+      <div class="step-line"></div>
+      <div class="step" [class.active]="pasoActual === 2" [class.completed]="pasoActual > 2">
+        <div class="step-icon">2</div>
+        <div class="step-label">Físico</div>
       </div>
-      <div class="step-line" [class.active]="pasoActual > 2"></div>
-      <div class="step" [class.active]="pasoActual >= 3">
-        <div class="step-number">3</div>
-        <span class="step-label">Receta</span>
+      <div class="step-line"></div>
+      <div class="step" [class.active]="pasoActual === 3" [class.completed]="pasoActual > 3">
+        <div class="step-icon">3</div>
+        <div class="step-label">Análisis</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" [class.active]="pasoActual === 4" [class.completed]="pasoActual > 4">
+        <div class="step-icon">4</div>
+        <div class="step-label">Plan</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" [class.active]="pasoActual === 5" [class.completed]="pasoActual > 5">
+        <div class="step-icon">5</div>
+        <div class="step-label">Cobros</div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== PASO 1: Paciente y Veterinario ==================== -->
+  <!-- ==================== PASO 1: TRIAGE (SUBJETIVO) ==================== -->
   <div class="step-content" *ngIf="pasoActual === 1">
     <div class="paso-header">
-      <h3><i class="bi bi-person-badge"></i> Información del Paciente y Veterinario</h3>
-      <p class="paso-desc">Seleccione o confirme los datos del paciente y del veterinario que atiende.</p>
+      <h3><i class="bi bi-journal-medical"></i> S - Subjetivo (Recepción y Triage)</h3>
+      <p class="paso-desc">Información proporcionada por el propietario y motivo de la visita.</p>
     </div>
 
-    <div class="info-grid">
-      <!-- Alerta: datos forzados desde la cita (Normalización B) -->
-      <div class="alert alert-info d-flex align-items-center mb-3" *ngIf="vieneDeCita">
-        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-        <div>Paciente y veterinario se asignan automáticamente desde la cita seleccionada. No se pueden modificar para mantener la coherencia de datos.</div>
-      </div>
-
-      <!-- Selección de Cita (si no viene de cita) -->
-      <div class="select-section" *ngIf="!vieneDeCita">
-        <div class="paso-header mb-3">
-          <h4 class="text-primary mb-1"><i class="bi bi-calendar-check"></i> Seleccione la Cita a Atender</h4>
-          <p class="small text-muted m-0">Elija al paciente de la lista de citas pendientes para iniciar el diagnóstico.</p>
+    <!-- Buscador de Citas (Oculto si viene desde Citas) -->
+    <div class="citas-selector mb-4" *ngIf="!vieneDeCita">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0 text-primary"><i class="bi bi-calendar-check"></i> Seleccionar Paciente en Espera</h5>
         </div>
-        
-        <!-- Chips de Días Disponibles -->
-        <div class="d-flex flex-wrap gap-2 mb-4" *ngIf="diasDisponibles.length > 0">
-          <button 
-            *ngFor="let dia of diasDisponibles"
-            class="btn btn-sm rounded-pill fw-bold px-3 shadow-sm"
-            [ngClass]="fechaFiltro === dia ? 'btn-primary' : 'btn-outline-secondary'"
-            (click)="filtrarCitasPorFecha(dia)"
-          >
-            <i class="bi bi-calendar-day me-1"></i> {{ dia | date:'mediumDate' }}
-          </button>
-        </div>
-
-        <div class="citas-grid mb-4">
-          <div *ngIf="citasPendientes.length === 0" class="alert alert-warning w-100 mb-0">
-            <i class="bi bi-emoji-frown me-2"></i> No hay citas pendientes para atender en este momento.
-          </div>
-          
-          <div 
-            class="cita-card" 
-            *ngFor="let c of citasPendientes" 
-            [class.selected]="consulta.citaCodigo === c.codigoCita"
-            (click)="seleccionarCita(c.codigoCita)"
-          >
-            <div class="cita-card-icon">
-              <i class="bi bi-calendar-event"></i>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Día de la Cita:</label>
+              <select class="form-select" [(ngModel)]="fechaFiltro" (change)="filtrarCitasPorFecha()">
+                <option value="">Todas las fechas</option>
+                <option *ngFor="let d of diasDisponibles" [value]="d">{{ d | date:'mediumDate' }}</option>
+              </select>
             </div>
-            <div class="cita-card-info">
-              <h5>{{ c.nombrePaciente }}</h5>
-              <span class="text-muted small d-block">Dr/a. {{ c.nombreVeterinario }}</span>
-              <span class="cita-time badge bg-light text-dark mt-1"><i class="bi bi-clock me-1"></i>{{ c.fechaHora | date:'shortTime' }}</span>
+            <div class="col-md-8">
+              <label class="form-label fw-bold">Paciente:</label>
+              <select class="form-select" [(ngModel)]="consulta.citaCodigo" (change)="onCitaSeleccionada()">
+                <option value="">-- Seleccione el paciente a atender --</option>
+                <option *ngFor="let cita of citasPendientes" [value]="cita.codigoCita">
+                  {{ cita.hora }} | {{ cita.nombrePaciente }} (Tutor: {{ cita.nombreCliente }}) - {{ cita.motivo }}
+                </option>
+              </select>
             </div>
-            <div class="cita-card-check">
-              <i class="bi bi-check-circle-fill"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tarjeta de Paciente -->
-      <div class="info-card paciente-card" *ngIf="mascotaInfo">
-        <div class="info-card-header paciente-header">
-          <div class="card-icon"><i class="bi bi-heart-pulse-fill"></i></div>
-          <div>
-            <h4>{{ mascotaInfo.nombre }}</h4>
-            <span class="code-badge">{{ mascotaInfo.codigoPaciente }}</span>
-          </div>
-        </div>
-        <div class="info-card-body">
-          <div class="detail-row">
-            <span class="detail-label">Especie</span>
-            <span class="detail-value">{{ mascotaInfo.especie || 'No registrada' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Raza</span>
-            <span class="detail-value">{{ mascotaInfo.raza || 'No registrada' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Edad</span>
-            <span class="detail-value">{{ mascotaInfo.edadCalculada ? mascotaInfo.edadCalculada + ' años' : 'No registrada' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Peso</span>
-            <span class="detail-value">{{ mascotaInfo.peso ? mascotaInfo.peso + ' kg' : 'No registrado' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Propietario</span>
-            <span class="detail-value">{{ mascotaInfo.clienteNombreCompleto }} ({{ mascotaInfo.clienteDni }})</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tarjeta de Veterinario -->
-      <div class="info-card vet-card" *ngIf="veterinarioInfo">
-        <div class="info-card-header vet-header">
-          <div class="card-icon"><i class="bi bi-person-badge-fill"></i></div>
-          <div>
-            <h4>{{ veterinarioInfo.nombres }}</h4>
-            <span class="code-badge">DNI: {{ veterinarioInfo.dni }}</span>
-          </div>
-        </div>
-        <div class="info-card-body">
-          <div class="detail-row">
-            <span class="detail-label">Especialidad</span>
-            <span class="detail-value">{{ veterinarioInfo.especialidad || 'General' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Celular</span>
-            <span class="detail-value">{{ veterinarioInfo.celular || 'No registrado' }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Correo</span>
-            <span class="detail-value">{{ veterinarioInfo.correo || 'No registrado' }}</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Fecha -->
-    <div class="row mt-3">
+    <!-- Info del Paciente -->
+    <div class="card patient-info-card border-0 shadow-sm mb-4" *ngIf="mascotaInfo">
+      <div class="card-body d-flex align-items-center">
+        <div class="patient-avatar me-4">
+          <img [src]="mascotaInfo.fotoUrl || 'assets/default-pet.png'" alt="Mascota" class="rounded-circle shadow" style="width: 80px; height: 80px; object-fit: cover;">
+        </div>
+        <div class="patient-details flex-grow-1">
+          <h4 class="mb-1 text-primary">{{ mascotaInfo.nombre }}</h4>
+          <div class="d-flex gap-3 text-muted" style="font-size: 0.9rem;">
+            <span><i class="bi bi-tag"></i> {{ mascotaInfo.especie }} ({{ mascotaInfo.raza }})</span>
+            <span><i class="bi bi-gender-ambiguous"></i> {{ mascotaInfo.genero }}</span>
+            <span><i class="bi bi-person"></i> Tutor: {{ mascotaInfo.clienteNombreCompleto }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Triage Form -->
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label fw-bold text-primary">Motivo de la Consulta:</label>
+        <input type="text" class="form-control" [(ngModel)]="consulta.motivo" placeholder="Ej: Vómitos desde hace 2 días..." />
+      </div>
       <div class="col-md-4">
-        <label class="form-label fw-bold"><i class="bi bi-calendar-event"></i> Fecha de Atención:</label>
-        <input type="date" class="form-control" [(ngModel)]="consulta.fecha" />
+        <label class="form-label fw-bold text-primary">Nivel de Urgencia:</label>
+        <select class="form-select" [(ngModel)]="consulta.nivelUrgencia" 
+                [ngClass]="{'bg-success text-white': consulta.nivelUrgencia === 'NORMAL', 'bg-warning text-dark': consulta.nivelUrgencia === 'URGENCIA', 'bg-danger text-white': consulta.nivelUrgencia === 'EMERGENCIA'}">
+          <option value="NORMAL">🟢 Normal (Control/Vacuna)</option>
+          <option value="URGENCIA">🟡 Urgencia (Atención prioritaria)</option>
+          <option value="EMERGENCIA">🔴 Emergencia (Riesgo vital)</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-bold text-primary">Anamnesis / Historia Clínica (Subjetivo):</label>
+        <textarea class="form-control" [(ngModel)]="consulta.observaciones" rows="4" 
+                  placeholder="Detalle los síntomas reportados por el dueño, tiempo de evolución, dieta, etc..."></textarea>
       </div>
     </div>
 
-    <div class="step-actions">
+    <div class="step-actions mt-4">
       <div></div>
       <button class="btn btn-primary btn-next" (click)="irPaso(2)">
-        Siguiente: Diagnóstico <i class="bi bi-arrow-right"></i>
+        Siguiente: Examen Físico <i class="bi bi-arrow-right"></i>
       </button>
     </div>
   </div>
 
-  <!-- ==================== PASO 2: Diagnóstico ==================== -->
+  <!-- ==================== PASO 2: EXAMEN FÍSICO (OBJETIVO) ==================== -->
   <div class="step-content" *ngIf="pasoActual === 2">
     <div class="paso-header">
-      <h3><i class="bi bi-clipboard2-pulse"></i> Diagnóstico Clínico</h3>
-      <p class="paso-desc" *ngIf="mascotaInfo">Diagnosticando a <strong>{{ mascotaInfo.nombre }}</strong></p>
+      <h3><i class="bi bi-activity"></i> O - Objetivo (Examen Físico)</h3>
+      <p class="paso-desc">Constantes vitales y revisión por sistemas.</p>
     </div>
 
-    <div class="diagnostico-form">
-      <div class="row g-3">
-        <div class="col-md-9">
-          <label class="form-label fw-bold text-primary">Motivo de la Consulta:</label>
-          <input
-            type="text"
-            class="form-control"
-            [(ngModel)]="consulta.motivo"
-            placeholder="Ej: Vacunación, Decaimiento, Control..."
-          />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label fw-bold text-primary">Peso Actual (kg):</label>
-          <input
-            type="number"
-            class="form-control"
-            [(ngModel)]="consulta.peso"
-            step="0.1"
-            placeholder="Ej: 12.5"
-          />
-        </div>
+    <div class="vital-signs-grid mb-4">
+      <div class="vital-card">
+        <div class="vital-icon text-primary"><i class="bi bi-rulers"></i></div>
+        <label>Peso (kg)</label>
+        <input type="number" class="form-control text-center" [(ngModel)]="consulta.peso" placeholder="0.0">
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon text-danger"><i class="bi bi-thermometer-half"></i></div>
+        <label>Temperatura (°C)</label>
+        <input type="number" class="form-control text-center" [(ngModel)]="consulta.temperatura" placeholder="38.5">
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon text-danger"><i class="bi bi-heart-pulse-fill"></i></div>
+        <label>Frec. Cardíaca (lpm)</label>
+        <input type="number" class="form-control text-center" [(ngModel)]="consulta.frecuenciaCardiaca" placeholder="120">
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon text-info"><i class="bi bi-lungs-fill"></i></div>
+        <label>Frec. Respiratoria (rpm)</label>
+        <input type="number" class="form-control text-center" [(ngModel)]="consulta.frecuenciaRespiratoria" placeholder="30">
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon text-warning"><i class="bi bi-droplet-half"></i></div>
+        <label>TRC (seg)</label>
+        <input type="number" class="form-control text-center" [(ngModel)]="consulta.tiempoLlenadoCapilar" placeholder="2">
+      </div>
+    </div>
 
-        <div class="col-12">
-          <div class="form-section">
-            <label class="form-label fw-bold text-primary"><i class="bi bi-search"></i> Diagnóstico Clínico:</label>
-            <textarea
-              class="form-control"
-              [(ngModel)]="consulta.diagnostico"
-              rows="3"
-              placeholder="Describa el diagnóstico médico..."
-            ></textarea>
-          </div>
+    <h5 class="text-primary mt-4 mb-3 border-bottom pb-2">Evaluación por Sistemas (Marcar si hay anomalías)</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="form-check form-switch fs-5">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="sistemasEval['digestivo']" id="sys1">
+          <label class="form-check-label" for="sys1">Digestivo</label>
         </div>
-
-        <div class="col-12">
-          <div class="form-section">
-            <label class="form-label fw-bold text-primary"><i class="bi bi-capsule"></i> Protocolo de Tratamiento:</label>
-            <textarea
-              class="form-control"
-              [(ngModel)]="consulta.tratamiento"
-              rows="3"
-              placeholder="Describa el tratamiento a seguir..."
-            ></textarea>
-          </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-check form-switch fs-5">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="sistemasEval['respiratorio']" id="sys2">
+          <label class="form-check-label" for="sys2">Respiratorio</label>
         </div>
-
-        <div class="col-12">
-          <div class="form-section obs-section">
-            <label class="form-label fw-bold"><i class="bi bi-journal-text"></i> Observaciones / Anamnesis (Opcional):</label>
-            <textarea
-              class="form-control"
-              [(ngModel)]="consulta.observaciones"
-              rows="2"
-              placeholder="Notas adicionales..."
-            ></textarea>
-          </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-check form-switch fs-5">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="sistemasEval['nervioso']" id="sys3">
+          <label class="form-check-label" for="sys3">Nervioso</label>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-check form-switch fs-5">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="sistemasEval['cardiovascular']" id="sys4">
+          <label class="form-check-label" for="sys4">Cardiovascular</label>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-check form-switch fs-5">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="sistemasEval['pielPelaje']" id="sys5">
+          <label class="form-check-label" for="sys5">Piel y Pelaje</label>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-check form-switch fs-5">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="sistemasEval['musculoEsqueletico']" id="sys6">
+          <label class="form-check-label" for="sys6">Músculo-Esquelético</label>
         </div>
       </div>
     </div>
 
-    <div class="step-actions">
-      <button class="btn btn-outline-secondary btn-back" (click)="irPaso(1)">
-        <i class="bi bi-arrow-left"></i> Volver
-      </button>
-      <button class="btn btn-primary btn-next" (click)="irPaso(3)">
-        Siguiente: Receta <i class="bi bi-arrow-right"></i>
-      </button>
+    <div class="step-actions mt-4">
+      <button class="btn btn-outline-secondary btn-back" (click)="irPaso(1)"><i class="bi bi-arrow-left"></i> Volver</button>
+      <button class="btn btn-primary btn-next" (click)="irPaso(3)">Siguiente: Análisis <i class="bi bi-arrow-right"></i></button>
     </div>
   </div>
 
-  <!-- ==================== PASO 3: Receta Médica ==================== -->
+  <!-- ==================== PASO 3: ANÁLISIS (DIAGNÓSTICO) ==================== -->
   <div class="step-content" *ngIf="pasoActual === 3">
     <div class="paso-header">
-      <h3><i class="bi bi-prescription2"></i> Receta Médica</h3>
-      <p class="paso-desc">Agregue los medicamentos y productos para la receta. Este paso es opcional.</p>
+      <h3><i class="bi bi-search"></i> A - Análisis (Diagnóstico)</h3>
+      <p class="paso-desc">Evaluación final, diagnóstico presuntivo/definitivo y estado del paciente.</p>
     </div>
 
-    <!-- Nueva Receta Médica (Sin Inventario) -->
+    <div class="row g-3">
+      <div class="col-12">
+        <label class="form-label fw-bold text-primary">Diagnóstico Clínico:</label>
+        <textarea class="form-control" [(ngModel)]="consulta.diagnostico" rows="3" 
+                  placeholder="Ej: Gastroenteritis aguda, Parvovirosis presuntiva..."></textarea>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Estado al Ingreso:</label>
+        <input type="text" class="form-control" [(ngModel)]="consulta.estadoIngreso" placeholder="Ej: Deprimido, deshidratado">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Estado a la Salida:</label>
+        <input type="text" class="form-control" [(ngModel)]="consulta.estadoSalida" placeholder="Ej: Estable con medicación">
+      </div>
+
+      <div class="col-12 mt-4">
+        <div class="card border-warning bg-light">
+          <div class="card-body">
+            <div class="form-check form-switch fs-5 text-warning mb-2">
+              <input class="form-check-input" type="checkbox" id="internamientoSwitch" [(ngModel)]="consulta.requiereInternamiento">
+              <label class="form-check-label fw-bold text-dark" for="internamientoSwitch">¿Requiere Hospitalización / Internamiento?</label>
+            </div>
+            <div *ngIf="consulta.requiereInternamiento" class="mt-2">
+              <label class="form-label fw-bold text-danger">Motivo de la Hospitalización:</label>
+              <textarea class="form-control border-danger" [(ngModel)]="consulta.motivoInternamiento" rows="2" 
+                        placeholder="Ej: Observación por 24h, Terapia de fluidos IV..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-actions mt-4">
+      <button class="btn btn-outline-secondary btn-back" (click)="irPaso(2)"><i class="bi bi-arrow-left"></i> Volver</button>
+      <button class="btn btn-primary btn-next" (click)="irPaso(4)">Siguiente: Plan <i class="bi bi-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ==================== PASO 4: PLAN (RECETA) ==================== -->
+  <div class="step-content" *ngIf="pasoActual === 4">
+    <div class="paso-header">
+      <h3><i class="bi bi-file-earmark-medical"></i> P - Plan (Tratamiento y Receta)</h3>
+      <p class="paso-desc">Tratamiento a seguir y receta médica para el cliente.</p>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12">
+        <label class="form-label fw-bold text-primary">Protocolo de Tratamiento Interno:</label>
+        <textarea class="form-control" [(ngModel)]="consulta.tratamiento" rows="2" 
+                  placeholder="Lo que se realizó en clínica (Ej: Vía IV, administración de Cerenia...)"></textarea>
+      </div>
+    </div>
+
+    <h5 class="text-primary mt-4 mb-3 border-bottom pb-2">Receta Médica (Para el Cliente)</h5>
+    
+    <div class="card p-3 shadow-sm border-0 bg-light mb-3">
+      <div class="row g-2">
+        <div class="col-md-4">
+          <select class="form-select mb-1" #selectMed (change)="onProductoRecetaChange(selectMed.value)">
+            <option value="">-- Autocompletar desde Inventario --</option>
+            <option *ngFor="let prod of productosInventario" [value]="prod.codigoBarras">{{prod.nombre}}</option>
+          </select>
+          <input type="text" class="form-control" [(ngModel)]="nuevoMedicamento.nombre" placeholder="Nombre del Medicamento">
+        </div>
+        <div class="col-md-4">
+          <input type="text" class="form-control mt-4" [(ngModel)]="nuevoMedicamento.frecuencia" placeholder="Frecuencia (Ej: Cada 12 horas)">
+        </div>
+        <div class="col-md-3">
+          <input type="text" class="form-control mt-4" [(ngModel)]="nuevoMedicamento.duracion" placeholder="Duración (Ej: Por 5 días)">
+        </div>
+        <div class="col-md-1 mt-4">
+          <button class="btn btn-primary w-100" (click)="agregarMedicamento()">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive" *ngIf="listaMedicamentos.length > 0">
+      <table class="table table-bordered table-hover bg-white shadow-sm">
+        <thead class="table-light">
+          <tr>
+            <th>Medicamento</th>
+            <th>Frecuencia</th>
+            <th>Duración</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let med of listaMedicamentos; let i = index">
+            <td class="fw-bold">{{med.nombre}}</td>
+            <td>{{med.frecuencia}}</td>
+            <td>{{med.duracion}}</td>
+            <td class="text-center">
+              <button class="btn btn-outline-danger btn-sm" (click)="eliminarMedicamento(i)"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-3">
+      <label class="form-label fw-bold text-primary">Indicaciones Generales para Casa:</label>
+      <textarea class="form-control" [(ngModel)]="indicacionesGenerales" rows="2" 
+                placeholder="Ej: Dieta blanda, reposo absoluto, regresar en 3 días..."></textarea>
+    </div>
+
+    <div class="step-actions mt-4">
+      <button class="btn btn-outline-secondary btn-back" (click)="irPaso(3)"><i class="bi bi-arrow-left"></i> Volver</button>
+      <button class="btn btn-primary btn-next" (click)="irPaso(5)">Siguiente: Cobros <i class="bi bi-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ==================== PASO 5: COBROS ==================== -->
+  <div class="step-content" *ngIf="pasoActual === 5">
+    <div class="paso-header">
+      <h3><i class="bi bi-cash-coin"></i> Cargos de la Consulta</h3>
+      <p class="paso-desc">Agregue los honorarios, insumos gastados y servicios (Obligatorio para Caja).</p>
+    </div>
+
+    <div class="alert alert-warning border-warning shadow-sm">
+      <i class="bi bi-exclamation-triangle-fill"></i> Recuerde agregar el cobro por <strong>Consulta General</strong> u otros servicios realizados.
+    </div>
+
     <div class="row g-3 mt-2">
       <div class="col-12">
-        <label class="form-label fw-bold text-primary"><i class="bi bi-capsule"></i> Medicamentos a Recetar:</label>
-        <textarea
-          class="form-control"
-          [(ngModel)]="recetaMedica.medicamentos"
-          rows="4"
-          placeholder="Ej: Amoxicilina 500mg, Meloxicam 2mg..."
-        ></textarea>
+        <div class="card p-3 shadow-sm border-0 bg-light">
+          <div class="row g-2">
+            <div class="col-md-5">
+              <select class="form-select mb-1" #selectCargo (change)="onProductoCargoChange(selectCargo.value); nuevoCargo.productoId = selectCargo.value">
+                <option value="">-- Seleccionar Servicio/Insumo --</option>
+                <option *ngFor="let prod of productosInventario" [value]="prod.codigoBarras">
+                  {{prod.nombre}} (S/. {{prod.precioVenta}})
+                </option>
+              </select>
+              <input type="text" class="form-control" [(ngModel)]="nuevoCargo.descripcion" placeholder="Descripción (Ej: Consulta General)">
+            </div>
+            <div class="col-md-2">
+              <input type="number" class="form-control mt-4" [(ngModel)]="nuevoCargo.precio" placeholder="Precio (S/.)">
+            </div>
+            <div class="col-md-2">
+              <input type="number" class="form-control mt-4" [(ngModel)]="nuevoCargo.cantidad" placeholder="Cantidad">
+            </div>
+            <div class="col-md-2 d-flex align-items-center fw-bold mt-4">
+              Subtotal: S/. {{ ((nuevoCargo.precio || 0) * (nuevoCargo.cantidad || 0)) | number:'1.2-2' }}
+            </div>
+            <div class="col-md-1 d-flex align-items-center mt-4">
+              <button class="btn btn-primary w-100" (click)="agregarCargo()">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="col-12 mt-3">
-        <label class="form-label fw-bold text-primary"><i class="bi bi-list-check"></i> Indicaciones y Dosis:</label>
-        <textarea
-          class="form-control"
-          [(ngModel)]="recetaMedica.indicaciones"
-          rows="4"
-          placeholder="Ej: Dar 1 pastilla cada 8 horas por 5 días..."
-        ></textarea>
+      <div class="col-12" *ngIf="listaCargos.length > 0">
+        <div class="table-responsive mt-3">
+          <table class="table table-bordered table-hover bg-white shadow-sm">
+            <thead class="table-light">
+              <tr>
+                <th>Descripción</th>
+                <th class="text-end">Precio Unit.</th>
+                <th class="text-center">Cant.</th>
+                <th class="text-end">Subtotal</th>
+                <th class="text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let cargo of listaCargos; let i = index">
+                <td class="fw-bold">{{cargo.descripcion}}</td>
+                <td class="text-end">S/. {{cargo.precio | number:'1.2-2'}}</td>
+                <td class="text-center">{{cargo.cantidad}}</td>
+                <td class="text-end fw-bold">S/. {{cargo.subtotal | number:'1.2-2'}}</td>
+                <td class="text-center">
+                  <button class="btn btn-outline-danger btn-sm" (click)="eliminarCargo(i)"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot class="table-light">
+              <tr>
+                <td colspan="3" class="text-end fw-bold">TOTAL A COBRAR:</td>
+                <td class="text-end fw-bold text-success fs-5">S/. {{ totalCobro | number:'1.2-2' }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="step-actions">
-      <button class="btn btn-outline-secondary btn-back" (click)="irPaso(2)">
-        <i class="bi bi-arrow-left"></i> Volver
-      </button>
-      <button class="btn btn-success btn-registrar" (click)="registrar()">
-        <i class="bi bi-check-circle"></i> Registrar Diagnóstico
+    <div class="step-actions mt-4">
+      <button class="btn btn-outline-secondary btn-back" (click)="irPaso(4)"><i class="bi bi-arrow-left"></i> Volver</button>
+      <button class="btn btn-success btn-registrar px-4 py-2" (click)="registrar()">
+        <i class="bi bi-check-circle"></i> Finalizar y Enviar a Caja
       </button>
     </div>
   </div>

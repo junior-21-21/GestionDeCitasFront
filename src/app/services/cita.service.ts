@@ -55,7 +55,7 @@ export class CitaService {
   }
 
   descargarComprobante(codigoCita: string): Observable<Blob> {
-    return this.http.get(`${environment.apiUrl}/reportes/cita/${codigoCita}/pdf`, { responseType: 'blob' });
+    return this.http.get(`${this.baseUrl}/${codigoCita}/comprobante/pdf`, { responseType: 'blob' });
   }
 
   eliminarCita(codigoCita: string): Observable<any> {

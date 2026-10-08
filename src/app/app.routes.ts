@@ -4,6 +4,16 @@ import { RoleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   // ══════════════════════════════════════════
+  // RUTA RAÍZ → LANDING PAGE
+  // ══════════════════════════════════════════
+  {
+    path: '',
+    loadComponent: () =>
+      import('./features/landing/landing').then(m => m.LandingComponent),
+    pathMatch: 'full'
+  },
+  
+  // ══════════════════════════════════════════
   // AUTH PÚBLICO
   // ══════════════════════════════════════════
   {
@@ -73,6 +83,20 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
       },
       {
+        path: 'compras',
+        loadComponent: () =>
+          import('./features/inventario/compras/compras').then(m => m.ComprasComponent),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'kardex',
+        loadComponent: () =>
+          import('./features/inventario/kardex/kardex').then(m => m.KardexComponent),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
+      },
+      {
         path: 'mascotas',
         loadComponent: () =>
           import('./features/mascota/mascota').then(m => m.MascotaComponent),
@@ -110,6 +134,13 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'VETERINARIO'] }
       },
+      {
+        path: 'caja',
+        loadComponent: () =>
+          import('./features/caja/caja').then(m => m.CajaComponent),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
+      },
 
       {
         path: 'historial-clinico',
@@ -131,6 +162,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/no-acceso/no-acceso').then(m => m.NoAccesoComponent)
       },
+      {
+        path: 'asistencias',
+        loadComponent: () =>
+          import('./features/asistencia/asistencia').then(m => m.AsistenciaComponent),
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
 
 
       {
@@ -145,16 +183,8 @@ export const routes: Routes = [
     ]
   },
 
-  // ══════════════════════════════════════════
-  // RUTA RAÍZ → LOGIN
-  // ══════════════════════════════════════════
-  {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full'
-  },
   {
     path: '**',
-    redirectTo: 'login'
+    redirectTo: ''
   }
 ];

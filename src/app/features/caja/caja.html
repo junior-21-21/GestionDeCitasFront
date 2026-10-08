@@ -1,0 +1,161 @@
+<div class="caja-container container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-cash-stack text-success"></i> Módulo de Caja (Cobros Pendientes)</h2>
+    <button class="btn btn-outline-secondary" (click)="cargarPendientes()">
+      <i class="bi bi-arrow-clockwise"></i> Actualizar
+    </button>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-12">
+      <ul class="nav nav-pills nav-fill">
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="modoActivo === 'cobros'" (click)="setModo('cobros')" style="cursor: pointer;">
+            <i class="bi bi-cash-stack"></i> Cobros Pendientes
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="modoActivo === 'venta'" (click)="setModo('venta')" style="cursor: pointer;">
+            <i class="bi bi-cart-plus"></i> Nueva Venta Rápida (Mostrador)
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Vista Cobros Pendientes -->
+  <div *ngIf="modoActivo === 'cobros'">
+    <div *ngIf="cargando" class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!cargando && cobrosPendientes.length === 0" class="alert alert-info text-center shadow-sm">
+      <i class="bi bi-info-circle fs-4 d-block mb-2"></i>
+      No hay cobros pendientes de pago en este momento.
+    </div>
+
+    <div class="row g-4" *ngIf="!cargando && cobrosPendientes.length > 0">
+      <div class="col-md-6 col-lg-4" *ngFor="let cobro of cobrosPendientes">
+        <div class="card shadow-sm h-100 border-0 caja-card">
+          <div class="card-header bg-warning bg-opacity-25 border-0 d-flex justify-content-between align-items-center py-3">
+            <span class="badge bg-warning text-dark fs-6 rounded-pill">PENDIENTE</span>
+            <span class="fw-bold text-muted">{{ cobro.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          
+          <div class="card-body">
+            <h5 class="card-title text-primary mb-3">Consulta: {{ cobro.consulta?.codigoConsulta }}</h5>
+            
+            <div class="detalle-lista mb-3">
+              <h6 class="fw-bold border-bottom pb-2">Detalle de Cargos</h6>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1" 
+                    *ngFor="let item of parseDetalles(cobro.detalleCargos)">
+                  <small class="text-truncate" style="max-width: 150px;" title="{{item.descripcion}}">
+                    {{ item.cantidad }}x {{ item.descripcion }}
+                  </small>
+                  <span class="fw-bold">S/. {{ item.subtotal | number:'1.2-2' }}</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded mt-auto">
+              <span class="fs-5 fw-bold text-secondary">Total a Pagar:</span>
+              <span class="fs-3 fw-bold text-success">S/. {{ cobro.total | number:'1.2-2' }}</span>
+            </div>
+          </div>
+          
+          <div class="card-footer bg-white border-0 p-3 pt-0">
+            <button class="btn btn-success w-100 btn-lg shadow-sm" (click)="pagarCobro(cobro)">
+              <i class="bi bi-check-circle-fill me-2"></i> Procesar Pago
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Venta Directa (POS) -->
+  <div *ngIf="modoActivo === 'venta'" class="row">
+    <!-- Lista de Productos (Izquierda) -->
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-search"></i> Productos / Insumos</h5>
+        </div>
+        <div class="card-body">
+          <input type="text" class="form-control mb-3" placeholder="Buscar por código o nombre..." [(ngModel)]="busquedaPOS" (input)="filtrarProductosPOS()">
+          
+          <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+            <div *ngFor="let p of productosFiltrados" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-0 fw-bold">{{ p.nombre }}</h6>
+                <small class="text-muted">{{ p.codigo }} | Stock: {{ p.stock }}</small>
+              </div>
+              <div class="d-flex align-items-center gap-3">
+                <span class="fw-bold text-success">S/. {{ p.precioVenta | number:'1.2-2' }}</span>
+                <button class="btn btn-sm btn-primary" (click)="agregarAlCarrito(p)" [disabled]="p.stock === 0">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </div>
+            </div>
+            <div *ngIf="productosFiltrados.length === 0" class="text-center py-3 text-muted">
+              No se encontraron productos
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carrito de Compras (Derecha) -->
+    <div class="col-md-5">
+      <div class="card shadow-sm border-0 bg-light">
+        <div class="card-header bg-dark text-white d-flex justify-content-between">
+          <h5 class="mb-0"><i class="bi bi-cart"></i> Detalle Venta</h5>
+          <span class="badge bg-light text-dark rounded-pill">{{ carrito.length }}</span>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-light border-bottom" *ngFor="let item of carrito; let i = index">
+              <div class="w-100">
+                <div class="d-flex justify-content-between">
+                  <span class="fw-bold text-truncate" style="max-width: 180px;">{{ item.producto.nombre }}</span>
+                  <button class="btn btn-sm btn-link text-danger p-0" (click)="quitarDelCarrito(i)"><i class="bi bi-trash"></i></button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <div class="input-group input-group-sm" style="width: 100px;">
+                    <button class="btn btn-outline-secondary" (click)="actualizarCantidadCarrito(i, -1)">-</button>
+                    <input type="number" class="form-control text-center px-0" [value]="item.cantidad" readonly>
+                    <button class="btn btn-outline-secondary" (click)="actualizarCantidadCarrito(i, 1)">+</button>
+                  </div>
+                  <span class="fw-bold">S/. {{ item.subtotal | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            </li>
+            <li class="list-group-item py-4 text-center text-muted" *ngIf="carrito.length === 0">
+              <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
+              El carrito está vacío
+            </li>
+          </ul>
+        </div>
+        <div class="card-footer bg-white border-top p-3">
+          <div class="d-flex justify-content-between mb-3">
+            <span class="fs-5">Total:</span>
+            <span class="fs-3 fw-bold text-success">S/. {{ totalVenta | number:'1.2-2' }}</span>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label small text-muted">Nombre del Cliente (Opcional)</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="ventaNueva.clienteNombre" placeholder="Cliente General">
+          </div>
+          
+          <button class="btn btn-success w-100 btn-lg shadow-sm" [disabled]="carrito.length === 0 || procesandoVenta" (click)="procesarVenta()">
+            <span *ngIf="!procesandoVenta"><i class="bi bi-check2-circle"></i> Confirmar Venta</span>
+            <span *ngIf="procesandoVenta"><i class="spinner-border spinner-border-sm"></i> Procesando...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

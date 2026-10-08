@@ -18,7 +18,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   private isLoggingOut = false;
   private readonly public401Urls = [
     '/api/auth/login',
-    '/api/auth/register',
+    '/api/auth/registro',
     '/api/usuarios/admin',
     'apisperu.com'
   ];

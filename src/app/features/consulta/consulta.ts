@@ -7,22 +7,27 @@ import { ConsultaService } from '../../services/consulta.service';
 import { VeterinarioService } from '../../services/veterinario.service';
 import { MascotaService } from '../../services/mascota.service';
 import { ProductoService } from '../../services/producto.service';
-import { ConsultaProductoService } from '../../services/consulta-producto.service';
 import { AuthService } from '../../services/auth.service';
 import { ProductoDTO } from '../../models/producto.model';
-import {
-  ConsultaDTO,
-} from '../../models/consulta.model';
+import { ConsultaDTO } from '../../models/consulta.model';
 import { VeterinarioResponseDTO } from '../../models/veterinario.model';
 import { PacienteResponseDTO } from '../../models/mascota.model';
 import Swal from 'sweetalert2';
-
-import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
-interface RecetaMedica {
-  medicamentos: string;
-  indicaciones: string;
+interface MedicamentoDetalle {
+  nombre: string;
+  indicacion: string;
+  frecuencia: string;
+  duracion: string;
+}
+
+interface CargoDetalle {
+  descripcion: string;
+  precio: number;
+  cantidad: number;
+  subtotal: number;
+  productoId?: string;
 }
 
 @Component({
@@ -41,27 +46,50 @@ export class ConsultasComponent implements OnInit {
     diagnostico: '',
     tratamiento: '',
     citaCodigo: '',
+    estadoIngreso: '',
+    estadoSalida: '',
+    requiereInternamiento: false,
+    motivoInternamiento: '',
+    nivelUrgencia: 'NORMAL',
+    temperatura: undefined,
+    frecuenciaCardiaca: undefined,
+    frecuenciaRespiratoria: undefined,
+    tiempoLlenadoCapilar: undefined,
+    sistemasAnormales: '[]'
   };
 
-  // Info cards
+  sistemasEval: { [key: string]: boolean } = {
+    digestivo: false,
+    respiratorio: false,
+    nervioso: false,
+    cardiovascular: false,
+    pielPelaje: false,
+    musculoEsqueletico: false,
+    urogenital: false
+  };
+
   mascotaInfo: PacienteResponseDTO | null = null;
   veterinarioInfo: VeterinarioResponseDTO | null = null;
 
-  // Datos para dropdowns (fallback cuando no viene de cita)
   veterinarios: VeterinarioResponseDTO[] = [];
   mascotas: PacienteResponseDTO[] = [];
+  productosInventario: ProductoDTO[] = [];
 
-  // Stepper
   citasPendientesFull: any[] = [];
   citasPendientes: any[] = [];
-  diasDisponibles: string[] = []; // Días que realmente tienen citas
+  diasDisponibles: string[] = [];
   fechaFiltro: string = '';
   pasoActual: number = 1;
   vieneDeCita: boolean = false;
 
-  recetaMedica: RecetaMedica = { medicamentos: '', indicaciones: '' };
+  listaMedicamentos: MedicamentoDetalle[] = [];
+  nuevoMedicamento: MedicamentoDetalle = { nombre: '', indicacion: '', frecuencia: '', duracion: '' };
+  indicacionesGenerales: string = '';
 
-  // Código de la consulta registrada (para asociar productos después)
+  listaCargos: CargoDetalle[] = [];
+  nuevoCargo: Partial<CargoDetalle> = { descripcion: '', precio: undefined, cantidad: 1, productoId: '' };
+  totalCobro: number = 0;
+
   codigoConsultaRegistrada: string = '';
 
   constructor(
@@ -72,17 +100,15 @@ export class ConsultasComponent implements OnInit {
     private router: Router,
     private citaService: CitaService,
     private productoService: ProductoService,
-    private consultaProductoService: ConsultaProductoService,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.cargarVeterinarios();
     this.cargarMascotas();
-    this.autoDetectarVeterinario();
+    this.cargarProductos();
     this.autoDetectarVeterinario();
 
-    // Check for query params from Citas
     this.route.queryParams.subscribe((params) => {
       const citaCodigo = params['citaCodigo'];
       if (citaCodigo) {
@@ -98,17 +124,12 @@ export class ConsultasComponent implements OnInit {
     this.citaService.listarPendientes().subscribe({
       next: (citas) => {
         this.citasPendientesFull = citas.filter((c: any) => c.nombrePaciente);
-        
-        // Extraer los días únicos que tienen citas
         const diasSet = new Set<string>();
         this.citasPendientesFull.forEach(c => {
            const diaStr = this.extraerDia(c.fechaHora);
            if(diaStr) diasSet.add(diaStr);
         });
-        
         this.diasDisponibles = Array.from(diasSet).sort();
-        
-        // Seleccionar por defecto
         if (this.diasDisponibles.length > 0) {
            const hoyStr = new Date().toISOString().split('T')[0];
            if(this.diasDisponibles.includes(hoyStr)) {
@@ -117,7 +138,6 @@ export class ConsultasComponent implements OnInit {
                this.fechaFiltro = this.diasDisponibles[0];
            }
         }
-        
         this.filtrarCitasPorFecha();
       },
       error: () => console.error('No se pudieron cargar citas pendientes')
@@ -138,12 +158,10 @@ export class ConsultasComponent implements OnInit {
 
   filtrarCitasPorFecha(dia?: string): void {
     if (dia) this.fechaFiltro = dia;
-    
     if (!this.fechaFiltro) {
       this.citasPendientes = this.citasPendientesFull;
       return;
     }
-    
     this.citasPendientes = this.citasPendientesFull.filter((c: any) => {
       return this.extraerDia(c.fechaHora) === this.fechaFiltro;
     });
@@ -167,9 +185,7 @@ export class ConsultasComponent implements OnInit {
         next: (vet) => {
           this.veterinarioInfo = vet;
         },
-        error: () => {
-          // Si falla, se cargará desde el dropdown
-        },
+        error: () => {},
       });
     }
   }
@@ -181,25 +197,19 @@ export class ConsultasComponent implements OnInit {
         this.consulta.fecha = new Date().toISOString().split('T')[0];
         this.consulta.citaCodigo = codigoCita;
 
-        // Cargar info de mascota
         this.mascotaService.buscarPorCodigo(cita.pacienteCodigo).subscribe({
           next: (mascota) => (this.mascotaInfo = mascota),
           error: () => {},
         });
 
-        // Cargar info de veterinario si no se auto-detectó
         if (!this.veterinarioInfo) {
-          const vet = this.veterinarios.find(
-            (v) => v.dni === cita.veterinarioDni
-          );
+          const vet = this.veterinarios.find((v) => v.dni === cita.veterinarioDni);
           if (vet) {
             this.veterinarioInfo = vet;
           } else {
-            // Esperar a que carguen los veterinarios
             this.veterinarioService.listar().subscribe({
-              next: (vets) => {
-                this.veterinarioInfo =
-                  vets.find((v) => v.dni === cita.veterinarioDni) || null;
+              next: (vets: VeterinarioResponseDTO[]) => {
+                this.veterinarioInfo = vets.find((v) => v.dni === cita.veterinarioDni) || null;
               },
             });
           }
@@ -215,38 +225,103 @@ export class ConsultasComponent implements OnInit {
           });
         }
       },
-      error: () =>
-        Swal.fire(
-          'Error',
-          'No se pudo cargar la información de la cita',
-          'error'
-        ),
+      error: () => Swal.fire('Error', 'No se pudo cargar la información de la cita', 'error'),
     });
   }
 
   cargarVeterinarios(): void {
     this.veterinarioService.listar().subscribe({
-      next: (data) => (this.veterinarios = data),
-      error: () =>
-        Swal.fire('Error', 'No se pudo cargar veterinarios', 'error'),
+      next: (data: VeterinarioResponseDTO[]) => (this.veterinarios = data),
+      error: (err: any) => console.error('Error cargando veterinarios', err),
     });
   }
 
   cargarMascotas(): void {
     this.mascotaService.listarTodas().subscribe({
-      next: (data) => (this.mascotas = data),
-      error: () => Swal.fire('Error', 'No se pudo cargar mascotas', 'error'),
+      next: (data: PacienteResponseDTO[]) => (this.mascotas = data),
+      error: (err: any) => console.error('Error cargando mascotas', err),
     });
   }
 
+  cargarProductos(): void {
+    this.productoService.listarTodos().subscribe({
+      next: (data: ProductoDTO[]) => {
+        this.productosInventario = data.filter(p => p.stockActual > 0 || p.tipoInventario === 'SERVICIO');
+      },
+      error: (err: any) => console.error('Error cargando productos', err)
+    });
+  }
 
+  // --- Step 4 Receta ---
+  onProductoRecetaChange(codigoBarras: string): void {
+    if (!codigoBarras) {
+      this.nuevoMedicamento.nombre = '';
+      return;
+    }
+    const prod = this.productosInventario.find(p => p.codigoBarras === codigoBarras);
+    if (prod) {
+      this.nuevoMedicamento.nombre = prod.nombre;
+    }
+  }
 
+  agregarMedicamento(): void {
+    if (!this.nuevoMedicamento.nombre.trim() || !this.nuevoMedicamento.frecuencia.trim()) {
+      Swal.fire('Atención', 'Ingrese al menos el nombre y la frecuencia del medicamento', 'warning');
+      return;
+    }
+    this.listaMedicamentos.push({ ...this.nuevoMedicamento });
+    this.nuevoMedicamento = { nombre: '', indicacion: '', frecuencia: '', duracion: '' };
+  }
 
+  eliminarMedicamento(index: number): void {
+    this.listaMedicamentos.splice(index, 1);
+  }
 
-  // --- Stepper ---
+  // --- Step 5 Cargos ---
+  onProductoCargoChange(codigoBarras: string): void {
+    if (!codigoBarras) {
+      this.nuevoCargo.descripcion = '';
+      this.nuevoCargo.precio = undefined;
+      return;
+    }
+    const prod = this.productosInventario.find(p => p.codigoBarras === codigoBarras);
+    if (prod) {
+      this.nuevoCargo.descripcion = prod.nombre;
+      this.nuevoCargo.precio = prod.precioVenta;
+    }
+  }
+
+  agregarCargo(): void {
+    if (!this.nuevoCargo.descripcion || !this.nuevoCargo.precio || !this.nuevoCargo.cantidad) {
+      Swal.fire('Atención', 'Ingrese descripción, precio y cantidad', 'warning');
+      return;
+    }
+    const subtotal = this.nuevoCargo.precio * this.nuevoCargo.cantidad;
+    this.listaCargos.push({
+      descripcion: this.nuevoCargo.descripcion,
+      precio: this.nuevoCargo.precio,
+      cantidad: this.nuevoCargo.cantidad,
+      subtotal: subtotal,
+      productoId: this.nuevoCargo.productoId
+    });
+    this.calcularTotal();
+    this.nuevoCargo = { descripcion: '', precio: undefined, cantidad: 1, productoId: '' };
+  }
+
+  eliminarCargo(index: number): void {
+    this.listaCargos.splice(index, 1);
+    this.calcularTotal();
+  }
+
+  calcularTotal(): void {
+    this.totalCobro = this.listaCargos.reduce((acc, curr) => acc + curr.subtotal, 0);
+  }
+
+  // --- Stepper Navigation ---
   irPaso(paso: number): void {
-    if (paso === 2 && !this.validarPaso1()) return;
-    if (paso === 3 && !this.validarPaso2()) return;
+    if (paso > 1 && !this.validarPaso1()) return;
+    if (paso > 2 && !this.validarPaso2()) return;
+    if (paso > 3 && !this.validarPaso3()) return;
     this.pasoActual = paso;
   }
 
@@ -255,69 +330,96 @@ export class ConsultasComponent implements OnInit {
       Swal.fire('Atención', 'Seleccione una cita previa obligatoriamente', 'warning');
       return false;
     }
-    return true;
-  }
-
-  validarPaso2(): boolean {
     if (!this.consulta.motivo?.trim()) {
       Swal.fire('Atención', 'Ingrese el motivo de la consulta', 'warning');
       return false;
     }
-    if (!this.consulta.diagnostico?.trim()) {
-      Swal.fire('Atención', 'Ingrese el diagnóstico', 'warning');
-      return false;
+    return true;
+  }
+
+  validarPaso2(): boolean {
+    if (!this.consulta.peso) {
+      Swal.fire('Atención', 'Es recomendable ingresar el peso de la mascota', 'warning');
     }
-    if (!this.consulta.tratamiento?.trim()) {
-      Swal.fire('Atención', 'Ingrese el tratamiento', 'warning');
+    return true;
+  }
+
+  validarPaso3(): boolean {
+    if (!this.consulta.diagnostico?.trim()) {
+      Swal.fire('Atención', 'Ingrese el diagnóstico de la mascota', 'warning');
       return false;
     }
     return true;
   }
 
-
-
-  // --- Registrar consulta y receta ---
+  // --- Registrar consulta, receta y cobros ---
   registrar(): void {
+    if (this.listaCargos.length === 0) {
+      Swal.fire('Atención', 'Debe agregar al menos un cargo en el Paso 5 (ej. Costo de Consulta) para que caja pueda realizar el cobro.', 'warning');
+      return;
+    }
+
+    // Convertir array de sistemas anormales a JSON
+    const anormales = Object.keys(this.sistemasEval).filter(k => this.sistemasEval[k]);
+    this.consulta.sistemasAnormales = JSON.stringify(anormales);
+
     this.consultaService.registrarConsulta(this.consulta).subscribe({
       next: (consultaCreada: any) => {
         this.codigoConsultaRegistrada = consultaCreada.codigoConsulta || '';
 
-        if ((this.recetaMedica.medicamentos || this.recetaMedica.indicaciones) && this.codigoConsultaRegistrada) {
-          this.guardarReceta(this.codigoConsultaRegistrada);
-        } else {
-          this.mostrarExito();
+        let promises = [];
+        if (this.listaMedicamentos.length > 0 || this.indicacionesGenerales) {
+          promises.push(this.guardarReceta(this.codigoConsultaRegistrada));
         }
+        if (this.listaCargos.length > 0) {
+          promises.push(this.guardarCobro(this.codigoConsultaRegistrada));
+        }
+
+        Promise.all(promises).then(() => {
+          this.mostrarExito();
+        }).catch(() => {
+          Swal.fire('Advertencia', 'Consulta registrada pero hubo un error con la receta o cobros.', 'warning');
+          this.mostrarExito();
+        });
       },
       error: (err) => {
-        Swal.fire(
-          'Error',
-          err.error?.mensaje || 'No se pudo registrar la consulta',
-          'error'
-        );
+        Swal.fire('Error', err.error?.mensaje || 'No se pudo registrar la consulta', 'error');
       },
     });
   }
 
-  private guardarReceta(codigoConsulta: string): void {
-    // Requires HttpClient which is not injected directly but we can use fetch or inject it.
-    // Wait, let's inject HttpClient. I'll add it to constructor below if needed, but for now I'll use fetch as it's simpler here.
+  private guardarReceta(codigoConsulta: string): Promise<void> {
     const url = `${environment.apiUrl}/recetas/consulta/${codigoConsulta}`;
-    fetch(url, {
+    return fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.authService.getToken()}`
       },
-      body: JSON.stringify(this.recetaMedica)
+      body: JSON.stringify({
+        medicamentos: JSON.stringify(this.listaMedicamentos),
+        indicaciones: this.indicacionesGenerales
+      })
     }).then(res => {
-      if (res.ok) {
-        this.mostrarExito();
-      } else {
-        throw new Error('Error al guardar receta');
-      }
-    }).catch(err => {
-      Swal.fire('Advertencia', 'Consulta registrada pero hubo un error al guardar la receta.', 'warning');
-      this.mostrarExito();
+      if (!res.ok) throw new Error('Error receta');
+    });
+  }
+
+  private guardarCobro(codigoConsulta: string): Promise<void> {
+    const url = `${environment.apiUrl}/cobros/consulta/${codigoConsulta}`;
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.authService.getToken()}`
+      },
+      body: JSON.stringify({
+        estado: 'PENDIENTE',
+        total: this.totalCobro,
+        detalleCargos: JSON.stringify(this.listaCargos)
+      })
+    }).then(res => {
+      if (!res.ok) throw new Error('Error cobros');
     });
   }
 
@@ -340,25 +442,13 @@ export class ConsultasComponent implements OnInit {
 
   descargarReceta(): void {
     if (!this.codigoConsultaRegistrada) return;
-    this.consultaService
-      .descargarRecetaPdf(this.codigoConsultaRegistrada)
-      .subscribe({
-        next: (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `receta_${this.codigoConsultaRegistrada}.pdf`;
-          a.click();
-          window.URL.revokeObjectURL(url);
-        },
-        error: () => {
-          Swal.fire(
-            'Error',
-            'No se pudo descargar la receta médica',
-            'error'
-          );
-        },
-      });
+    this.consultaService.descargarRecetaPdf(this.codigoConsultaRegistrada).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      },
+      error: () => Swal.fire('Error', 'No se pudo descargar la receta médica', 'error'),
+    });
   }
 
   resetFormulario(): void {
@@ -370,14 +460,31 @@ export class ConsultasComponent implements OnInit {
       diagnostico: '',
       tratamiento: '',
       citaCodigo: '',
+      estadoIngreso: '',
+      estadoSalida: '',
+      requiereInternamiento: false,
+      motivoInternamiento: '',
+      nivelUrgencia: 'NORMAL',
+      temperatura: undefined,
+      frecuenciaCardiaca: undefined,
+      frecuenciaRespiratoria: undefined,
+      tiempoLlenadoCapilar: undefined,
+      sistemasAnormales: '[]'
     };
+    this.sistemasEval = {
+      digestivo: false, respiratorio: false, nervioso: false,
+      cardiovascular: false, pielPelaje: false, musculoEsqueletico: false, urogenital: false
+    };
+    this.listaMedicamentos = [];
+    this.nuevoMedicamento = { nombre: '', indicacion: '', frecuencia: '', duracion: '' };
+    this.indicacionesGenerales = '';
+    this.listaCargos = [];
+    this.nuevoCargo = { descripcion: '', precio: undefined, cantidad: 1, productoId: '' };
+    this.totalCobro = 0;
     this.mascotaInfo = null;
-    this.recetaMedica = { medicamentos: '', indicaciones: '' };
     this.pasoActual = 1;
     this.codigoConsultaRegistrada = '';
     this.vieneDeCita = false;
-
-    // Mantener veterinario auto-detectado
     this.autoDetectarVeterinario();
   }
 }

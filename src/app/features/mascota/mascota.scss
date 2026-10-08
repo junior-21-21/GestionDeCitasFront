@@ -240,144 +240,231 @@ $shadow-clay:
   gap: 1rem;
 }
 
-// ── Preview tarjeta estilo DNI ───────────────────────────────────────────────
-.cred-preview-card {
-  background: linear-gradient(120deg, #0d6e5c 0%, #20c997 70%, #5ce6b5 100%);
-  border-radius: 14px;
-  padding: 0;
+// ── Preview tarjeta estilo DNI Premium (PEID) ─────────────────────────────────
+.cred-preview-card.peid-style {
+  background: linear-gradient(135deg, #74b9ff 0%, #00d2d3 100%);
+  border-radius: 16px;
+  padding: 16px;
   position: relative;
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  grid-template-rows: 1fr auto;
-  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  min-height: 250px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(13, 110, 92, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #1e272e;
+  border: 1px solid rgba(255,255,255,0.5);
 
-  // Patrón de onda decorativo
-  &::before {
+  // Textura de líneas de seguridad
+  &::after {
     content: '';
     position: absolute;
-    top: 0; right: 0; bottom: 0;
-    width: 120px;
-    background: radial-gradient(ellipse at 120% 50%, rgba(255,255,255,0.12) 40%, transparent 70%);
+    inset: 0;
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 6px);
     pointer-events: none;
-  }
-}
-
-.cred-photo-area {
-  grid-row: 1;
-  grid-column: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 0 12px 12px;
-
-  img {
-    width: 68px;
-    height: 68px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #d4af37;
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+    z-index: 0;
   }
 
-  .cred-photo-placeholder {
-    width: 68px;
-    height: 68px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.15);
-    border: 3px solid #d4af37;
+  // Marca de agua central (hueso)
+  &::before {
+    content: '\F4B4'; // bi-bone
+    font-family: bootstrap-icons !important;
+    position: absolute;
+    top: 50%; left: 55%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-size: 14rem;
+    color: rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  > * { z-index: 1; position: relative; }
+
+  .peid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(255,255,255,0.4);
+  }
+
+  .peid-logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: rgba(255,255,255,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 68px;
-    text-align: center;
+    img {
+      max-height: 40px;
+      filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.4));
+    }
   }
-}
 
-.cred-info-area {
-  grid-row: 1;
-  grid-column: 2;
-  padding: 10px 12px 6px 8px;
-  color: white;
-}
+  .peid-title {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+  }
 
-.cred-clinic-name {
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  line-height: 1.3;
-}
+  .peid-numero {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #fff;
+    background: rgba(0,0,0,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
 
-.cred-clinic-sub {
-  font-size: 0.52rem;
-  opacity: 0.75;
-  margin-bottom: 4px;
-}
+  .peid-body {
+    display: flex;
+    gap: 16px;
+    flex-grow: 1;
+  }
 
-.cred-divider {
-  height: 1.5px;
-  background: #d4af37;
-  margin: 4px 0;
-  width: 70%;
-}
+  .peid-left {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    
+    .peid-vert-num {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      font-size: 0.8rem;
+      letter-spacing: 6px;
+      font-weight: 800;
+      color: rgba(0,0,0,0.5);
+      margin-top: 10px;
+    }
+    
+    .peid-photo {
+      width: 95px;
+      height: 130px;
+      background: #fff;
+      border-radius: 47px / 65px; // Ovalado tipo retrato
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15), inset 0 2px 8px rgba(0,0,0,0.1);
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      i {
+        font-size: 3.5rem;
+        color: #d1d8e0;
+      }
+    }
+  }
 
-.cred-badge {
-  font-size: 0.52rem;
-  font-weight: 700;
-  color: rgba(212, 255, 230, 0.9);
-  letter-spacing: 0.08em;
-  margin-bottom: 2px;
-}
+  .peid-center {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    justify-content: flex-start;
+    padding-top: 8px;
 
-.cred-codigo {
-  font-size: 0.78rem;
-  font-weight: 900;
-  color: #d4af37;
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
+    .peid-pill {
+      background: rgba(255,255,255,0.7);
+      padding: 8px 12px 6px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #2f3542;
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      position: relative;
+      word-wrap: break-word;
+      line-height: 1.2;
+      
+      .lbl {
+        position: absolute;
+        top: -9px;
+        left: 10px;
+        font-size: 0.48rem;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: #1e90ff;
+        background: #eaf5ff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      }
+    }
+    .peid-pill-row {
+      display: flex;
+      gap: 10px;
+      .half { flex: 1; }
+    }
+  }
 
-.cred-row {
-  display: flex;
-  gap: 6px;
-  font-size: 0.54rem;
-  line-height: 1.7;
-  color: white;
-}
+  .peid-right {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 95px;
+    align-items: flex-end;
 
-.cred-lbl {
-  color: rgba(180, 240, 210, 0.9);
-  font-weight: 700;
-  min-width: 42px;
-}
+    .peid-date-box {
+      width: 100%;
+      border: 1px solid rgba(0,0,0,0.3);
+      border-radius: 6px;
+      text-align: center;
+      padding: 4px;
+      background: rgba(255,255,255,0.3);
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.5);
+      
+      div { 
+        font-size: 0.45rem; 
+        text-transform: uppercase; 
+        font-weight: 800; 
+        color: #57606f;
+        margin-bottom: 2px;
+      }
+      strong { 
+        font-size: 0.65rem; 
+        color: #2f3542;
+        font-family: 'Courier New', Courier, monospace;
+        letter-spacing: 0.5px;
+      }
+    }
 
-.cred-footer-strip {
-  grid-column: 1 / -1;
-  background: white;
-  padding: 6px 14px;
-  font-size: 0.54rem;
-  color: #333;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    .peid-thumb {
+      margin-top: auto;
+      width: 45px;
+      height: 55px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      img { width: 100%; height: 100%; object-fit: cover; }
+      i { font-size: 1.8rem; color: #a4b0be; }
+    }
+  }
 
-.cred-footer-lbl {
-  font-weight: 700;
-  color: #0d6e5c;
-}
-
-.cred-mrz {
-  font-family: 'Courier New', monospace;
-  font-size: 0.44rem;
-  color: #aaa;
-  letter-spacing: 0.05em;
+  .peid-footer {
+    margin-top: 14px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    line-height: 1.3;
+    font-weight: 900;
+    color: rgba(0,0,0,0.6);
+    background: rgba(255,255,255,0.3);
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
 }
 
 // ── Upload area ──────────────────────────────────────────────────────────────

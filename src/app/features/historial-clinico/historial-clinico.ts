@@ -107,4 +107,27 @@ export class HistorialClinicoComponent {
       this.currentPage = page;
     }
   }
+
+  descargarHistorialPdf(): void {
+    if (!this.mascotaInfo) {
+      Swal.fire('Atención', 'Primero busque una mascota', 'warning');
+      return;
+    }
+
+    this.consultaService.descargarHistorialPdf(this.mascotaInfo.codigoPaciente).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `historial_${this.mascotaInfo!.codigoPaciente}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        Swal.fire('Error', 'No se pudo generar el PDF del historial clínico', 'error');
+      }
+    });
+  }
 }

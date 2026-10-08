@@ -19,7 +19,7 @@ export class VeterinariosComponent implements OnInit {
   veterinarios: VeterinarioResponseDTO[] = [];
   veterinariosFiltrados: VeterinarioResponseDTO[] = [];
   especialidades: Especialidad[] = [];
-  nuevoVet: VeterinarioDTO = { nombres: '', dni: '', celular: '', correo: '', especialidadId: 0 };
+  nuevoVet: VeterinarioDTO = { nombres: '', apellidos: '', dni: '', celular: '', correo: '', especialidadId: 0 };
   editando: VeterinarioResponseDTO | null = null;
 
   // Archivos
@@ -143,7 +143,7 @@ export class VeterinariosComponent implements OnInit {
 
   // ========== CRUD ==========
   guardar() {
-    if (!this.nuevoVet.nombres || !this.nuevoVet.dni || !this.nuevoVet.celular || !this.nuevoVet.correo || !this.nuevoVet.especialidadId) return;
+    if (!this.nuevoVet.nombres || !this.nuevoVet.apellidos || !this.nuevoVet.dni || !this.nuevoVet.celular || !this.nuevoVet.correo || !this.nuevoVet.especialidadId) return;
 
     if (this.editando) {
       this.vetService.actualizar(
@@ -177,6 +177,7 @@ export class VeterinariosComponent implements OnInit {
     this.editando = v;
     this.nuevoVet = {
       nombres: v.nombres,
+      apellidos: v.apellidos || '',
       dni: v.dni || '',
       celular: v.celular || '',
       correo: v.correo || '',
@@ -199,7 +200,7 @@ export class VeterinariosComponent implements OnInit {
   }
 
   private limpiarFormulario() {
-    this.nuevoVet = { nombres: '', dni: '', celular: '', correo: '', especialidadId: 0 };
+    this.nuevoVet = { nombres: '', apellidos: '', dni: '', celular: '', correo: '', especialidadId: 0 };
     this.fotoFile = null;
     this.tituloFile = null;
     this.fotoPreview = null;

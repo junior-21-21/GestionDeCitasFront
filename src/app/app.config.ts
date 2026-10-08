@@ -15,7 +15,7 @@ import { AuthInterceptor } from './services/auth.interceptor'; // importa tu int
 import { ErrorInterceptor } from './services/error.interceptor';
 import { LoadingInterceptor } from './services/loading.interceptor';
 
-import { registerLocaleData } from '@angular/common';
+import { registerLocaleData, IMAGE_CONFIG } from '@angular/common';
 import localeEsPe from '@angular/common/locales/es-PE';
 import { LOCALE_ID } from '@angular/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
@@ -33,6 +33,15 @@ export const appConfig: ApplicationConfig = {
 
     // ✅ Establecer el locale ID globalmente
     { provide: LOCALE_ID, useValue: 'es-PE' },
+
+    // ✅ Ocultar warnings de Angular sobre tamaño de imágenes (NG0913)
+    {
+      provide: IMAGE_CONFIG,
+      useValue: {
+        disableImageSizeWarning: true,
+        disableImageLazyLoadWarning: true
+      }
+    },
 
     // ✅ registra el interceptor para que Angular lo use
     {

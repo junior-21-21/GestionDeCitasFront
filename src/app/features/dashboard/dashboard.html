@@ -3,7 +3,8 @@
     <div class="welcome-content">
       <div class="role-badge">{{ rolLabel }}</div>
       
-      <h1>Bienvenido(a) a <br><span class="brand-text">Petyzoos</span></h1>
+      <h1 class="welcome-title">Bienvenido(a) a</h1>
+      <img src="logo_sysvet.png" alt="SYSVET" class="dashboard-logo">
       
       <p class="greeting">
         Buenos días, <strong>{{ usuario?.nombres || 'Admin Sistema' }}</strong>
@@ -15,11 +16,11 @@
       
       <p class="quote">"No solo son mascotas, son familia"</p>
       
-      <p class="date">{{ fechaActual | date:'EEEE, d \'de\' MMMM \'de\' yyyy':'':'es' }}</p>
+      <p class="date">{{ fechaActual | date:'EEEE, d \'de\' MMMM \'de\' yyyy' }}</p>
     </div>
     
     <div class="welcome-illustration">
-      <img src="vet_welcome.png" alt="Veterinaria Petyzoos" />
+      <img src="landing/about_us_vet_1788827143514.jpg" alt="Veterinaria Petyzoos" class="real-image-style shadow-clay" />
     </div>
   </div>
   

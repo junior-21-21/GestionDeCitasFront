@@ -6,6 +6,16 @@ export interface ConsultaDTO {
   diagnostico: string;
   tratamiento: string;
   citaCodigo: string;
+  estadoIngreso?: string;
+  estadoSalida?: string;
+  requiereInternamiento?: boolean;
+  motivoInternamiento?: string;
+  nivelUrgencia?: string;
+  temperatura?: number;
+  frecuenciaCardiaca?: number;
+  frecuenciaRespiratoria?: number;
+  tiempoLlenadoCapilar?: number;
+  sistemasAnormales?: string;
 }
 
 export interface ConsultaResponse {
@@ -18,6 +28,16 @@ export interface ConsultaResponse {
   tratamiento: string;
   nombrePaciente: string;
   nombreVeterinario: string;
+  estadoIngreso?: string;
+  estadoSalida?: string;
+  requiereInternamiento?: boolean;
+  motivoInternamiento?: string;
+  nivelUrgencia?: string;
+  temperatura?: number;
+  frecuenciaCardiaca?: number;
+  frecuenciaRespiratoria?: number;
+  tiempoLlenadoCapilar?: number;
+  sistemasAnormales?: string;
 }
 
 export interface Consulta {
@@ -29,6 +49,16 @@ export interface Consulta {
   diagnostico: string;
   tratamiento: string;
   citaCodigo: string;
+  estadoIngreso?: string;
+  estadoSalida?: string;
+  requiereInternamiento?: boolean;
+  motivoInternamiento?: string;
+  nivelUrgencia?: string;
+  temperatura?: number;
+  frecuenciaCardiaca?: number;
+  frecuenciaRespiratoria?: number;
+  tiempoLlenadoCapilar?: number;
+  sistemasAnormales?: string;
 }
 
 export interface ConsultaProductoDTO {

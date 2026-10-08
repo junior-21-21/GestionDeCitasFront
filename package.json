@@ -16,6 +16,7 @@
     "@angular/compiler": "^20.3.21",
     "@angular/core": "^20.3.21",
     "@angular/forms": "^20.3.21",
+    "@angular/localize": "^22.1.5",
     "@angular/material": "~20.0.3",
     "@angular/platform-browser": "^20.3.21",
     "@angular/router": "^20.3.21",

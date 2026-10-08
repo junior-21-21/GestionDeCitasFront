@@ -1,0 +1,129 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0 text-primary">Gestión de Compras (Ingresos)</h2>
+    <button *ngIf="!mostrarFormulario" class="btn btn-primary" (click)="abrirFormulario()">
+      <i class="fas fa-plus me-2"></i> Nueva Compra
+    </button>
+  </div>
+
+  <!-- Formulario de Registro -->
+  <div class="card border-0 shadow-sm mb-4" *ngIf="mostrarFormulario">
+    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+      <h5 class="fw-bold text-secondary">Registrar Nueva Factura/Compra</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="form-label">Número de Factura</label>
+          <input type="text" class="form-control" [(ngModel)]="nuevaCompra.numeroFactura" placeholder="Ej: F001-1234">
+        </div>
+      </div>
+
+      <hr>
+      <h6 class="fw-bold mb-3">Agregar Productos</h6>
+      <div class="row g-3 align-items-end mb-4 bg-light p-3 rounded">
+        <div class="col-md-4">
+          <label class="form-label">Producto</label>
+          <select class="form-select" [(ngModel)]="productoSeleccionadoId" (change)="onProductoChange()">
+            <option [value]="null">Seleccione...</option>
+            <option *ngFor="let p of productos" [value]="p.id">{{ p.nombre }} (Stock: {{ p.stock }})</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Cantidad</label>
+          <input type="number" class="form-control" [(ngModel)]="cantidadActual" min="1">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Costo Unit.</label>
+          <input type="number" class="form-control" [(ngModel)]="precioUnitarioActual" min="0">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Lote</label>
+          <input type="text" class="form-control" [(ngModel)]="loteActual" placeholder="LT-123">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Vencimiento</label>
+          <input type="date" class="form-control" [(ngModel)]="vencimientoActual">
+        </div>
+        <div class="col-md-12 text-end mt-3">
+          <button class="btn btn-success" (click)="agregarDetalle()">
+            <i class="fas fa-plus"></i> Agregar
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla de Detalles -->
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Producto ID</th>
+            <th>Lote</th>
+            <th>Vencimiento</th>
+            <th>Cantidad</th>
+            <th>Costo U.</th>
+            <th>Subtotal</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of nuevaCompra.detalles; let i = index">
+            <td>{{ d.producto.id }}</td>
+            <td>{{ d.numeroLote || '-' }}</td>
+            <td>{{ d.fechaVencimiento || '-' }}</td>
+            <td>{{ d.cantidad }}</td>
+            <td>S/. {{ d.precioUnitario | number:'1.2-2' }}</td>
+            <td>S/. {{ d.subtotal | number:'1.2-2' }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-danger" (click)="quitarDetalle(i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="nuevaCompra.detalles.length === 0">
+            <td colspan="7" class="text-center text-muted py-3">No hay productos agregados.</td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="nuevaCompra.detalles.length > 0">
+          <tr>
+            <td colspan="5" class="text-end fw-bold">TOTAL:</td>
+            <td colspan="2" class="fw-bold fs-5 text-primary">S/. {{ calcularTotal() | number:'1.2-2' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button class="btn btn-outline-secondary" (click)="cerrarFormulario()">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarCompra()">Guardar Compra</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Compras -->
+  <div class="card border-0 shadow-sm" *ngIf="!mostrarFormulario">
+    <div class="card-body p-0">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">ID Compra</th>
+            <th>Fecha</th>
+            <th>Factura</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of compras">
+            <td class="ps-4 fw-bold text-secondary">#{{ c.id }}</td>
+            <td>{{ c.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ c.numeroFactura || 'N/A' }}</td>
+            <td class="fw-bold">S/. {{ c.total | number:'1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="compras.length === 0">
+            <td colspan="4" class="text-center text-muted py-5">
+              No hay compras registradas.<br>Haz clic en "Nueva Compra" para registrar tu primer ingreso de stock.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

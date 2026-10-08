@@ -1,0 +1,280 @@
+@use "sass:color";
+
+// Variables
+$primary-dark: #00334e; // Navy from logo
+$accent-color: #ed1c24; // Red from cross
+$yellow-color: #f4a216; // Yellow from logo
+$teal-color: #00b48c;   // Teal from logo
+
+.text-yellow { color: $yellow-color !important; }
+.text-teal { color: $teal-color !important; }
+.bg-yellow { background-color: $yellow-color !important; }
+.bg-teal { background-color: $teal-color !important; }
+
+.text-accent {
+  color: $accent-color !important;
+}
+.bg-accent {
+  background-color: $accent-color !important;
+}
+.btn-accent {
+  background-color: $accent-color !important;
+  color: white !important;
+  border: none;
+  
+  &:hover {
+    background-color: color.adjust($accent-color, $lightness: -10%) !important;
+  }
+}
+
+.bg-primary-dark {
+  background-color: $primary-dark !important;
+}
+
+.fw-black {
+  font-weight: 900;
+}
+
+.z-index-1 {
+  z-index: 1;
+}
+
+.drop-shadow-text {
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+}
+
+// Nav
+.landing-nav {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+
+  .nav-link {
+    color: $primary-dark !important;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin: 0 8px;
+    position: relative;
+    padding: 8px 16px !important;
+    border-radius: 30px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    &:hover {
+      color: $accent-color !important;
+      background: rgba($accent-color, 0.05);
+      transform: translateY(-2px);
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      border-radius: 2px;
+      background-color: $accent-color;
+      transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    &:hover::after {
+      width: 40%;
+    }
+  }
+
+  .btn-login {
+    border: 2px solid $primary-dark;
+    color: $primary-dark;
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background-color: $primary-dark;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba($primary-dark, 0.2);
+    }
+  }
+
+  .btn-accent {
+    border-radius: 30px;
+    padding: 10px 28px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba($accent-color, 0.35);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba($accent-color, 0.5);
+    }
+  }
+}
+
+// Hero
+.hero-section {
+  height: 85vh;
+  min-height: 600px;
+  overflow: hidden;
+  position: relative;
+  
+  .hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+  }
+  
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(0, 51, 78, 0) 0%, rgba(0, 51, 78, 0.7) 50%, rgba(0, 51, 78, 0.9) 100%);
+    z-index: 0;
+  }
+}
+
+// About Us
+.about-img {
+  border: 4px solid white;
+}
+
+// Services
+.service-card {
+  border-radius: 20px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  
+  .card-img-top {
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .service-placeholder {
+    height: 200px;
+  }
+  
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+  }
+}
+
+// Feature Box
+.feature-box {
+  transition: transform 0.3s;
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+// Footer
+.footer-links a {
+  transition: color 0.3s;
+  &:hover {
+    color: $accent-color !important;
+  }
+}
+
+// Form Control overrides for landing
+#contacto .form-control {
+  border: none;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 12px;
+  &:focus {
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05), 0 0 0 3px rgba($accent-color, 0.2);
+  }
+}
+
+// Animations
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  
+  &.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-content h1, .hero-content h2, .hero-content p {
+  animation: fadeSlideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  opacity: 0;
+}
+.hero-content h1 { animation-delay: 0.2s; }
+.hero-content h2 { animation-delay: 0.4s; }
+.hero-content p { animation-delay: 0.6s; }
+
+/* --- WHATSAPP FLOATING BUTTON --- */
+.whatsapp-float {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  bottom: 40px;
+  right: 40px;
+  background-color: #ffffff; /* White background */
+  color: #25d366; /* Green icon */
+  border-radius: 50px;
+  text-align: center;
+  font-size: 38px; /* Larger icon */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Soft shadow */
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: pulse-whatsapp 2s infinite; /* Pulsing animation */
+  
+  &:hover, &:focus {
+    color: #ffffff;
+    background-color: #25d366;
+    transform: scale(1.15) rotate(-10deg);
+    animation: none; /* Stop pulsing on hover */
+    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+  }
+}
+
+@keyframes pulse-whatsapp {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .whatsapp-float {
+    width: 55px;
+    height: 55px;
+    bottom: 25px;
+    right: 25px;
+    font-size: 34px;
+  }
+}

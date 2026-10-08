@@ -185,7 +185,13 @@ export class MascotaComponent implements OnInit {
 
     this.mascotaService.registrar(this.mascota).subscribe({
       next: (nuevaMascota) => {
-        Swal.fire('Registrado', 'Mascota registrada correctamente ✅', 'success');
+        Swal.fire({
+          title: 'Registrado',
+          text: 'Mascota registrada correctamente ✅',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
         this.mascotas.unshift(nuevaMascota);
         
         if (nuevaMascota.codigoPaciente) {
@@ -243,11 +249,7 @@ export class MascotaComponent implements OnInit {
       this.mascotaService.descargarCredencialPdf(codigoPaciente).subscribe({
         next: (blob: Blob) => {
           const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `credencial_${codigoPaciente}.pdf`;
-          a.click();
-          window.URL.revokeObjectURL(url);
+          window.open(url, '_blank');
         },
         error: () => Swal.fire('Error', 'No se pudo generar la credencial PDF', 'error')
       });
@@ -332,13 +334,51 @@ export class MascotaComponent implements OnInit {
       });
 
       pdf.addImage(imgData, 'PNG', 0, 0, 85.6, 54);
-      pdf.save(`credencial_${m.codigoPaciente}.pdf`);
+      
+      const blob = pdf.output('blob');
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
       
       this.cerrarModalCredencial();
     }).catch(err => {
       console.error('Error al generar PDF con html2canvas:', err);
       Swal.fire('Error', 'Hubo un problema al renderizar el PDF', 'error');
     });
+  }
+
+  // --- MRZ GENERADOR (Machine Readable Zone) ---
+  get mrzLinea1(): string {
+    const m = this.mascotaCredencial;
+    if (!m) return 'I<PER<<<<<<<<<<<<<<<<<<<<<<<<<<';
+    const cod = (m.codigoPaciente || '').replace(/-/g, '').padEnd(9, '<');
+    const nom = (m.nombre || '').replace(/\s+/g, '<').toUpperCase();
+    return `I<PER${cod}<<${nom}`.padEnd(30, '<').substring(0, 30);
+  }
+
+  get mrzLinea2(): string {
+    const m = this.mascotaCredencial;
+    if (!m) return '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<';
+    
+    // Fecha de Nacimiento (YYMMDD)
+    let fNac = '<<<<<<';
+    if (m.fechaNacimiento) {
+      const d = new Date(m.fechaNacimiento + 'T00:00:00');
+      if (!isNaN(d.getTime())) {
+        fNac = d.getFullYear().toString().substring(2,4) + 
+               (d.getMonth() + 1).toString().padStart(2, '0') + 
+               d.getDate().toString().padStart(2, '0');
+      }
+    }
+    
+    // Género
+    let sexo = '<';
+    if (m.genero?.toLowerCase() === 'macho') sexo = 'M';
+    else if (m.genero?.toLowerCase() === 'hembra') sexo = 'F';
+
+    // Fecha de Caducidad (Fijada a 31-12-2034 como en la UI) = 341231
+    const fCad = '341231';
+    
+    return `${fNac}0${sexo}${fCad}0PER<<<<<<<<<<<0`.padEnd(30, '<').substring(0, 30);
   }
 
   // --- LÓGICA DE FILTROS ---
@@ -427,7 +467,13 @@ export class MascotaComponent implements OnInit {
 
     this.mascotaService.actualizar(this.editando.codigoPaciente, dto).subscribe({
       next: (mascotaActualizada) => {
-        Swal.fire('Actualizado', 'Mascota actualizada correctamente', 'success');
+        Swal.fire({
+          title: 'Actualizado',
+          text: 'Mascota actualizada correctamente',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
         this.mascotas = this.mascotas.filter(m => m.codigoPaciente !== mascotaActualizada.codigoPaciente);
         this.mascotas.unshift(mascotaActualizada);
         this.editando = null;
@@ -455,7 +501,13 @@ export class MascotaComponent implements OnInit {
       if (result.isConfirmed) {
         this.mascotaService.eliminar(codigoPaciente).subscribe({
           next: () => {
-            Swal.fire('Eliminado', 'Mascota eliminada correctamente', 'success');
+            Swal.fire({
+              title: 'Eliminado',
+              text: 'Mascota eliminada correctamente',
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false
+            });
             this.cargarMascotas();
           },
           error: err => {

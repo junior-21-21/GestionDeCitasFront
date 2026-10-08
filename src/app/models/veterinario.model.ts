@@ -1,5 +1,6 @@
 export interface VeterinarioDTO {
   nombres: string;
+  apellidos: string;
   dni: string;
   celular: string;
   correo: string;
@@ -9,6 +10,7 @@ export interface VeterinarioDTO {
 export interface VeterinarioResponseDTO {
   dni: string;
   nombres: string;
+  apellidos: string;
   celular: string;
   correo: string;
   fotoUrl: string;

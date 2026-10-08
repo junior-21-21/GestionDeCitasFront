@@ -1,0 +1,201 @@
+<div class="asistencia-container">
+  <div class="header-section">
+    <div>
+      <h2 class="title">Control de Personal</h2>
+      <p class="subtitle">Gestiona la asistencia diaria y los horarios fijos de los empleados.</p>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <div class="custom-tabs">
+      <button class="tab-btn" [class.active]="tabActiva === 'asistencias'" (click)="cambiarTab('asistencias')">
+        <i class="bi bi-clock-history"></i> Asistencias Diarias
+      </button>
+      <button class="tab-btn" [class.active]="tabActiva === 'horarios'" (click)="cambiarTab('horarios')">
+        <i class="bi bi-calendar-week"></i> Horarios Semanales
+      </button>
+    </div>
+
+    <div class="filters-group">
+      <select class="role-select" [(ngModel)]="filtroRol">
+        <option value="TODOS">Todos los roles</option>
+        <option value="VETERINARIO">Veterinarios</option>
+        <option value="RECEPCIONISTA">Recepcionistas</option>
+      </select>
+
+      <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" placeholder="Buscar por empleado..." [(ngModel)]="searchTerm" class="search-input">
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA ASISTENCIAS -->
+  <div class="table-card" *ngIf="tabActiva === 'asistencias'">
+    <div class="p-3 border-bottom bg-light d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-2">
+        <label class="fw-bold mb-0 text-muted small"><i class="bi bi-person"></i> Empleado:</label>
+        <select class="form-select form-select-sm shadow-sm" style="width: auto;" [(ngModel)]="filtroEmpleadoId">
+          <option value="">Todos</option>
+          <option *ngFor="let user of usuarios" [value]="user.id">{{ user.nombres }}</option>
+        </select>
+
+        <label class="fw-bold mb-0 ms-2 text-muted small"><i class="bi bi-calendar-month"></i> Mes:</label>
+        <input type="month" class="form-control form-control-sm shadow-sm" style="width: auto;" [(ngModel)]="filtroMes" (change)="filtroDia = ''">
+        
+        <label class="fw-bold mb-0 ms-2 text-muted small"><i class="bi bi-calendar-day"></i> Día:</label>
+        <input type="date" class="form-control form-control-sm shadow-sm" style="width: auto;" [(ngModel)]="filtroDia" (change)="filtroMes = ''">
+
+        <button class="btn btn-sm btn-outline-secondary" (click)="limpiarFiltrosFecha()" *ngIf="filtroMes || filtroDia || filtroEmpleadoId">
+          <i class="bi bi-x"></i> Limpiar
+        </button>
+      </div>
+      
+      <button class="btn btn-pdf shadow-sm" (click)="exportarAsistenciasPdf()">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Exportar Asistencias (PDF)
+      </button>
+    </div>
+    <table class="table modern-table mb-0">
+      <thead>
+        <tr>
+          <th>Empleado</th>
+          <th>Rol</th>
+          <th>Fecha</th>
+          <th>Hora Entrada</th>
+          <th>Hora Salida</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let asis of asistenciasFiltradas">
+          <td class="fw-bold">{{ asis.usuario?.nombres }}</td>
+          <td><span class="badge-rol">{{ asis.usuario?.rol?.nombre }}</span></td>
+          <td>{{ asis.fecha }}</td>
+          <td class="text-success">{{ asis.horaApertura | date:'shortTime' }}</td>
+          <td class="text-danger">{{ asis.horaCierre ? (asis.horaCierre | date:'shortTime') : '--:--' }}</td>
+          <td>
+            <span class="badge" [ngClass]="asis.estado === 'ABIERTO' ? 'bg-success' : 'bg-secondary'">
+              {{ asis.estado }}
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="asistenciasFiltradas.length === 0">
+          <td colspan="6" class="text-center py-4 text-muted">No se encontraron registros.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TABLA HORARIOS -->
+  <div class="table-card mb-4" *ngIf="tabActiva === 'horarios'">
+    <div class="form-crear-horario p-4 border-bottom bg-light">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="text-primary m-0"><i class="bi bi-plus-circle me-2"></i>Asignar Nuevo Horario</h5>
+        <button class="btn btn-pdf shadow-sm" (click)="exportarPdf()">
+          <i class="bi bi-file-earmark-pdf-fill"></i> Exportar Horarios (PDF)
+        </button>
+      </div>
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Empleado</label>
+          <select class="form-select" [(ngModel)]="nuevoHorario.usuarioId">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let user of usuarios" [value]="user.id">{{ user.nombres }} ({{ user.rol?.nombre }})</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Días de la semana</label>
+          <div class="d-flex flex-wrap gap-2">
+            <div class="form-check form-check-inline m-0" *ngFor="let dia of diasSemanaList">
+              <input class="form-check-input" type="checkbox" [id]="dia.id" 
+                     (change)="toggleDia(dia.id)" [checked]="nuevoHorario.diasSemana.includes(dia.id)">
+              <label class="form-check-label" [for]="dia.id" style="font-size: 0.85rem;">{{ dia.label.substring(0,2) }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Entrada</label>
+          <input type="time" class="form-control" [(ngModel)]="nuevoHorario.horaInicio">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Salida</label>
+          <input type="time" class="form-control" [(ngModel)]="nuevoHorario.horaFin">
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-success w-100 fw-bold" (click)="guardarNuevoHorario()">
+            <i class="bi bi-save me-1"></i> Asignar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <table class="table modern-table mb-0 table-bordered text-center">
+      <thead class="bg-light">
+        <tr>
+          <th class="text-start">Personal</th>
+          <th>Lunes</th>
+          <th>Martes</th>
+          <th>Miércoles</th>
+          <th>Jueves</th>
+          <th>Viernes</th>
+          <th>Sábado</th>
+          <th>Domingo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of horariosAgrupados">
+          <td class="text-start fw-bold">
+            {{ row.usuario.nombres }}<br>
+            <small class="text-muted">{{ row.usuario.rol.nombre }}</small>
+          </td>
+          <td>
+            <div class="time-badge" *ngIf="row.dias['MONDAY']">
+              {{ row.dias['MONDAY'].texto }}
+              <i class="bi bi-x-circle-fill delete-icon" (click)="eliminarHorario(row.dias['MONDAY'].id)"></i>
+            </div>
+          </td>
+          <td>
+            <div class="time-badge" *ngIf="row.dias['TUESDAY']">
+              {{ row.dias['TUESDAY'].texto }}
+              <i class="bi bi-x-circle-fill delete-icon" (click)="eliminarHorario(row.dias['TUESDAY'].id)"></i>
+            </div>
+          </td>
+          <td>
+            <div class="time-badge" *ngIf="row.dias['WEDNESDAY']">
+              {{ row.dias['WEDNESDAY'].texto }}
+              <i class="bi bi-x-circle-fill delete-icon" (click)="eliminarHorario(row.dias['WEDNESDAY'].id)"></i>
+            </div>
+          </td>
+          <td>
+            <div class="time-badge" *ngIf="row.dias['THURSDAY']">
+              {{ row.dias['THURSDAY'].texto }}
+              <i class="bi bi-x-circle-fill delete-icon" (click)="eliminarHorario(row.dias['THURSDAY'].id)"></i>
+            </div>
+          </td>
+          <td>
+            <div class="time-badge" *ngIf="row.dias['FRIDAY']">
+              {{ row.dias['FRIDAY'].texto }}
+              <i class="bi bi-x-circle-fill delete-icon" (click)="eliminarHorario(row.dias['FRIDAY'].id)"></i>
+            </div>
+          </td>
+          <td>
+            <div class="time-badge" *ngIf="row.dias['SATURDAY']">
+              {{ row.dias['SATURDAY'].texto }}
+              <i class="bi bi-x-circle-fill delete-icon" (click)="eliminarHorario(row.dias['SATURDAY'].id)"></i>
+            </div>
+          </td>
+          <td>
+            <div class="time-badge" *ngIf="row.dias['SUNDAY']">
+              {{ row.dias['SUNDAY'].texto }}
+              <i class="bi bi-x-circle-fill delete-icon" (click)="eliminarHorario(row.dias['SUNDAY'].id)"></i>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="horariosAgrupados.length === 0">
+          <td colspan="8" class="py-5 text-muted">Aún no hay horarios asignados.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

@@ -387,7 +387,12 @@ export class CitasComponent implements OnInit, AfterViewInit {
         `
         : cita.estado === 'CANCELADA'
           ? '<div class="w-100 text-center py-2"><button id="btn-eliminar" class="btn btn-outline-danger px-4 py-2 rounded-3 fw-bold"><i class="bi bi-trash me-2"></i> Liberar Horario</button></div>'
-          : '<div class="w-100 text-center py-2"><button id="btn-reprogramar" class="btn btn-outline-warning px-4 py-2 rounded-3 fw-bold text-dark"><i class="bi bi-calendar-event me-2"></i> Reprogramar Horario</button></div>',
+          : `
+            <div class="d-flex gap-3 justify-content-center w-100 py-2">
+              <button id="btn-descargar-pdf" class="btn btn-outline-dark px-4 py-2 rounded-3 fw-bold"><i class="bi bi-printer me-2"></i> Imprimir Comprobante</button>
+              <button id="btn-reprogramar" class="btn btn-outline-warning px-4 py-2 rounded-3 fw-bold text-dark"><i class="bi bi-calendar-event me-2"></i> Reprogramar Horario</button>
+            </div>
+          `,
     }).then((result) => {
       if (result.isConfirmed) {
         this.router.navigate(['/consultas'], {
@@ -414,7 +419,7 @@ export class CitasComponent implements OnInit, AfterViewInit {
       if (btnPdf) {
         btnPdf.addEventListener('click', () => {
           Swal.close();
-          this.descargarComprobante(cita.codigoCita);
+          this.verComprobante(cita.codigoCita);
         });
       }
 

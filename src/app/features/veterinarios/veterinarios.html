@@ -58,25 +58,45 @@
         <!-- COLUMNA DERECHA: Datos -->
         <div class="form-col-data">
 
-          <!-- Fila: Nombres + DNI -->
+          <!-- Fila: Nombres + Apellidos + DNI -->
           <div class="form-row">
             <!-- Nombres -->
-            <div class="form-group flex-2">
+            <div class="form-group flex-1">
               <label for="nombres">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-                Nombres Completos
+                Nombres
               </label>
               <input
                 type="text"
                 id="nombres"
                 class="form-control"
-                placeholder="Ej: Dr. Juan Carlos Pérez López"
+                placeholder="Ej: Dr. Juan Carlos"
                 required
                 [(ngModel)]="nuevoVet.nombres"
                 name="nombres"
+              />
+            </div>
+
+            <!-- Apellidos -->
+            <div class="form-group flex-1">
+              <label for="apellidos">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Apellidos
+              </label>
+              <input
+                type="text"
+                id="apellidos"
+                class="form-control"
+                placeholder="Ej: Pérez López"
+                required
+                [(ngModel)]="nuevoVet.apellidos"
+                name="apellidos"
               />
             </div>
 
@@ -316,7 +336,7 @@
           <tr>
             <th>Foto</th>
             <th>DNI</th>
-            <th>Nombres</th>
+            <th>Nombres y Apellidos</th>
             <th>Celular</th>
             <th>Correo</th>
             <th>Especialidad</th>
@@ -345,7 +365,7 @@
             <td>
               <span class="info-chip dni-chip">{{ vet.dni || '—' }}</span>
             </td>
-            <td class="name-cell">{{ vet.nombres }}</td>
+            <td class="name-cell">{{ vet.nombres }} {{ vet.apellidos }}</td>
             <td>
               <span class="info-chip phone-chip">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

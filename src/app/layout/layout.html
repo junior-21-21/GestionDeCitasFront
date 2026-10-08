@@ -8,13 +8,24 @@
   </button>
   
   <span class="logo-section">
-    <img src="logo_petyzoos.png" alt="PetyZoos" class="logo-img">
+    <img src="logo_sysvet.png" alt="SYSVET" class="logo-img">
     <span class="brand-name">
         PetyZoos
     </span>
   </span>
   
   <span class="spacer"></span>
+
+  <!-- Botón de Turno (Para no Administradores) -->
+  <div *ngIf="usuario && !esAdmin()" class="me-3">
+    <button class="btn btn-turno"
+            [ngClass]="estadoTurno === 'ABIERTO' ? 'turno-abierto' : 'turno-cerrado'"
+            (click)="toggleTurno()"
+            [matTooltip]="estadoTurno === 'ABIERTO' ? 'Finalizar tu jornada de trabajo' : 'Iniciar tu jornada de trabajo'">
+      <i class="bi" [ngClass]="estadoTurno === 'ABIERTO' ? 'bi-stop-circle-fill' : 'bi-play-circle-fill'"></i>
+      {{ estadoTurno === 'ABIERTO' ? 'Cerrar Turno' : 'Abrir Turno' }}
+    </button>
+  </div>
 
   <!-- Info usuario -->
   <div *ngIf="usuario" class="user-section">
@@ -125,6 +136,13 @@
           <span *ngIf="!isCollapsed">Pacientes</span>
         </a>
 
+        <a *ngIf="esAdmin() || esRecepcionista()" routerLink="/caja" routerLinkActive="active" 
+           [matTooltip]="isCollapsed ? 'Caja' : ''" matTooltipPosition="right"
+           class="nav-item">
+          <mat-icon>point_of_sale</mat-icon>
+          <span *ngIf="!isCollapsed">Caja</span>
+        </a>
+
         <!-- INVENTARIO -->
         <ng-container *ngIf="esAdmin() || esRecepcionista()">
           <div class="sidebar-divider"></div>
@@ -135,6 +153,20 @@
              class="nav-item">
             <mat-icon>inventory_2</mat-icon>
             <span *ngIf="!isCollapsed">Productos e Insumos</span>
+          </a>
+
+          <a routerLink="/compras" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Compras (Ingresos)' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>local_shipping</mat-icon>
+            <span *ngIf="!isCollapsed">Compras (Ingresos)</span>
+          </a>
+
+          <a routerLink="/kardex" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Kardex (Historial)' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>receipt_long</mat-icon>
+            <span *ngIf="!isCollapsed">Kardex (Historial)</span>
           </a>
 
           <a *ngIf="esAdmin()" routerLink="/categorias" routerLinkActive="active" 
@@ -149,6 +181,13 @@
         <ng-container *ngIf="esAdmin()">
           <div class="sidebar-divider"></div>
           <span class="nav-section-label" *ngIf="!isCollapsed">ADMINISTRACIÓN</span>
+
+          <a routerLink="/asistencias" routerLinkActive="active" 
+             [matTooltip]="isCollapsed ? 'Control de Asistencias' : ''" matTooltipPosition="right"
+             class="nav-item">
+            <mat-icon>schedule</mat-icon>
+            <span *ngIf="!isCollapsed">Control de Asistencias</span>
+          </a>
 
           <a routerLink="/especialidades" routerLinkActive="active" 
              [matTooltip]="isCollapsed ? 'Especialidades' : ''" matTooltipPosition="right"

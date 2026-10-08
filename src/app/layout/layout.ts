@@ -16,6 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 // Servicios
 import { AuthService } from '../services/auth.service';
 import { AnimationService } from '../services/animation.service';
+import { AsistenciaService } from '../services/asistencia.service';
 
 // Utilidades
 import Swal from 'sweetalert2';
@@ -49,6 +50,7 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
   usuario: any;
   rolLabel: string = '';
   imagenPerfil: string | null = null;
+  estadoTurno: string = 'CERRADO';
 
   // Estado del sidebar: por defecto colapsado (solo iconos)
   isCollapsed: boolean = true;
@@ -56,6 +58,7 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private authService: AuthService,
+    private asistenciaService: AsistenciaService,
     private router: Router,
     private anim: AnimationService
   ) {
@@ -112,7 +115,17 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
       this.authService.usuario$.subscribe(user => {
         if (user) {
           this.usuario = user;
+          if (!this.esAdmin()) {
+            this.asistenciaService.verificarEstado().subscribe();
+          }
         }
+      })
+    );
+
+    // Suscripción al estado del turno
+    this.subscriptions.push(
+      this.asistenciaService.estadoTurno$.subscribe(estado => {
+        this.estadoTurno = estado;
       })
     );
 
@@ -139,6 +152,32 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
   // Método para alternar entre expandido y colapsado
   toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  // Alternar turno
+  toggleTurno() {
+    if (this.estadoTurno === 'ABIERTO') {
+      Swal.fire({
+        title: '¿Cerrar turno?',
+        text: 'Ya no podrás registrar operaciones hasta que abras un nuevo turno.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar',
+        cancelButtonText: 'Cancelar'
+      }).then(res => {
+        if (res.isConfirmed) {
+          this.asistenciaService.cerrarTurno().subscribe({
+            next: () => Swal.fire('Turno cerrado', 'Has cerrado tu turno correctamente.', 'success'),
+            error: err => Swal.fire('Error', err.error || 'Error al cerrar el turno', 'error')
+          });
+        }
+      });
+    } else {
+      this.asistenciaService.abrirTurno().subscribe({
+        next: () => Swal.fire('Turno abierto', '¡Que tengas un excelente día de trabajo!', 'success'),
+        error: err => Swal.fire('Error', err.error || 'Error al abrir el turno', 'error')
+      });
+    }
   }
 
   // Lógica de cierre de sesión con confirmación

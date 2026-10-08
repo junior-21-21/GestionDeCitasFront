@@ -162,7 +162,12 @@ export class CajaComponent implements OnInit {
     this.procesandoVenta = true;
     this.ventaService.registrarVenta(this.ventaNueva).subscribe({
       next: (ventaConfirmada) => {
-        Swal.fire('Venta Exitosa', `Se procesó la venta por S/. ${ventaConfirmada.total?.toFixed(2)}`, 'success');
+        Swal.fire('Venta Exitosa', `Se procesó la venta por S/. ${ventaConfirmada.total?.toFixed(2)}`, 'success').then(() => {
+          if (ventaConfirmada.id) {
+            const url = `http://localhost:8080/api/ventas/${ventaConfirmada.id}/comprobante/pdf`;
+            window.open(url, '_blank');
+          }
+        });
         this.procesandoVenta = false;
         
         // Limpiar carrito

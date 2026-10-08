@@ -93,8 +93,8 @@ export class ComprasComponent implements OnInit {
       cantidad: this.cantidadActual,
       precioUnitario: this.precioUnitarioActual,
       subtotal: this.cantidadActual * this.precioUnitarioActual,
-      numeroLote: this.loteActual,
-      fechaVencimiento: this.vencimientoActual
+      numeroLote: this.loteActual || null,
+      fechaVencimiento: this.vencimientoActual ? this.vencimientoActual : null
     });
 
     // Reset fields

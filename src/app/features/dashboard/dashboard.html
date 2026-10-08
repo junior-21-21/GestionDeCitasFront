@@ -87,6 +87,28 @@
         </div>
       </div>
       
+      <!-- Ventas (Ingresos) Card -->
+      <div class="stat-card ingresos">
+        <div class="stat-icon" style="background: rgba(46, 204, 113, 0.2); color: #2ecc71;">
+          <i class="bi bi-cash-coin"></i>
+        </div>
+        <div class="stat-details">
+          <h3>S/ <span #statNumber [attr.data-value]="stats.ventas">0</span></h3>
+          <p>Ingresos (Ventas)</p>
+        </div>
+      </div>
+      
+      <!-- Compras (Gastos) Card -->
+      <div class="stat-card gastos">
+        <div class="stat-icon" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">
+          <i class="bi bi-cart-x"></i>
+        </div>
+        <div class="stat-details">
+          <h3>S/ <span #statNumber [attr.data-value]="stats.compras">0</span></h3>
+          <p>Gastos (Compras)</p>
+        </div>
+      </div>
+      
     </div>
     
     <div class="stats-loading" *ngIf="loadingStats">

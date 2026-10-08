@@ -8,6 +8,8 @@ export interface DashboardStats {
   consultas: number;
   pacientes: number;
   topEspecies: { [key: string]: number };
+  ventas: number;
+  compras: number;
 }
 
 @Injectable({
